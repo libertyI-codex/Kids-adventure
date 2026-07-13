@@ -19,6 +19,13 @@
 
     function start(event) {
       event.preventDefault();
+      if (button.setPointerCapture && event.pointerId != null) {
+        try {
+          button.setPointerCapture(event.pointerId);
+        } catch (error) {
+          // Pointer capture is best-effort for older browsers.
+        }
+      }
       clear();
       startedAt = Date.now();
       progressTimer = global.setInterval(function () {
@@ -31,10 +38,24 @@
       }, holdMs);
     }
 
+    function finish(event) {
+      if (event && event.preventDefault) event.preventDefault();
+      if (button.releasePointerCapture && event && event.pointerId != null) {
+        try {
+          button.releasePointerCapture(event.pointerId);
+        } catch (error) {
+          // Already released.
+        }
+      }
+      clear();
+    }
+
     button.addEventListener("pointerdown", start);
-    button.addEventListener("pointerup", clear);
-    button.addEventListener("pointercancel", clear);
-    button.addEventListener("pointerleave", clear);
+    button.addEventListener("pointerup", finish);
+    button.addEventListener("pointercancel", finish);
+    button.addEventListener("contextmenu", function (event) {
+      event.preventDefault();
+    });
   }
 
   function updateProfileName(name) {

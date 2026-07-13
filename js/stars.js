@@ -17,11 +17,13 @@
     var total = totals();
     var totalDelta = Number(options.totalDelta || 0);
     var spendableDelta = Number(options.spendableDelta || 0);
+    var eggsBefore = Array.isArray(data.eggInventory) ? data.eggInventory.length : 0;
     total.lifetimeStars = Math.max(0, Number(total.lifetimeStars || 0) + totalDelta);
     total.spendableStars = Math.max(0, Number(total.spendableStars || 0) + spendableDelta);
     if (KA.eggs && KA.eggs.syncEggInventory) {
       KA.eggs.syncEggInventory(data);
     }
+    var eggsAfter = Array.isArray(data.eggInventory) ? data.eggInventory.length : eggsBefore;
     var entry = {
       id: makeId("ledger"),
       profileId: profile.profileId,
@@ -34,7 +36,8 @@
       totalDelta: totalDelta,
       spendableDelta: spendableDelta,
       totalAfter: total.lifetimeStars,
-      spendableAfter: total.spendableStars
+      spendableAfter: total.spendableStars,
+      eggsEarned: Math.max(0, eggsAfter - eggsBefore)
     };
     data.starLedger.push(entry);
     return entry;

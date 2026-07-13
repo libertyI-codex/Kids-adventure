@@ -6,6 +6,8 @@
   var modalRoot;
   var toastRoot;
   var audioContext = null;
+  var bgmTimer = null;
+  var bgmGain = null;
 
   function escapeHtml(value) {
     return String(value == null ? "" : value)
@@ -112,25 +114,84 @@
     modalRoot.querySelector("[data-dialog-cancel]").addEventListener("click", closeDialog);
   }
 
+  function ensureAudioContext() {
+    audioContext = audioContext || new (global.AudioContext || global.webkitAudioContext)();
+    if (audioContext.state === "suspended" && audioContext.resume) {
+      audioContext.resume();
+    }
+    return audioContext;
+  }
+
+  function playSingleTone(frequency, startAt, duration, volume, type, output) {
+    var ctx = ensureAudioContext();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.frequency.value = frequency;
+    osc.type = type || "sine";
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(volume || 0.1, startAt + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+    osc.connect(gain);
+    gain.connect(output || ctx.destination);
+    osc.start(startAt);
+    osc.stop(startAt + duration + 0.03);
+  }
+
   function playTone(kind) {
-    if (!KA.state.getAppData().settings.soundEnabled) return;
+    var settings = KA.state.getAppData().settings;
+    if (settings.effectsEnabled === false || settings.soundEnabled === false) return;
     try {
-      audioContext = audioContext || new (global.AudioContext || global.webkitAudioContext)();
-      var osc = audioContext.createOscillator();
-      var gain = audioContext.createGain();
+      var ctx = ensureAudioContext();
       var now = audioContext.currentTime;
-      osc.frequency.value = kind === "star" ? 784 : kind === "magic" ? 988 : 520;
-      osc.type = "sine";
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.exponentialRampToValueAtTime(0.12, now + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
-      osc.connect(gain);
-      gain.connect(audioContext.destination);
-      osc.start(now);
-      osc.stop(now + 0.2);
+      var notes = kind === "star" ? [784, 988] :
+        kind === "egg" ? [523, 659, 784] :
+        kind === "hatch" ? [392, 523, 659, 1046] :
+        kind === "complete" || kind === "magic" ? [659, 784, 988] : [520];
+      notes.forEach(function (frequency, index) {
+        playSingleTone(frequency, now + index * 0.08, 0.18, 0.11, "sine", ctx.destination);
+      });
     } catch (error) {
       // Sound is optional.
     }
+  }
+
+  function scheduleBgmLoop() {
+    if (!bgmGain) return;
+    var ctx = ensureAudioContext();
+    var now = ctx.currentTime + 0.05;
+    var notes = [392, 440, 523, 587, 523, 440, 392, 330];
+    notes.forEach(function (frequency, index) {
+      playSingleTone(frequency, now + index * 0.46, 0.42, 0.045, index % 2 ? "sine" : "triangle", bgmGain);
+    });
+  }
+
+  function stopBgm() {
+    if (bgmTimer) global.clearInterval(bgmTimer);
+    bgmTimer = null;
+    if (bgmGain) {
+      try { bgmGain.disconnect(); } catch (error) { /* optional */ }
+    }
+    bgmGain = null;
+  }
+
+  function startBgm() {
+    if (bgmTimer) return;
+    try {
+      var ctx = ensureAudioContext();
+      bgmGain = ctx.createGain();
+      bgmGain.gain.value = 0.34;
+      bgmGain.connect(ctx.destination);
+      scheduleBgmLoop();
+      bgmTimer = global.setInterval(scheduleBgmLoop, 3800);
+    } catch (error) {
+      stopBgm();
+    }
+  }
+
+  function syncBgmState() {
+    var settings = KA.state.getAppData().settings || {};
+    if (settings.bgmEnabled) startBgm();
+    else stopBgm();
   }
 
   function starPill() {
@@ -217,6 +278,12 @@
           return;
         }
         playTone("star");
+        if (result.ledger && result.ledger.eggsEarned > 0) {
+          global.setTimeout(function () {
+            playTone("egg");
+            toast("ふしぎなたまごを見つけたよ");
+          }, 260);
+        }
         KA.router.navigate("star", { earned: result.task.rewardStars });
       });
     });
@@ -293,7 +360,8 @@
     var draft = KA.coloring.getDraft(templateId);
     var selected = KA.state.getUiState().selectedColor || KA.constants.COLOR_PALETTE[1].value;
     var palette = KA.constants.COLOR_PALETTE.map(function (color) {
-      return '<button class="swatch ' + (selected === color.value ? "is-selected" : "") + '" style="background:' + color.value + '" title="' + escapeHtml(color.name) + '" aria-label="' + escapeHtml(color.name) + '" data-color="' + color.value + '">' + escapeHtml(color.name) + '</button>';
+      var dark = ["blue", "purple", "brown", "black"].indexOf(color.id) >= 0;
+      return '<button class="swatch crayon-swatch ' + (selected === color.value ? "is-selected " : "") + (dark ? "is-dark" : "") + '" style="--swatch-color:' + color.value + '" title="' + escapeHtml(color.name) + '" aria-label="' + escapeHtml(color.name) + '" data-color="' + color.value + '"><span>' + escapeHtml(color.name) + '</span></button>';
     }).join("");
     var body = [
       '<div class="screen-header"><div><h2>' + escapeHtml(template.title) + '</h2><p class="muted">いろをえらんで、ぬりたいところをタップしてね。</p></div></div>',
@@ -358,7 +426,7 @@
           toast("うまく保存できなかったみたい。おとなのひとと ためしてね。");
           return;
         }
-        playTone("magic");
+        playTone("complete");
         KA.router.navigate("magic", { artworkId: result.artwork.artworkId });
       });
     });
@@ -546,7 +614,7 @@
       '<label class="field"><span>子どもの名前</span><input id="profile-name" value="' + escapeHtml(data.profile.displayName) + '"></label>' + button("名前を保存", "btn-primary", 'data-save-profile') + '</div>',
       '<div class="panel panel-pad"><h2>今日のおしごと</h2><div class="grid">' + taskRows + '</div></div>',
       '<div class="panel panel-pad"><h2>今日の作品</h2><div class="grid">' + (artRows || '<p class="muted">今日の作品はまだありません。</p>') + '</div></div>',
-      '<div class="panel panel-pad"><h2>設定</h2><label class="field"><span>効果音</span><select id="sound-setting"><option value="true" ' + (data.settings.soundEnabled ? "selected" : "") + '>オン</option><option value="false" ' + (!data.settings.soundEnabled ? "selected" : "") + '>オフ</option></select></label><label class="field"><span>アニメーション</span><select id="animation-setting"><option value="normal" ' + (data.settings.animationLevel !== "reduced" ? "selected" : "") + '>ふつう</option><option value="reduced" ' + (data.settings.animationLevel === "reduced" ? "selected" : "") + '>ひかえめ</option></select></label><p class="muted">' + escapeHtml(KA.constants.VERSION_LABEL + " / appVersion " + KA.constants.APP_VERSION) + '</p><div class="quick-actions">' + button("データ管理", "btn-soft", 'data-route="data"') + button("ホームへ戻る", "btn-primary", 'data-route="home"') + '</div></div>',
+      '<div class="panel panel-pad"><h2>設定</h2><label class="field"><span>BGM</span><select id="bgm-setting"><option value="false" ' + (!data.settings.bgmEnabled ? "selected" : "") + '>オフ</option><option value="true" ' + (data.settings.bgmEnabled ? "selected" : "") + '>オン</option></select></label><label class="field"><span>効果音</span><select id="effects-setting"><option value="true" ' + (data.settings.effectsEnabled !== false && data.settings.soundEnabled !== false ? "selected" : "") + '>オン</option><option value="false" ' + (data.settings.effectsEnabled === false || data.settings.soundEnabled === false ? "selected" : "") + '>オフ</option></select></label><label class="field"><span>アニメーション</span><select id="animation-setting"><option value="normal" ' + (data.settings.animationLevel !== "reduced" ? "selected" : "") + '>ふつう</option><option value="reduced" ' + (data.settings.animationLevel === "reduced" ? "selected" : "") + '>ひかえめ</option></select></label><p class="muted">' + escapeHtml(KA.constants.VERSION_LABEL + " / appVersion " + KA.constants.APP_VERSION) + '</p><div class="quick-actions">' + button("データ管理", "btn-soft", 'data-route="data"') + button("ホームへ戻る", "btn-primary", 'data-route="home"') + '</div></div>',
       '</section>'
     ].join("");
     layout("親モード", body, { screenClass: "parent-screen", parentGate: false });
@@ -587,9 +655,19 @@
         toast("ひとことを保存しました");
       });
     });
-    appEl.querySelector("#sound-setting").addEventListener("change", function (event) {
-      KA.state.getAppData().settings.soundEnabled = event.target.value === "true";
-      KA.state.getUiState().soundEnabled = event.target.value === "true";
+    appEl.querySelector("#bgm-setting").addEventListener("change", function (event) {
+      KA.state.getAppData().settings.bgmEnabled = event.target.value === "true";
+      KA.state.getUiState().bgmEnabled = event.target.value === "true";
+      KA.state.saveAppData();
+      KA.state.saveUiState();
+      syncBgmState();
+    });
+    appEl.querySelector("#effects-setting").addEventListener("change", function (event) {
+      var enabled = event.target.value === "true";
+      KA.state.getAppData().settings.effectsEnabled = enabled;
+      KA.state.getAppData().settings.soundEnabled = enabled;
+      KA.state.getUiState().effectsEnabled = enabled;
+      KA.state.getUiState().soundEnabled = enabled;
       KA.state.saveAppData();
       KA.state.saveUiState();
     });
@@ -713,6 +791,7 @@
       startRoute = "home";
     }
     KA.router.navigate(startRoute);
+    document.addEventListener("pointerdown", syncBgmState, { once: true });
   }
 
   KA.app = {
@@ -721,6 +800,7 @@
     confirmDialog: confirmDialog,
     infoDialog: infoDialog,
     playTone: playTone,
+    syncBgmState: syncBgmState,
     escapeHtml: escapeHtml
   };
 

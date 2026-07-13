@@ -47,6 +47,8 @@
       },
       settings: {
         soundEnabled: true,
+        effectsEnabled: true,
+        bgmEnabled: false,
         animationLevel: "normal",
         textSize: "normal",
         parentGate: {
@@ -96,6 +98,8 @@
       },
       animationLevel: "normal",
       soundEnabled: true,
+      effectsEnabled: true,
+      bgmEnabled: false,
       dismissedMessages: []
     };
   }
@@ -154,12 +158,52 @@
       existing.sortOrder = defaults.sortOrder;
       existing.active = defaults.active;
       existing.worldObjectType = defaults.worldObjectType;
+      existing.designVersion = defaults.designVersion;
+      existing.svgKey = defaults.svgKey;
+      existing.viewBox = defaults.viewBox;
+      existing.regionAliases = clone(defaults.regionAliases || {});
       existing.regionIds = clone(defaults.regionIds);
       existing.regions = clone(defaults.regions);
       existing.defaultUnlocked = defaults.defaultUnlocked;
       if (before !== JSON.stringify(existing)) existing.updatedAt = KA.date.localIsoString();
     });
     return list;
+  }
+
+  function normalizeRegionColorsForTemplate(template, regionColors) {
+    var next = clone(regionColors || {});
+    var aliases = template.regionAliases || {};
+    (template.regionIds || []).forEach(function (regionId) {
+      if (next[regionId]) return;
+      var aliasList = aliases[regionId] || [];
+      for (var i = 0; i < aliasList.length; i += 1) {
+        if (next[aliasList[i]]) {
+          next[regionId] = next[aliasList[i]];
+          break;
+        }
+      }
+    });
+    return next;
+  }
+
+  function syncArtworkRegionColors(appData) {
+    var changed = false;
+    var templateMap = {};
+    KA.constants.COLORING_TEMPLATES.forEach(function (template) {
+      templateMap[template.templateId] = template;
+    });
+    appData.artworks.forEach(function (artwork) {
+      var template = templateMap[artwork.templateId];
+      if (!template) return;
+      var before = JSON.stringify(artwork.regionColors || {});
+      artwork.regionColors = normalizeRegionColorsForTemplate(template, artwork.regionColors);
+      artwork.regionColorDesignVersion = template.designVersion;
+      if (before !== JSON.stringify(artwork.regionColors || {})) {
+        artwork.updatedAt = KA.date.localIsoString();
+        changed = true;
+      }
+    });
+    return changed;
   }
 
   function syncBuiltInTaskMetadata(list) {
@@ -227,6 +271,7 @@
     appData.starLedger = ensureArray(appData.starLedger);
     appData.eggInventory = ensureArray(appData.eggInventory);
     appData.artworks = ensureArray(appData.artworks);
+    syncArtworkRegionColors(appData);
     appData.worlds = ensureObject(appData.worlds);
     if (!appData.worlds.world_forest) {
       appData.worlds.world_forest = clone(defaults.worlds.world_forest);
@@ -251,6 +296,8 @@
       KA.eggs.syncEggInventory(appData);
     }
     markMigration(appData, "prototype3_horse_and_eggs");
+    markMigration(appData, "prototype4_audio_palette_svg");
+    markMigration(appData, "prototype5_coloring_design_sync");
     appData.updatedAt = appData.updatedAt || KA.date.localIsoString();
     changed = before !== JSON.stringify(appData);
     return { data: appData, changed: changed };
