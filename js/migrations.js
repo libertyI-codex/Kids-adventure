@@ -20,11 +20,44 @@
     return next;
   }
 
+  function createWorldFromDefinition(definition, now) {
+    return {
+      worldId: definition.id,
+      id: definition.id,
+      name: definition.name,
+      title: definition.title,
+      icon: definition.icon,
+      description: definition.description,
+      theme: definition.theme,
+      unlocked: definition.unlocked,
+      unlockedAt: definition.unlockedAt || now,
+      designVersion: definition.designVersion,
+      displayOrder: definition.displayOrder,
+      unlockCondition: definition.unlockCondition || null,
+      active: true,
+      level: 1,
+      stats: {
+        totalArtworks: 0,
+        totalCompletedDays: 0,
+        totalLifetimeStarsAtLastUpdate: 0
+      },
+      placements: [],
+      createdAt: now,
+      updatedAt: now
+    };
+  }
+
+  function createDefaultWorlds(now) {
+    var worlds = {};
+    KA.constants.WORLD_DEFINITIONS.forEach(function (definition) {
+      worlds[definition.id] = createWorldFromDefinition(definition, now);
+    });
+    return worlds;
+  }
+
   function createDefaultAppData() {
     var now = KA.date.localIsoString();
-    var defaultWorld = clone(KA.constants.DEFAULT_WORLD);
-    defaultWorld.createdAt = now;
-    defaultWorld.updatedAt = now;
+    var defaultWorlds = createDefaultWorlds(now);
     return {
       schemaVersion: KA.constants.SCHEMA_VERSION,
       appVersion: KA.constants.APP_VERSION,
@@ -71,13 +104,11 @@
       eggInventory: [],
       coloringTemplates: KA.constants.COLORING_TEMPLATES.map(withAuditDefaults),
       artworks: [],
-      worlds: {
-        world_forest: defaultWorld
-      },
+      worlds: defaultWorlds,
       unlocks: {
         profileId: KA.constants.PROFILE_ID,
         coloringTemplateIds: [],
-        worldIds: [KA.constants.WORLD_ID],
+        worldIds: KA.constants.WORLD_DEFINITIONS.map(function (world) { return world.id; }),
         featureIds: []
       },
       migrations: []
@@ -100,6 +131,7 @@
       soundEnabled: true,
       effectsEnabled: true,
       bgmEnabled: false,
+      selectedWorldId: KA.constants.WORLD_ID,
       dismissedMessages: []
     };
   }
@@ -144,6 +176,110 @@
     return list.filter(function (item) {
       return item && item[idKey] === id;
     })[0] || null;
+  }
+
+  function validWorldIds() {
+    return KA.constants.WORLD_DEFINITIONS.map(function (world) { return world.id; });
+  }
+
+  function isValidWorldId(worldId) {
+    return validWorldIds().indexOf(worldId) >= 0;
+  }
+
+  function syncWorldMetadata(world, definition) {
+    var before = JSON.stringify(world);
+    world.worldId = definition.id;
+    world.id = definition.id;
+    world.name = definition.name;
+    world.title = definition.title;
+    world.icon = definition.icon;
+    world.description = definition.description;
+    world.theme = definition.theme;
+    world.unlocked = definition.unlocked;
+    world.unlockedAt = world.unlockedAt || definition.unlockedAt || KA.date.localIsoString();
+    world.designVersion = definition.designVersion;
+    world.displayOrder = definition.displayOrder;
+    world.unlockCondition = definition.unlockCondition || null;
+    world.active = typeof world.active === "undefined" ? true : world.active;
+    world.stats = ensureObject(world.stats);
+    mergeMissing(world.stats, {
+      totalArtworks: 0,
+      totalCompletedDays: 0,
+      totalLifetimeStarsAtLastUpdate: 0
+    });
+    world.placements = ensureArray(world.placements);
+    world.createdAt = world.createdAt || KA.date.localIsoString();
+    if (before !== JSON.stringify(world)) world.updatedAt = KA.date.localIsoString();
+  }
+
+  function placementKey(placement) {
+    return placement.placementId || (placement.artworkId ? "placement_" + placement.artworkId : "");
+  }
+
+  function syncWorlds(appData) {
+    var worlds = ensureObject(appData.worlds);
+    var ids = validWorldIds();
+    KA.constants.WORLD_DEFINITIONS.forEach(function (definition) {
+      if (!worlds[definition.id]) {
+        worlds[definition.id] = createWorldFromDefinition(definition, KA.date.localIsoString());
+      }
+      syncWorldMetadata(worlds[definition.id], definition);
+    });
+
+    var gathered = [];
+    Object.keys(worlds).forEach(function (worldId) {
+      var containerWorld = worlds[worldId];
+      containerWorld.placements = ensureArray(containerWorld.placements);
+      containerWorld.placements.forEach(function (placement) {
+        if (!placement) return;
+        var key = placementKey(placement);
+        if (!key) return;
+        if (!placement.placementId) placement.placementId = key;
+        if (!placement.worldId) {
+          placement.worldId = isValidWorldId(worldId) ? worldId : KA.constants.WORLD_ID;
+        } else if (!isValidWorldId(placement.worldId)) {
+          placement.worldId = KA.constants.WORLD_ID;
+        }
+        gathered.push(placement);
+      });
+      containerWorld.placements = [];
+    });
+
+    var seen = {};
+    gathered.forEach(function (placement) {
+      var key = placementKey(placement);
+      if (!key || seen[key]) return;
+      seen[key] = true;
+      var targetWorldId = isValidWorldId(placement.worldId) ? placement.worldId : KA.constants.WORLD_ID;
+      placement.worldId = targetWorldId;
+      placement.updatedAt = placement.updatedAt || placement.createdAt || KA.date.localIsoString();
+      worlds[targetWorldId].placements.push(placement);
+    });
+
+    appData.worlds = worlds;
+    appData.unlocks = ensureObject(appData.unlocks);
+    appData.unlocks.worldIds = ensureArray(appData.unlocks.worldIds);
+    ids.forEach(function (worldId) {
+      if (appData.unlocks.worldIds.indexOf(worldId) === -1) {
+        appData.unlocks.worldIds.push(worldId);
+      }
+    });
+  }
+
+  function syncArtworkWorldFallback(appData) {
+    appData.artworks.forEach(function (artwork) {
+      if (!artwork || !artwork.placementId) return;
+      var placement = null;
+      Object.keys(appData.worlds || {}).forEach(function (worldId) {
+        if (placement) return;
+        var found = ensureArray(appData.worlds[worldId].placements).filter(function (item) {
+          return item && item.placementId === artwork.placementId;
+        })[0];
+        if (found) placement = found;
+      });
+      if (!placement) return;
+      if (!isValidWorldId(placement.worldId)) placement.worldId = KA.constants.WORLD_ID;
+    });
   }
 
   function syncBuiltInColoringTemplates(list) {
@@ -272,23 +408,13 @@
     appData.eggInventory = ensureArray(appData.eggInventory);
     appData.artworks = ensureArray(appData.artworks);
     syncArtworkRegionColors(appData);
-    appData.worlds = ensureObject(appData.worlds);
-    if (!appData.worlds.world_forest) {
-      appData.worlds.world_forest = clone(defaults.worlds.world_forest);
-    } else {
-      mergeMissing(appData.worlds.world_forest, defaults.worlds.world_forest);
-      appData.worlds.world_forest.placements = ensureArray(appData.worlds.world_forest.placements);
-      appData.worlds.world_forest.stats = ensureObject(appData.worlds.world_forest.stats);
-      mergeMissing(appData.worlds.world_forest.stats, defaults.worlds.world_forest.stats);
-    }
     appData.unlocks = ensureObject(appData.unlocks);
     mergeMissing(appData.unlocks, defaults.unlocks);
     appData.unlocks.coloringTemplateIds = ensureArray(appData.unlocks.coloringTemplateIds);
     appData.unlocks.worldIds = ensureArray(appData.unlocks.worldIds);
-    if (appData.unlocks.worldIds.indexOf(KA.constants.WORLD_ID) === -1) {
-      appData.unlocks.worldIds.push(KA.constants.WORLD_ID);
-    }
     appData.unlocks.featureIds = ensureArray(appData.unlocks.featureIds);
+    syncWorlds(appData);
+    syncArtworkWorldFallback(appData);
     appData.migrations = ensureArray(appData.migrations);
     markMigration(appData, "prototype2_default_tasks_and_coloring");
     recalculateStarTotalsIfMissing(appData);
@@ -298,6 +424,8 @@
     markMigration(appData, "prototype3_horse_and_eggs");
     markMigration(appData, "prototype4_audio_palette_svg");
     markMigration(appData, "prototype5_coloring_design_sync");
+    markMigration(appData, "prototype6_svg_and_forest_placement");
+    markMigration(appData, "prototype7_multi_worlds");
     appData.updatedAt = appData.updatedAt || KA.date.localIsoString();
     changed = before !== JSON.stringify(appData);
     return { data: appData, changed: changed };

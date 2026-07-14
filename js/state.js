@@ -38,6 +38,13 @@
       uiState.activeProfileId = uiState.activeProfileId || KA.constants.PROFILE_ID;
       uiState.coloringDrafts = uiState.coloringDrafts || {};
       uiState.selectedColor = uiState.selectedColor || KA.constants.COLOR_PALETTE[1].value;
+      uiState.selectedWorldId = uiState.selectedWorldId || KA.constants.WORLD_ID;
+      if (KA.worlds && !KA.worlds.isValidWorldId(uiState.selectedWorldId)) {
+        uiState.selectedWorldId = KA.constants.WORLD_ID;
+      } else if (!KA.worlds) {
+        var ids = (KA.constants.WORLD_DEFINITIONS || []).map(function (world) { return world.id; });
+        if (ids.indexOf(uiState.selectedWorldId) < 0) uiState.selectedWorldId = KA.constants.WORLD_ID;
+      }
       uiState.lastRoute = uiState.lastRoute || "home";
       uiState.currentLocalDate = KA.date.localDateKey();
       saveUiState();

@@ -8,6 +8,8 @@
   var audioContext = null;
   var bgmTimer = null;
   var bgmGain = null;
+  var forestEditSession = null;
+  var forestDragState = null;
 
   function escapeHtml(value) {
     return String(value == null ? "" : value)
@@ -24,6 +26,72 @@
 
   function iconButton(icon, label, route) {
     return '<button class="nav-btn ' + (KA.router.getCurrent().name === route ? "is-active" : "") + '" data-route="' + route + '"><span>' + icon + '</span>' + label + '</button>';
+  }
+
+  function cloneJson(value) {
+    return JSON.parse(JSON.stringify(value || []));
+  }
+
+  function isForestEditing() {
+    return Boolean(forestEditSession && forestEditSession.active);
+  }
+
+  function startForestEdit() {
+    forestEditSession = {
+      active: true,
+      snapshot: cloneJson(KA.worlds.getPlacements())
+    };
+    forestDragState = null;
+    KA.router.render();
+  }
+
+  function commitForestEdit() {
+    if (!isForestEditing()) return;
+    KA.worlds.normalizeZIndexes();
+    KA.state.saveAppData();
+    forestEditSession = null;
+    forestDragState = null;
+  }
+
+  function restoreForestEditSnapshot() {
+    if (!isForestEditing()) return;
+    KA.worlds.world().placements = cloneJson(forestEditSession.snapshot);
+    KA.state.saveAppData();
+    forestEditSession = null;
+    forestDragState = null;
+  }
+
+  function forestLeaveDialog(route, params) {
+    modalRoot.innerHTML = [
+      '<div class="modal" role="dialog" aria-modal="true">',
+      '<h2>ならべかえをどうする？</h2>',
+      '<p>いまの場所をほぞんするか、もとにもどしてから進めます。</p>',
+      '<div class="modal-actions">',
+      button("やめる", "btn-soft", 'data-dialog-cancel'),
+      button("もどす", "btn-soft", 'data-forest-leave-restore'),
+      button("ほぞんする", "btn-primary", 'data-forest-leave-save'),
+      '</div>',
+      '</div>'
+    ].join("");
+    modalRoot.querySelector("[data-dialog-cancel]").addEventListener("click", closeDialog);
+    modalRoot.querySelector("[data-forest-leave-restore]").addEventListener("click", function () {
+      closeDialog();
+      restoreForestEditSnapshot();
+      KA.router.navigate(route, params);
+    });
+    modalRoot.querySelector("[data-forest-leave-save]").addEventListener("click", function () {
+      closeDialog();
+      commitForestEdit();
+      KA.router.navigate(route, params);
+    });
+  }
+
+  function navigateWithForestGuard(route, params) {
+    if (isForestEditing() && KA.router.getCurrent().name === "forest" && route !== "forest") {
+      forestLeaveDialog(route, params);
+      return;
+    }
+    KA.router.navigate(route, params);
   }
 
   function layout(title, body, options) {
@@ -44,21 +112,21 @@
       iconButton("🏠", "ホーム", "home"),
       iconButton("⭐", "おしごと", "tasks"),
       iconButton("🎨", "ぬりえ", "coloring-list"),
-      iconButton("🌳", "もり", "forest"),
+      iconButton("🌍", "せかい", "forest"),
       iconButton("🖼️", "さくひん", "album"),
       '</nav>'
     ].join("");
     appEl.innerHTML = '<main class="screen ' + (options.screenClass || "") + '">' + topbar + body + '</main>' + nav;
     Array.prototype.forEach.call(appEl.querySelectorAll("[data-route]"), function (el) {
       el.addEventListener("click", function () {
-        KA.router.navigate(el.getAttribute("data-route"));
+        navigateWithForestGuard(el.getAttribute("data-route"));
       });
     });
     var gate = document.getElementById("parent-gate");
     if (gate) {
       KA.parentMode.bindParentGate(gate, function () {
         confirmDialog("おとながつかいます", "親モードに進みます。おとなのひとといっしょに使ってください。", "すすむ", function () {
-          KA.router.navigate("parent");
+          navigateWithForestGuard("parent");
         });
       });
     }
@@ -211,7 +279,7 @@
 
   function forestMiniPreview() {
     var count = KA.state.getAppData().artworks.length;
-    return '<div class="preview-wrap" aria-hidden="true"><svg viewBox="0 0 320 160"><rect width="320" height="160" fill="#BDEEFF"/><circle cx="270" cy="32" r="20" fill="#FACC15"/><path d="M0 104 C70 84 125 120 190 96 C250 74 290 92 320 80 L320 160 L0 160 Z" fill="#8BD17E"/><path d="M50 112 L70 54 L90 112 Z" fill="#4F9F54"/><path d="M210 116 L238 44 L266 116 Z" fill="#3F8F46"/><text x="18" y="145" fill="#2F7837" font-size="18" font-weight="800">森のさくひん ' + count + '</text></svg></div>';
+    return '<div class="preview-wrap" aria-hidden="true"><svg viewBox="0 0 320 160"><rect width="320" height="160" fill="#BDEEFF"/><circle cx="270" cy="32" r="20" fill="#FACC15"/><path d="M0 104 C70 84 125 120 190 96 C250 74 290 92 320 80 L320 160 L0 160 Z" fill="#8BD17E"/><path d="M50 112 L70 54 L90 112 Z" fill="#4F9F54"/><path d="M210 116 L238 44 L266 116 Z" fill="#3F8F46"/><text x="18" y="145" fill="#2F7837" font-size="18" font-weight="800">せかいのさくひん ' + count + '</text></svg></div>';
   }
 
   function renderHome() {
@@ -229,7 +297,7 @@
       '<div class="quick-actions">',
       button("⭐ おしごと", "btn-primary", 'data-route="tasks"'),
       button("🎨 ぬりえ", "btn-sun", 'data-route="coloring-list"'),
-      button("🌳 もり", "btn-soft", 'data-route="forest"'),
+      button("🌍 せかい", "btn-soft", 'data-route="forest"'),
       button("🖼️ さくひん", "btn-soft", 'data-route="album"'),
       '</div>',
       '</div>',
@@ -446,7 +514,7 @@
       '</div></section>'
     ].join("");
     layout("まほう", body, { parentGate: false });
-    var steps = ["いろをみているよ", "もりにあうばしょをさがしているよ", "きらきらをつけているよ", "森へいくよ"];
+    var steps = ["いろをみているよ", "にあうせかいをさがしているよ", "きらきらをつけているよ", "せかいへいくよ"];
     var index = 0;
     var msg = document.getElementById("magic-message");
     var interval = global.setInterval(function () {
@@ -455,7 +523,7 @@
     }, 800);
     var finish = function () {
       global.clearInterval(interval);
-      KA.router.navigate("forest", { focusArtworkId: artwork.artworkId });
+      showWorldChoiceForArtwork(artwork);
     };
     var timeout = global.setTimeout(finish, 3600);
     appEl.querySelector("[data-skip-magic]").addEventListener("click", function () {
@@ -464,26 +532,322 @@
     });
   }
 
-  function forestBackgroundSvg() {
-    return '<svg class="forest-bg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="#BDEEFF"/><circle cx="85" cy="12" r="6" fill="#FACC15"/><path d="M0 54 C18 45 32 58 48 50 C66 40 82 48 100 38 L100 100 L0 100 Z" fill="#9BE18D"/><path d="M0 72 C18 64 40 79 58 68 C74 58 88 70 100 60 L100 100 L0 100 Z" fill="#7ACB77"/><path d="M8 64 C17 44 20 30 26 18 C34 32 39 48 45 66 Z" fill="#4F9F54"/><path d="M66 64 C74 42 79 28 86 14 C93 32 98 48 100 67 Z" fill="#3F8F46"/><path d="M0 82 C20 76 42 84 58 80 C76 76 90 82 100 78 L100 100 L0 100 Z" fill="#5FBF66"/><path d="M2 84 C12 78 24 78 36 84 C26 90 12 90 2 84 Z" fill="#7BCFE4" opacity=".9"/><g fill="#EF6FA6"><circle cx="70" cy="76" r="1.4"/><circle cx="74" cy="79" r="1.2"/><circle cx="79" cy="75" r="1.3"/><circle cx="84" cy="81" r="1.1"/></g></svg>';
+  function worldBackgroundSvg(worldId) {
+    var id = KA.worlds.safeWorldId(worldId);
+    if (id === "world_sea") {
+      return '<svg class="forest-bg world-bg world-bg-sea" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="seaWater" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ee7ff"/><stop offset=".55" stop-color="#48bde2"/><stop offset="1" stop-color="#2388bd"/></linearGradient></defs><rect width="100" height="100" fill="url(#seaWater)"/><path d="M10 0 L26 0 L15 70 L3 70 Z M44 0 L58 0 L50 68 L38 68 Z M76 0 L90 0 L82 70 L70 70 Z" fill="#fff" opacity=".18"/><g fill="#dff8ff" opacity=".72"><circle cx="18" cy="28" r="1.7"/><circle cx="25" cy="44" r="1.1"/><circle cx="70" cy="24" r="1.4"/><circle cx="84" cy="49" r="1.7"/><circle cx="57" cy="36" r="1"/></g><path d="M0 82 C18 76 32 86 50 80 C70 74 84 84 100 78 L100 100 L0 100 Z" fill="#f4d58a"/><path d="M13 78 C18 68 23 68 28 78 Z M79 80 C84 69 92 70 96 80 Z" fill="#6f7f88"/><path d="M18 81 C16 68 20 60 24 50 C25 64 27 71 23 82 Z M74 82 C72 69 76 60 82 52 C82 66 85 75 80 84 Z" fill="#2ea66b"/><g fill="#ff7fa8"><path d="M33 82 C30 74 34 69 39 75 C44 70 49 74 45 82 Z"/><path d="M64 83 C61 75 66 70 70 76 C75 72 80 76 76 84 Z"/></g></svg>';
+    }
+    if (id === "world_island") {
+      return '<svg class="forest-bg world-bg world-bg-island" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="#aee7ff"/><circle cx="84" cy="13" r="6" fill="#facc15"/><path d="M0 55 C20 48 36 57 52 50 C72 42 88 50 100 44 L100 72 L0 72 Z" fill="#6ccce6"/><path d="M0 72 C18 63 40 63 58 70 C74 78 90 76 100 70 L100 100 L0 100 Z" fill="#f5d48a"/><path d="M18 73 C35 55 68 55 85 73 C66 80 36 80 18 73 Z" fill="#7ed36f"/><path d="M42 77 C50 73 59 78 64 91" fill="none" stroke="#d19a52" stroke-width="3" stroke-linecap="butt"/><path d="M78 64 L83 36" stroke="#8b5a2b" stroke-width="4"/><path d="M81 38 C70 32 66 24 81 28 C86 17 94 23 87 34 C99 32 100 43 87 42 C91 53 79 54 81 38 Z" fill="#2f9f54"/><g fill="#ef6fa6"><circle cx="67" cy="73" r="1.2"/><circle cx="72" cy="76" r="1.1"/><circle cx="31" cy="75" r="1.2"/></g></svg>';
+    }
+    if (id === "world_castle") {
+      return '<svg class="forest-bg world-bg world-bg-castle" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="#dff3ff"/><circle cx="84" cy="12" r="5" fill="#facc15"/><path d="M10 20 H25 V38 H10 Z M75 20 H90 V38 H75 Z M25 28 H75 V48 H25 Z" fill="#f8f5ff" stroke="#b7abd8" stroke-width="1"/><path d="M12 20 L17 10 L23 20 Z M77 20 L83 10 L88 20 Z" fill="#e5dcff"/><path d="M48 29 V16 L62 20 L48 24 Z" fill="#ef6fa6"/><path d="M43 48 C43 39 57 39 57 48 V60 H43 Z" fill="#a78bfa"/><path d="M0 58 H100 V100 H0 Z" fill="#91d887"/><path d="M36 63 C44 60 56 60 64 63 L56 100 H44 Z" fill="#d8d1c4"/><path d="M42 78 H58 M39 91 H61" stroke="#aaa094" stroke-width="1.5"/><circle cx="50" cy="67" r="5" fill="#7bcfe4"/><g fill="#ef6fa6"><circle cx="23" cy="78" r="1.3"/><circle cx="28" cy="80" r="1.2"/><circle cx="76" cy="77" r="1.3"/><circle cx="82" cy="80" r="1.1"/></g></svg>';
+    }
+    if (id === "world_sky_island") {
+      return '<svg class="forest-bg world-bg world-bg-sky" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="#bdeeff"/><path d="M12 30 C18 20 32 22 35 31 C45 29 52 36 47 43 H10 C4 39 6 32 12 30 Z M70 22 C75 13 88 15 91 24 C99 25 103 33 96 39 H66 C60 35 62 25 70 22 Z" fill="#fff" opacity=".9"/><path d="M55 16 C70 18 82 29 87 43" fill="none" stroke="#f472b6" stroke-width="3"/><path d="M55 22 C67 24 77 32 82 44" fill="none" stroke="#facc15" stroke-width="3"/><path d="M55 28 C65 30 72 36 77 45" fill="none" stroke="#38bdf8" stroke-width="3"/><path d="M18 70 C36 50 70 50 86 70 C74 82 32 83 18 70 Z" fill="#7ed36f"/><path d="M24 73 C40 88 63 88 80 72 C70 95 34 96 24 73 Z" fill="#8b6f47"/><path d="M60 70 C62 82 58 91 53 100" fill="none" stroke="#7bcfe4" stroke-width="4" opacity=".85"/><g fill="#fff" opacity=".86"><circle cx="20" cy="84" r="5"/><circle cx="28" cy="86" r="6"/><circle cx="78" cy="85" r="6"/><circle cx="88" cy="86" r="5"/></g><g fill="#fff7a8"><circle cx="37" cy="35" r="1"/><circle cx="45" cy="24" r="1.2"/><circle cx="83" cy="55" r="1.1"/></g></svg>';
+    }
+    return '<svg class="forest-bg world-bg world-bg-forest" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="#BDEEFF"/><circle cx="85" cy="12" r="6" fill="#FACC15"/><path d="M0 54 C18 45 32 58 48 50 C66 40 82 48 100 38 L100 100 L0 100 Z" fill="#9BE18D"/><path d="M0 72 C18 64 40 79 58 68 C74 58 88 70 100 60 L100 100 L0 100 Z" fill="#7ACB77"/><path d="M8 64 C17 44 20 30 26 18 C34 32 39 48 45 66 Z" fill="#4F9F54"/><path d="M66 64 C74 42 79 28 86 14 C93 32 98 48 100 67 Z" fill="#3F8F46"/><path d="M0 82 C20 76 42 84 58 80 C76 76 90 82 100 78 L100 100 L0 100 Z" fill="#5FBF66"/><path d="M2 84 C12 78 24 78 36 84 C26 90 12 90 2 84 Z" fill="#7BCFE4" opacity=".9"/><g fill="#EF6FA6"><circle cx="70" cy="76" r="1.4"/><circle cx="74" cy="79" r="1.2"/><circle cx="79" cy="75" r="1.3"/><circle cx="84" cy="81" r="1.1"/></g></svg>';
   }
 
-  function renderForest() {
-    var placements = KA.worlds.getPlacements();
+  function worldMiniPreview(worldId) {
+    return '<div class="world-mini world-mini-' + escapeHtml(KA.worlds.safeWorldId(worldId).replace("world_", "")) + '">' + worldBackgroundSvg(worldId) + '</div>';
+  }
+
+  function worldCards(attrsPrefix, currentWorldId, recommendedIds) {
+    recommendedIds = recommendedIds || [];
+    return KA.worlds.allWorlds().map(function (world) {
+      var id = world.worldId || world.id;
+      var isCurrent = id === currentWorldId;
+      var isRecommended = recommendedIds.indexOf(id) >= 0;
+      return [
+        '<button class="world-card ' + (isCurrent ? "is-current " : "") + '" ' + attrsPrefix + '="' + escapeHtml(id) + '">',
+        '<span class="world-card-icon">' + escapeHtml(world.icon || "🌍") + '</span>',
+        '<strong>' + escapeHtml(world.name || world.title || id) + '</strong>',
+        worldMiniPreview(id),
+        isCurrent ? '<span class="badge">いまここ</span>' : '',
+        isRecommended ? '<span class="badge star">おすすめ</span>' : '',
+        '</button>'
+      ].join("");
+    }).join("");
+  }
+
+  function showWorldSelector() {
+    var current = KA.worlds.selectedWorldId();
+    modalRoot.innerHTML = [
+      '<div class="modal world-modal" role="dialog" aria-modal="true">',
+      '<h2>せかいをかえる</h2>',
+      '<p class="muted">いきたいせかいを えらんでね。</p>',
+      '<div class="world-card-grid">',
+      worldCards("data-select-world", current, []),
+      '</div>',
+      '<div class="modal-actions">',
+      button("とじる", "btn-soft", 'data-dialog-cancel'),
+      '</div>',
+      '</div>'
+    ].join("");
+    modalRoot.querySelector("[data-dialog-cancel]").addEventListener("click", closeDialog);
+    Array.prototype.forEach.call(modalRoot.querySelectorAll("[data-select-world]"), function (el) {
+      el.addEventListener("click", function () {
+        var worldId = KA.worlds.setSelectedWorldId(el.getAttribute("data-select-world"));
+        closeDialog();
+        KA.router.navigate("forest", { worldId: worldId });
+      });
+    });
+  }
+
+  function openWorldAfterPlacement(worldId) {
+    KA.worlds.setSelectedWorldId(worldId);
+    KA.state.saveAppData();
+    closeDialog();
+    KA.router.navigate("forest", { worldId: worldId });
+  }
+
+  function showWorldChoiceForArtwork(artwork) {
+    if (!artwork) return;
+    var placement = KA.worlds.placementForArtwork(artwork.artworkId);
+    var current = placement ? placement.worldId : KA.worlds.recommendedWorldForTemplate(artwork.templateId);
+    var recommended = KA.worlds.recommendedWorldIds(artwork.templateId);
+    modalRoot.innerHTML = [
+      '<div class="modal world-modal" role="dialog" aria-modal="true">',
+      '<h2>どのせかいに おく？</h2>',
+      '<p class="muted">' + escapeHtml(artwork.title) + 'を すきなせかいに おけるよ。</p>',
+      '<div class="world-card-grid">',
+      worldCards("data-place-artwork-world", current, recommended),
+      '</div>',
+      '<div class="modal-actions">',
+      button("おすすめにおく", "btn-primary", 'data-place-recommended'),
+      '</div>',
+      '</div>'
+    ].join("");
+    Array.prototype.forEach.call(modalRoot.querySelectorAll("[data-place-artwork-world]"), function (el) {
+      el.addEventListener("click", function () {
+        var worldId = el.getAttribute("data-place-artwork-world");
+        var moved = KA.worlds.moveArtworkToWorld(artwork.artworkId, worldId);
+        if (moved.ok) openWorldAfterPlacement(worldId);
+      });
+    });
+    modalRoot.querySelector("[data-place-recommended]").addEventListener("click", function () {
+      var recommendedWorld = KA.worlds.recommendedWorldForTemplate(artwork.templateId);
+      var moved = KA.worlds.moveArtworkToWorld(artwork.artworkId, recommendedWorld);
+      if (moved.ok) openWorldAfterPlacement(recommendedWorld);
+    });
+  }
+
+  function showMoveArtworkSelector() {
+    var currentWorldId = KA.worlds.selectedWorldId();
+    var placements = KA.worlds.getPlacements(currentWorldId);
+    if (!placements.length) {
+      toast("このせかいには まださくひんがないよ");
+      return;
+    }
+    modalRoot.innerHTML = [
+      '<div class="modal world-modal" role="dialog" aria-modal="true">',
+      '<h2>さくひんをうつす</h2>',
+      '<p class="muted">うつしたい さくひんを えらんでね。</p>',
+      '<div class="move-art-grid">',
+      placements.map(function (placement) {
+        var artwork = KA.coloring.getArtwork(placement.artworkId);
+        if (!artwork) return "";
+        return '<button class="move-art-card" data-move-artwork="' + escapeHtml(artwork.artworkId) + '"><div class="art-preview preview-wrap">' + KA.coloring.renderTemplate(artwork.templateId, artwork.regionColors, "") + '</div><strong>' + escapeHtml(artwork.title) + '</strong></button>';
+      }).join(""),
+      '</div>',
+      '<div class="modal-actions">',
+      button("とじる", "btn-soft", 'data-dialog-cancel'),
+      '</div>',
+      '</div>'
+    ].join("");
+    modalRoot.querySelector("[data-dialog-cancel]").addEventListener("click", closeDialog);
+    Array.prototype.forEach.call(modalRoot.querySelectorAll("[data-move-artwork]"), function (el) {
+      el.addEventListener("click", function () {
+        showMoveDestinationSelector(el.getAttribute("data-move-artwork"));
+      });
+    });
+  }
+
+  function showMoveDestinationSelector(artworkId) {
+    var artwork = KA.coloring.getArtwork(artworkId);
+    if (!artwork) return;
+    var current = (KA.worlds.placementForArtwork(artworkId) || {}).worldId || KA.worlds.selectedWorldId();
+    modalRoot.innerHTML = [
+      '<div class="modal world-modal" role="dialog" aria-modal="true">',
+      '<h2>どこへ うつす？</h2>',
+      '<p class="muted">' + escapeHtml(artwork.title) + 'を うつすせかいを えらんでね。</p>',
+      '<div class="world-card-grid">',
+      worldCards("data-move-target-world", current, KA.worlds.recommendedWorldIds(artwork.templateId)),
+      '</div>',
+      '<div class="modal-actions">',
+      button("もどる", "btn-soft", 'data-move-back'),
+      '</div>',
+      '</div>'
+    ].join("");
+    modalRoot.querySelector("[data-move-back]").addEventListener("click", showMoveArtworkSelector);
+    Array.prototype.forEach.call(modalRoot.querySelectorAll("[data-move-target-world]"), function (el) {
+      el.addEventListener("click", function () {
+        var targetWorldId = el.getAttribute("data-move-target-world");
+        confirmDialog("さくひんをうつす？", KA.worlds.worldLabel(targetWorldId) + "へ うつします。", "うつす", function () {
+          var moved = KA.worlds.moveArtworkToWorld(artworkId, targetWorldId);
+          if (!moved.ok) {
+            toast("うまく うつせなかったみたい");
+            return;
+          }
+          KA.state.saveAppData();
+          openWorldAfterPlacement(targetWorldId);
+        });
+      });
+    });
+  }
+
+  function findPlacement(placementId) {
+    return KA.worlds.getPlacements().filter(function (placement) {
+      return placement.placementId === placementId;
+    })[0] || null;
+  }
+
+  function stageDeltaToPercent(stage, dx, dy, startXPercent, startYPercent) {
+    var rect = stage.getBoundingClientRect();
+    var width = Math.max(1, rect.width);
+    var height = Math.max(1, rect.height);
+    return KA.worlds.clampPlacementPercent(
+      startXPercent + (dx / width) * 100,
+      startYPercent + (dy / height) * 100
+    );
+  }
+
+  function bindForestDrag(stage) {
+    Array.prototype.forEach.call(stage.querySelectorAll("[data-draggable-placement]"), function (el) {
+      el.addEventListener("pointerdown", function (event) {
+        if (!isForestEditing()) return;
+        var placement = findPlacement(el.getAttribute("data-draggable-placement"));
+        if (!placement) return;
+        event.preventDefault();
+        event.stopPropagation();
+        forestDragState = {
+          pointerId: event.pointerId,
+          placementId: placement.placementId,
+          startClientX: event.clientX,
+          startClientY: event.clientY,
+          startXPercent: Number(placement.xPercent || placement.x || 50),
+          startYPercent: Number(placement.yPercent || placement.y || 64),
+          originalZIndex: Number(placement.zIndex || 1),
+          dragZIndex: KA.worlds.nextZIndex(),
+          moved: false
+        };
+        el.classList.add("is-pressed");
+        if (el.setPointerCapture) {
+          try { el.setPointerCapture(event.pointerId); } catch (error) { /* optional */ }
+        }
+      });
+
+      el.addEventListener("pointermove", function (event) {
+        if (!forestDragState || forestDragState.placementId !== el.getAttribute("data-draggable-placement")) return;
+        var dx = event.clientX - forestDragState.startClientX;
+        var dy = event.clientY - forestDragState.startClientY;
+        if (!forestDragState.moved && Math.sqrt(dx * dx + dy * dy) < 6) return;
+        event.preventDefault();
+        event.stopPropagation();
+        forestDragState.moved = true;
+        el.classList.add("is-dragging");
+        var next = stageDeltaToPercent(stage, dx, dy, forestDragState.startXPercent, forestDragState.startYPercent);
+        var placement = KA.worlds.updatePlacementPosition(forestDragState.placementId, next.xPercent, next.yPercent, forestDragState.dragZIndex, true);
+        if (!placement) return;
+        el.style.left = placement.xPercent + "%";
+        el.style.top = placement.yPercent + "%";
+        el.style.zIndex = placement.zIndex;
+      });
+
+      function endDrag(event) {
+        if (!forestDragState || forestDragState.placementId !== el.getAttribute("data-draggable-placement")) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (!forestDragState.moved) {
+          el.style.zIndex = forestDragState.originalZIndex;
+        }
+        el.classList.remove("is-pressed");
+        el.classList.remove("is-dragging");
+        if (el.releasePointerCapture) {
+          try { el.releasePointerCapture(event.pointerId); } catch (error) { /* optional */ }
+        }
+        forestDragState = null;
+      }
+
+      el.addEventListener("pointerup", endDrag);
+      el.addEventListener("pointercancel", endDrag);
+    });
+  }
+
+  function renderForest(params) {
+    if (params && params.worldId) {
+      KA.worlds.setSelectedWorldId(params.worldId);
+    }
+    var currentWorldId = KA.worlds.selectedWorldId();
+    var currentWorld = KA.worlds.getWorld(currentWorldId);
+    var placements = KA.worlds.getPlacements(currentWorldId);
+    var editing = isForestEditing();
     var objects = placements.map(function (placement) {
       var artwork = KA.coloring.getArtwork(placement.artworkId);
       if (!artwork) return "";
-      return '<button class="forest-object anim-' + escapeHtml(placement.animation) + '" style="left:' + placement.x + '%; top:' + placement.y + '%; --scale:' + placement.scale + '" data-artwork-detail="' + escapeHtml(artwork.artworkId) + '" aria-label="' + escapeHtml(artwork.title) + '">' + KA.coloring.renderTemplate(artwork.templateId, artwork.regionColors, "") + '</button>';
+      var attrs = editing ? 'data-draggable-placement="' + escapeHtml(placement.placementId) + '"' : 'data-artwork-detail="' + escapeHtml(artwork.artworkId) + '"';
+      var classes = "forest-object anim-" + escapeHtml(placement.animation) + (editing ? " is-editable" : "");
+      return '<button class="' + classes + '" style="left:' + Number(placement.xPercent || placement.x) + '%; top:' + Number(placement.yPercent || placement.y) + '%; --scale:' + placement.scale + '; z-index:' + Number(placement.zIndex || 1) + '" ' + attrs + ' aria-label="' + escapeHtml(artwork.title) + '">' + KA.coloring.renderTemplate(artwork.templateId, artwork.regionColors, "") + '</button>';
     }).join("");
+    var headerActions = editing ?
+      '<div class="forest-tools">' + button("できた", "btn-primary", 'data-finish-forest-edit') + button("もとにもどす", "btn-soft", 'data-reset-forest-layout') + button("やめる", "btn-soft", 'data-cancel-forest-edit') + '</div>' :
+      '<div class="forest-tools">' + button("せかいをかえる", "btn-soft", 'data-change-world') + (placements.length ? button("ならべかえ", "btn-sun", 'data-start-forest-edit') : '') + button("さくひんをうつす", "btn-soft", 'data-move-artwork-world') + button("きょうのぼうけん", "btn-soft", 'data-route="summary"') + '</div>';
     var body = [
-      '<div class="screen-header"><div><h2>思い出の森</h2><p class="muted">ぬりえの作品が森にあらわれるよ。</p></div>' + button("きょうのぼうけん", "btn-soft", 'data-route="summary"') + '</div>',
-      '<section class="forest-stage">',
-      forestBackgroundSvg(),
-      objects || '<div class="panel panel-pad" style="position:absolute; left:16px; right:16px; bottom:16px"><p>まだ作品はありません。ぬりえを完成させると森に登場します。</p></div>',
+      '<div class="screen-header world-screen-header"><div><p class="eyebrow">' + escapeHtml(currentWorld.icon || "🌍") + ' せかい</p><h2>' + escapeHtml(currentWorld.title || currentWorld.name || "せかい") + '</h2><p class="' + (editing ? "forest-edit-banner" : "muted") + '">' + (editing ? "すきなところへ うごかしてね" : escapeHtml(currentWorld.description || "ぬりえの作品があらわれるよ。")) + '</p></div>' + headerActions + '</div>',
+      '<section class="forest-stage world-stage world-stage-' + escapeHtml(currentWorldId.replace("world_", "")) + ' ' + (editing ? "is-editing" : "") + '" id="forest-stage">',
+      worldBackgroundSvg(currentWorldId),
+      objects || '<div class="panel panel-pad empty-world-message"><p>このせかいには まだ作品がありません。ぬりえを完成させるか、作品をうつしてね。</p></div>',
       '</section>'
     ].join("");
-    layout("もり", body);
-    bindArtworkDetails();
+    layout("せかい", body);
+    var worldButton = appEl.querySelector("[data-change-world]");
+    if (worldButton) {
+      worldButton.addEventListener("click", showWorldSelector);
+    }
+    var moveButton = appEl.querySelector("[data-move-artwork-world]");
+    if (moveButton) {
+      moveButton.addEventListener("click", showMoveArtworkSelector);
+    }
+    var startButton = appEl.querySelector("[data-start-forest-edit]");
+    if (startButton) {
+      startButton.addEventListener("click", startForestEdit);
+    }
+    var finishButton = appEl.querySelector("[data-finish-forest-edit]");
+    if (finishButton) {
+      finishButton.addEventListener("click", function () {
+        commitForestEdit();
+        toast("ならべかえを ほぞんしたよ");
+        KA.router.render();
+      });
+    }
+    var cancelButton = appEl.querySelector("[data-cancel-forest-edit]");
+    if (cancelButton) {
+      cancelButton.addEventListener("click", function () {
+        confirmDialog("ならべかえをやめる？", "動かした場所をもとにもどします。", "もどす", function () {
+          restoreForestEditSnapshot();
+          KA.router.render();
+        });
+      });
+    }
+    var resetButton = appEl.querySelector("[data-reset-forest-layout]");
+    if (resetButton) {
+      resetButton.addEventListener("click", function () {
+        confirmDialog("ならべかえを もとにもどす？", "作品は消えません。自動で決めた場所にもどします。", "もどす", function () {
+          KA.worlds.resetToAutoPlacements(currentWorldId);
+          KA.worlds.normalizeZIndexes(currentWorldId);
+          KA.state.saveAppData();
+          forestEditSession = null;
+          forestDragState = null;
+          KA.router.render();
+        });
+      });
+    }
+    if (editing) {
+      bindForestDrag(document.getElementById("forest-stage"));
+    } else {
+      bindArtworkDetails();
+    }
   }
 
   function colorNames(values) {
@@ -496,9 +860,12 @@
   function showArtworkDetail(artworkId) {
     var artwork = KA.coloring.getArtwork(artworkId);
     if (!artwork) return;
+    var placement = KA.worlds.placementForArtwork(artworkId);
+    var worldName = placement ? KA.worlds.worldLabel(placement.worldId) : "もり";
     var html = [
       '<div class="art-preview preview-wrap">' + KA.coloring.renderTemplate(artwork.templateId, artwork.regionColors, "") + '</div>',
       '<p><strong>完成日:</strong> ' + escapeHtml(KA.date.formatDisplayDate(artwork.localDate)) + '</p>',
+      '<p><strong>いるせかい:</strong> ' + escapeHtml(worldName) + '</p>',
       '<p><strong>つかった色:</strong> ' + escapeHtml(colorNames(artwork.usedColors)) + '</p>',
       '<p><strong>おきにいり:</strong> ' + (artwork.favorite ? "はい" : "まだ") + '</p>',
       '<p><strong>親のひとこと:</strong><br>' + escapeHtml(artwork.parentNote || "まだありません") + '</p>'
@@ -508,12 +875,13 @@
 
   function artCard(artwork) {
     var placement = KA.worlds.placementForArtwork(artwork.artworkId);
+    var worldName = placement ? KA.worlds.worldLabel(placement.worldId) : "";
     return [
       '<article class="art-card">',
       '<div class="art-preview preview-wrap">' + KA.coloring.renderTemplate(artwork.templateId, artwork.regionColors, "") + '</div>',
       '<h3>' + escapeHtml(artwork.title) + '</h3>',
       '<p><span class="badge">' + escapeHtml(KA.date.formatDisplayDate(artwork.localDate)) + '</span> <span class="badge">' + escapeHtml((artwork.analysis || {}).dominantColorFamily || "color") + '</span></p>',
-      '<p class="muted">' + (placement ? "森にいるよ" : "森にはまだいません") + '</p>',
+      '<p class="muted">' + (placement ? escapeHtml(worldName) + "にいるよ" : "せかいにはまだいません") + '</p>',
       '<p>' + (artwork.favorite ? "★ おきにいり" : "☆ おきにいり") + '</p>',
       '<p class="muted">' + escapeHtml(artwork.parentNote || "親のひとことはまだありません") + '</p>',
       button("見る", "btn-soft btn-small", 'data-artwork-detail="' + escapeHtml(artwork.artworkId) + '"'),
@@ -535,6 +903,11 @@
     KA.tasks.allTasks().forEach(function (task) { taskMap[task.taskId] = task; });
     var completed = KA.tasks.completedToday();
     var artworks = record.artworkIds.map(KA.coloring.getArtwork).filter(Boolean);
+    var artworkWorldMessages = artworks.map(function (artwork) {
+      var placement = KA.worlds.placementForArtwork(artwork.artworkId);
+      var worldName = placement ? KA.worlds.worldLabel(placement.worldId) : "もり";
+      return '<li>' + escapeHtml(artwork.title) + 'が ' + escapeHtml(worldName) + 'に なかまいりしたよ！</li>';
+    }).join("");
     var body = [
       '<section class="panel panel-pad">',
       '<h2>きょうもがんばったね</h2>',
@@ -542,10 +915,11 @@
       '<h3>できたおしごと</h3><ul class="summary-list">',
       completed.length ? completed.map(function (item) { return '<li>' + escapeHtml((taskMap[item.taskId] || {}).icon || "⭐") + ' ' + escapeHtml((taskMap[item.taskId] || {}).title || item.taskId) + '</li>'; }).join("") : '<li>できたことがここに出るよ</li>',
       '</ul><p><span class="badge star">きょうのほし ' + Number(record.earnedStarsToday || 0) + '</span></p>',
+      artworkWorldMessages ? '<h3>せかいにふえたなかま</h3><ul class="summary-list">' + artworkWorldMessages + '</ul>' : '',
       '<h3>きょうのさくひん</h3><div class="album-grid">',
       artworks.length ? artworks.map(artCard).join("") : '<p class="muted">ぬりえを完成するとここに出ます。</p>',
       '</div><div class="quick-actions">',
-      button("森へ進む", "btn-primary", 'data-route="forest"'),
+      button("せかいへ進む", "btn-primary", 'data-route="forest"'),
       button("ホームへ戻る", "btn-soft", 'data-route="home"'),
       '</div></section>'
     ].join("");
@@ -605,7 +979,9 @@
       return '<div class="parent-row"><h3>' + escapeHtml(task.icon + " " + task.title) + '</h3><div class="form-grid"><label class="field"><span>有効</span><select data-parent-task-active="' + task.taskId + '"><option value="true" ' + (task.active !== false ? "selected" : "") + '>有効</option><option value="false" ' + (task.active === false ? "selected" : "") + '>無効</option></select></label><label class="field"><span>報酬スター</span><input type="number" min="0" max="9" value="' + Number(task.rewardStars || 0) + '" data-parent-task-reward="' + task.taskId + '"></label><p><span class="badge">' + (done ? "今日 完了" : "今日 未完了") + '</span></p>' + (done ? button("完了を訂正", "btn-danger btn-small", 'data-undo-task="' + task.taskId + '"') : '') + '</div></div>';
     }).join("");
     var artRows = todayArt.map(function (art) {
-      return '<div class="parent-row"><h3>' + escapeHtml(art.title) + '</h3><div class="art-preview preview-wrap">' + KA.coloring.renderTemplate(art.templateId, art.regionColors, "") + '</div><label class="field"><span>親のひとこと</span><textarea data-parent-note="' + escapeHtml(art.artworkId) + '">' + escapeHtml(art.parentNote || "") + '</textarea></label>' + button("ひとこと保存", "btn-primary btn-small", 'data-save-note="' + escapeHtml(art.artworkId) + '"') + '</div>';
+      var placement = KA.worlds.placementForArtwork(art.artworkId);
+      var worldName = placement ? KA.worlds.worldLabel(placement.worldId) : "もり";
+      return '<div class="parent-row"><h3>' + escapeHtml(art.title) + '</h3><p><span class="badge">いるせかい: ' + escapeHtml(worldName) + '</span></p><div class="art-preview preview-wrap">' + KA.coloring.renderTemplate(art.templateId, art.regionColors, "") + '</div><label class="field"><span>親のひとこと</span><textarea data-parent-note="' + escapeHtml(art.artworkId) + '">' + escapeHtml(art.parentNote || "") + '</textarea></label>' + button("ひとこと保存", "btn-primary btn-small", 'data-save-note="' + escapeHtml(art.artworkId) + '"') + '</div>';
     }).join("");
     var body = [
       '<section class="parent-screen grid">',
