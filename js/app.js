@@ -272,9 +272,22 @@
   }
 
   function eggStateLabel(state) {
-    if (state === "cracked") return "ひびが入った";
-    if (state === "hatched") return "うまれた";
-    return "まだ開いていない";
+    return KA.eggs && KA.eggs.statusLabel ? KA.eggs.statusLabel(state) : "たまご";
+  }
+
+  function favoriteCompanionCard() {
+    if (!KA.companions || !KA.companions.favoriteCompanion) return "";
+    var companion = KA.companions.favoriteCompanion(KA.state.getAppData());
+    if (!companion) return "";
+    var species = KA.companions.getSpecies(companion.speciesId);
+    if (!species) return "";
+    return [
+      '<div class="panel panel-pad companion-home-card">',
+      '<div class="companion-home-art">' + KA.companions.renderCompanion(species.id) + '</div>',
+      '<div><p class="eyebrow">いっしょに ぼうけん</p><h3>' + escapeHtml(species.name) + '</h3>',
+      '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span></p></div>',
+      '</div>'
+    ].join("");
   }
 
   function forestMiniPreview() {
@@ -306,6 +319,7 @@
       '<p><span class="badge">おしごと ' + completed.length + ' / ' + tasks.length + '</span> <span class="badge">さくひん ' + record.artworkIds.length + '</span></p>',
       button("🥚 ふしぎなたまご " + KA.eggs.eggCount() + "こ", "btn-soft egg-button", 'data-route="eggs"'),
       forestMiniPreview(),
+      favoriteCompanionCard(),
       dataIssueMessage(),
       '</div>',
       '</section>'
@@ -351,6 +365,12 @@
             playTone("egg");
             toast("ふしぎなたまごを見つけたよ");
           }, 260);
+        }
+        if (result.eggGrowth && result.eggGrowth.ok) {
+          global.setTimeout(function () {
+            playTone(result.eggGrowth.ready ? "hatch" : "egg");
+            toast("おしごとを がんばったから たまごが そだったよ！");
+          }, 560);
         }
         KA.router.navigate("star", { earned: result.task.rewardStars });
       });
@@ -495,6 +515,9 @@
           return;
         }
         playTone("complete");
+        if (result.eggGrowth && result.eggGrowth.ok) {
+          toast("ぬりえが できたから たまごが ひかったよ！");
+        }
         KA.router.navigate("magic", { artworkId: result.artwork.artworkId });
       });
     });
@@ -769,7 +792,7 @@
     });
   }
 
-  function findPlacement(placementId) {
+  function findDraggedPlacement(placementId) {
     return KA.worlds.getPlacements().filter(function (placement) {
       return placement.placementId === placementId;
     })[0] || null;
@@ -789,7 +812,7 @@
     Array.prototype.forEach.call(stage.querySelectorAll("[data-draggable-placement]"), function (el) {
       el.addEventListener("pointerdown", function (event) {
         if (!isForestEditing()) return;
-        var placement = findPlacement(el.getAttribute("data-draggable-placement"));
+        var placement = findDraggedPlacement(el.getAttribute("data-draggable-placement"));
         if (!placement) return;
         event.preventDefault();
         event.stopPropagation();
@@ -1012,46 +1035,128 @@
     bindArtworkDetails();
   }
 
-  function renderEggs() {
-    var data = KA.state.getAppData();
-    var eggs = KA.eggs.getEggs();
-    var nextAt = KA.eggs.nextEggAt(data);
-    var body = [
-      '<div class="screen-header"><div><h2>ふしぎなたまご</h2><p class="muted">あつめたほしが10こふえるごとに、たまごがひとつ増えるよ。</p></div><div><span class="badge star">🥚 ' + eggs.length + 'こ</span></div></div>',
-      '<section class="album-grid">'
+  function eggDailyChecklist(activity) {
+    var items = [
+      { key: "petted", done: activity.petted, label: activity.petted ? "たまごを なでた" : "たまごを なでる" },
+      { key: "jobBonus", done: activity.jobBonus, label: activity.jobBonus ? "おしごとを がんばった" : "おしごとを がんばる" },
+      { key: "coloringBonus", done: activity.coloringBonus, label: activity.coloringBonus ? "ぬりえを かんせいした" : "ぬりえを かんせいしよう" }
     ];
-    if (!eggs.length) {
-      body.push('<div class="panel panel-pad"><h3>まだたまごはありません</h3><p>あつめたほしが ' + nextAt + ' こになると、たまごが見つかるよ。</p>' + button("おしごとへ", "btn-primary", 'data-route="tasks"') + '</div>');
-    } else {
-      eggs.forEach(function (egg) {
-        body.push([
-          '<button class="egg-card" data-egg-id="' + escapeHtml(egg.id) + '">',
-          '<span class="egg-icon">🥚</span>',
-          '<strong>' + escapeHtml(eggStateLabel(egg.state)) + '</strong>',
-          '<span class="muted">あつめたほし ' + Number(egg.earnedByStars || 0) + ' こで見つけたよ</span>',
-          '</button>'
-        ].join(""));
-      });
-    }
-    body.push('</section>');
-    layout("たまご", body.join(""));
-    Array.prototype.forEach.call(appEl.querySelectorAll("[data-egg-id]"), function (el) {
-      el.addEventListener("click", function () {
-        toast("もうすぐうまれるかも？");
-      });
-    });
+    return '<ul class="egg-checklist">' + items.map(function (item) {
+      return '<li class="' + (item.done ? "is-done" : "") + '">' + (item.done ? '✓ ' : '・') + escapeHtml(item.label) + '</li>';
+    }).join("") + '</ul>';
   }
 
-  function renderAlbum() {
-    var artworks = KA.coloring.recentArtworks();
-    var body = [
-      '<div class="screen-header"><div><h2>さくひん</h2><p class="muted">完成したぬりえを新しい順で見られます。</p></div></div>',
-      '<section class="album-grid">',
-      artworks.length ? artworks.map(artCard).join("") : '<div class="panel panel-pad"><p>まだ作品はありません。</p></div>',
-      '</section>'
+  function renderEggPanel(data) {
+    var eggs = KA.eggs.getEggs();
+    var egg = KA.eggs.activeEgg(data);
+    var activity = KA.eggs.todayActivity(data);
+    var nextAt = KA.eggs.nextEggAt(data);
+    var lifetime = Number((data.profile.starTotals || {}).lifetimeStars || 0);
+    var toNext = Math.max(0, nextAt - lifetime);
+    if (!eggs.length) {
+      return '<div class="panel panel-pad egg-focus"><h3>まだ たまごはありません</h3><p>あと ' + toNext + 'こ スターをあつめると<br>あたらしい たまごが もらえるよ！</p>' + button("おしごとへ", "btn-primary", 'data-route="tasks"') + '</div>';
+    }
+    var progress = egg ? Number(egg.growthPoints || 0) : 0;
+    var state = egg ? egg.state : "waiting";
+    var message = egg ? (state === "ready" ? "もうすぐ うまれるよ！" : state === "cracked" ? "ひびが はいってきたよ" : state === "glowing" ? "きらきら ひかっているよ" : state === "warm" ? "ぽかぽか あたたかいよ" : "やさしく そだてよう") : "じゅんばんまちの たまごが あります";
+    return [
+      '<div class="panel panel-pad egg-focus">',
+      '<div class="egg-focus-header"><div><h3>いま そだてている たまご</h3><p><span class="badge">' + escapeHtml(eggStateLabel(state)) + '</span> <span class="badge star">' + progress + ' / 6</span></p></div></div>',
+      '<div class="egg-big ' + (state === "ready" ? "is-ready" : "") + '">' + (egg ? KA.eggs.renderEggSvg(egg) : '') + '</div>',
+      '<p class="egg-message">' + escapeHtml(message) + '</p>',
+      '<div class="quick-actions">',
+      button("たまごを なでる", "btn-primary", 'data-pet-egg'),
+      egg && egg.state === "ready" ? button("うまれる！", "btn-sun", 'data-hatch-egg="' + escapeHtml(egg.id) + '"') : '',
+      '</div>',
+      '</div>',
+      '<div class="panel panel-pad"><h3>きょう できること</h3>' + eggDailyChecklist(activity) + '</div>',
+      '<div class="egg-count-grid">',
+      '<div class="panel panel-pad"><strong>じゅんばんまち</strong><span>' + KA.eggs.waitingCount(data) + 'こ</span></div>',
+      '<div class="panel panel-pad"><strong>うまれたたまご</strong><span>' + KA.eggs.hatchedCount(data) + 'こ</span></div>',
+      '<div class="panel panel-pad"><strong>つぎのたまご</strong><span>あと ' + toNext + 'スター</span></div>',
+      '</div>'
     ].join("");
-    layout("さくひん", body);
-    bindArtworkDetails();
+  }
+
+  function renderCompanionDex(data) {
+    var companions = KA.companions.ensureCompanions(data);
+    var companionBySpecies = {};
+    companions.forEach(function (companion) { companionBySpecies[companion.speciesId] = companion; });
+    return '<section class="companion-grid">' + KA.companions.allSpecies().map(function (species) {
+      var companion = companionBySpecies[species.id];
+      var owned = Boolean(companion && Number(companion.hatchCount || 0) > 0);
+      return [
+        '<article class="companion-card ' + (owned ? "is-owned" : "is-locked") + '">',
+        '<div class="companion-art">' + KA.companions.renderCompanion(species.id, { silhouette: !owned }) + '</div>',
+        '<h3>' + escapeHtml(species.name) + '</h3>',
+        owned ? '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span> <span class="badge">' + Number(companion.hatchCount || 1) + 'かい</span></p>' : '<p class="muted">まだ あっていないよ</p>',
+        owned ? '<p class="muted">はじめて: ' + escapeHtml((companion.firstHatchedAt || "").slice(0, 10)) + '<br>さいご: ' + escapeHtml((companion.lastHatchedAt || "").slice(0, 10)) + '</p>' : '',
+        owned ? button(companion.isFavorite ? "お気に入りを はずす" : "お気に入り", companion.isFavorite ? "btn-sun btn-small" : "btn-soft btn-small", 'data-favorite-companion="' + escapeHtml(species.id) + '" data-favorite-enabled="' + (companion.isFavorite ? "false" : "true") + '"') : '',
+        '</article>'
+      ].join("");
+    }).join("") + '</section>';
+  }
+
+  function renderEggs() {
+    var data = KA.state.getAppData();
+    KA.eggs.syncEggInventory(data);
+    KA.companions.ensureCompanions(data);
+    var ui = KA.state.getUiState();
+    ui.eggTab = ui.eggTab === "companions" ? "companions" : "eggs";
+    var eggs = KA.eggs.getEggs();
+    var body = [
+      '<div class="screen-header"><div><h2>ふしぎなたまご</h2><p class="muted">たまごを まいにち そだてると、鳥のなかまが うまれるよ。</p></div><div><span class="badge star">🥚 ' + eggs.length + 'こ</span></div></div>',
+      '<div class="segmented egg-tabs">',
+      button("たまご", ui.eggTab === "eggs" ? "btn-primary" : "btn-soft", 'data-egg-tab="eggs"'),
+      button("なかまずかん", ui.eggTab === "companions" ? "btn-primary" : "btn-soft", 'data-egg-tab="companions"'),
+      '</div>',
+      ui.eggTab === "companions" ? renderCompanionDex(data) : renderEggPanel(data)
+    ].join("");
+    layout("たまご", body);
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-egg-tab]"), function (el) {
+      el.addEventListener("click", function () {
+        KA.state.getUiState().eggTab = el.getAttribute("data-egg-tab");
+        KA.state.saveUiState();
+        KA.router.render();
+      });
+    });
+    var petButton = appEl.querySelector("[data-pet-egg]");
+    if (petButton) {
+      petButton.addEventListener("click", function () {
+        var result = KA.eggs.petActiveEgg();
+        if (result.ok) {
+          playTone(result.ready ? "hatch" : "egg");
+          toast(result.ready ? "うまれそうだよ！" : "あたたかくなったよ！");
+        } else if (result.alreadyDone) {
+          toast("きょうは もう なでたよ");
+        } else {
+          toast("いま そだてる たまごは ないみたい");
+        }
+        KA.router.render();
+      });
+    }
+    var hatchButton = appEl.querySelector("[data-hatch-egg]");
+    if (hatchButton) {
+      hatchButton.addEventListener("click", function () {
+        var result = KA.eggs.hatchReadyEgg(hatchButton.getAttribute("data-hatch-egg"));
+        if (!result.ok) {
+          toast("もうすこしで うまれるよ");
+          KA.router.render();
+          return;
+        }
+        playTone("hatch");
+        var html = '<div class="hatch-result"><div class="egg-hatch-pop">' + KA.companions.renderCompanion(result.species.id) + '</div><h3>なかまが うまれたよ！</h3><p>' + escapeHtml(result.species.name) + 'が なかまになったよ。</p><p><span class="badge star">なかよし ' + Number(result.companion.bondLevel || 1) + '</span></p></div>';
+        infoDialog("たまごが かえったよ", html);
+      });
+    }
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-favorite-companion]"), function (el) {
+      el.addEventListener("click", function () {
+        var enabled = el.getAttribute("data-favorite-enabled") === "true";
+        KA.companions.setFavorite(el.getAttribute("data-favorite-companion"), enabled);
+        toast(enabled ? "いっしょに ぼうけんするよ" : "お気に入りを はずしたよ");
+        KA.router.render();
+      });
+    });
   }
 
   function renderParent() {
@@ -1241,7 +1346,43 @@
     KA.router.register("data", renderData);
   }
 
+  function initStartupSplash() {
+    var splash = document.getElementById("startup-splash");
+    if (!splash) return function () {};
+    var startedAt = Date.now();
+    var minMs = Number(splash.getAttribute("data-min-ms") || 1200);
+    var maxMs = Number(splash.getAttribute("data-max-ms") || 4000);
+    var ready = false;
+    var closed = false;
+    function close(force) {
+      if (closed) return;
+      if (!ready && !force) return;
+      var wait = force ? 0 : Math.max(0, minMs - (Date.now() - startedAt));
+      global.setTimeout(function () {
+        if (closed) return;
+        closed = true;
+        splash.classList.add("is-hiding");
+        splash.setAttribute("aria-hidden", "true");
+        global.setTimeout(function () {
+          if (splash.parentNode) splash.parentNode.removeChild(splash);
+        }, 450);
+      }, wait);
+    }
+    splash.addEventListener("click", function () {
+      close(false);
+    });
+    global.setTimeout(function () {
+      ready = true;
+      close(true);
+    }, maxMs);
+    return function () {
+      ready = true;
+      close(false);
+    };
+  }
+
   function initApp() {
+    var closeStartupSplash = initStartupSplash();
     appEl = document.getElementById("app");
     modalRoot = document.getElementById("modal-root");
     toastRoot = document.getElementById("toast-root");
@@ -1252,6 +1393,7 @@
       startRoute = "home";
     }
     KA.router.navigate(startRoute);
+    closeStartupSplash();
     document.addEventListener("pointerdown", syncBgmState, { once: true });
   }
 

@@ -102,6 +102,11 @@
       dailyRecords: {},
       starLedger: [],
       eggInventory: [],
+      eggSystem: {
+        activeEggId: null,
+        dailyActivity: {}
+      },
+      companions: [],
       coloringTemplates: KA.constants.COLORING_TEMPLATES.map(withAuditDefaults),
       artworks: [],
       worlds: defaultWorlds,
@@ -182,7 +187,7 @@
     return KA.constants.WORLD_DEFINITIONS.map(function (world) { return world.id; });
   }
 
-  function isValidWorldId(worldId) {
+  function isKnownWorldId(worldId) {
     return validWorldIds().indexOf(worldId) >= 0;
   }
 
@@ -236,8 +241,8 @@
         if (!key) return;
         if (!placement.placementId) placement.placementId = key;
         if (!placement.worldId) {
-          placement.worldId = isValidWorldId(worldId) ? worldId : KA.constants.WORLD_ID;
-        } else if (!isValidWorldId(placement.worldId)) {
+          placement.worldId = isKnownWorldId(worldId) ? worldId : KA.constants.WORLD_ID;
+        } else if (!isKnownWorldId(placement.worldId)) {
           placement.worldId = KA.constants.WORLD_ID;
         }
         gathered.push(placement);
@@ -250,7 +255,7 @@
       var key = placementKey(placement);
       if (!key || seen[key]) return;
       seen[key] = true;
-      var targetWorldId = isValidWorldId(placement.worldId) ? placement.worldId : KA.constants.WORLD_ID;
+      var targetWorldId = isKnownWorldId(placement.worldId) ? placement.worldId : KA.constants.WORLD_ID;
       placement.worldId = targetWorldId;
       placement.updatedAt = placement.updatedAt || placement.createdAt || KA.date.localIsoString();
       worlds[targetWorldId].placements.push(placement);
@@ -278,7 +283,7 @@
         if (found) placement = found;
       });
       if (!placement) return;
-      if (!isValidWorldId(placement.worldId)) placement.worldId = KA.constants.WORLD_ID;
+      if (!isKnownWorldId(placement.worldId)) placement.worldId = KA.constants.WORLD_ID;
     });
   }
 
@@ -406,6 +411,13 @@
     appData.dailyRecords = ensureObject(appData.dailyRecords);
     appData.starLedger = ensureArray(appData.starLedger);
     appData.eggInventory = ensureArray(appData.eggInventory);
+    appData.eggSystem = ensureObject(appData.eggSystem);
+    mergeMissing(appData.eggSystem, defaults.eggSystem);
+    appData.eggSystem.dailyActivity = ensureObject(appData.eggSystem.dailyActivity);
+    appData.companions = ensureArray(appData.companions);
+    if (KA.companions && KA.companions.ensureCompanions) {
+      KA.companions.ensureCompanions(appData);
+    }
     appData.artworks = ensureArray(appData.artworks);
     syncArtworkRegionColors(appData);
     appData.unlocks = ensureObject(appData.unlocks);
@@ -421,6 +433,9 @@
     if (KA.eggs && KA.eggs.syncEggInventory) {
       KA.eggs.syncEggInventory(appData);
     }
+    if (KA.companions && KA.companions.ensureCompanions) {
+      KA.companions.ensureCompanions(appData);
+    }
     markMigration(appData, "prototype3_horse_and_eggs");
     markMigration(appData, "prototype4_audio_palette_svg");
     markMigration(appData, "prototype5_coloring_design_sync");
@@ -428,6 +443,9 @@
     markMigration(appData, "prototype7_multi_worlds");
     markMigration(appData, "prototype8_artwork_background_and_coloring");
     markMigration(appData, "prototype9_adopted_layered_coloring");
+    markMigration(appData, "prototype10_secret_base_world");
+    markMigration(appData, "prototype11_apple_touch_icon");
+    markMigration(appData, "prototype12_egg_companions");
     appData.updatedAt = appData.updatedAt || KA.date.localIsoString();
     changed = before !== JSON.stringify(appData);
     return { data: appData, changed: changed };

@@ -944,9 +944,10 @@
     var record = KA.state.getDailyRecord(dateKey);
     if (record.artworkIds.indexOf(artworkId) === -1) record.artworkIds.push(artworkId);
     if (record.forestPlacementIds.indexOf(placement.placementId) === -1) record.forestPlacementIds.push(placement.placementId);
+    var eggGrowth = KA.eggs && KA.eggs.recordColoringBonus ? KA.eggs.recordColoringBonus() : null;
     clearDraft(templateId);
     KA.state.saveAppData();
-    return { ok: true, artwork: artwork, placement: placement };
+    return { ok: true, artwork: artwork, placement: placement, eggGrowth: eggGrowth };
   }
 
   function getArtwork(artworkId) {

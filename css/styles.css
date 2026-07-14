@@ -44,6 +44,61 @@ body {
   overflow-x: hidden;
 }
 
+.startup-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: calc(20px + var(--safe-top)) 20px calc(20px + var(--safe-bottom));
+  background:
+    radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.9), transparent 24%),
+    linear-gradient(145deg, #dff4ff 0%, #fff7d8 52%, #f5fbf2 100%);
+  transition: opacity 0.42s ease, visibility 0.42s ease;
+}
+
+.startup-splash.is-hiding {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.startup-splash-inner {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+.startup-icon {
+  width: min(82vw, 360px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  display: block;
+}
+
+.startup-loading {
+  padding: 8px 12px;
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--leaf-dark);
+  font-weight: 900;
+}
+
+.startup-sparkles span {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #fff7a8;
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.8);
+  animation: startupSparkle 1.4s ease-in-out infinite;
+}
+
+.startup-sparkles span:nth-child(1) { left: 8%; top: 22%; }
+.startup-sparkles span:nth-child(2) { right: 8%; top: 34%; animation-delay: 0.24s; }
+.startup-sparkles span:nth-child(3) { left: 18%; bottom: 24%; animation-delay: 0.48s; }
+
 button,
 input,
 select,
@@ -322,6 +377,159 @@ h3 {
     linear-gradient(160deg, #fff7d8, #f7c948);
   font-size: 2.6rem;
   box-shadow: 0 10px 20px rgba(120, 90, 0, 0.12);
+}
+
+.egg-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.egg-focus {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.egg-focus-header {
+  width: 100%;
+}
+
+.egg-big {
+  display: grid;
+  place-items: center;
+  min-height: 230px;
+}
+
+.egg-svg {
+  width: min(68vw, 240px);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 14px 18px rgba(126, 91, 22, 0.16));
+}
+
+.egg-svg-warm .egg-aura,
+.egg-svg-glowing .egg-aura,
+.egg-svg-cracked .egg-aura,
+.egg-svg-ready .egg-aura {
+  animation: eggGlow 1.6s ease-in-out infinite;
+}
+
+.egg-svg-glowing,
+.egg-svg-ready {
+  animation: eggBreath 1.8s ease-in-out infinite;
+}
+
+.egg-svg-cracked,
+.egg-big.is-ready .egg-svg {
+  animation: eggWiggle 1.2s ease-in-out infinite;
+}
+
+.egg-message {
+  margin: 0;
+  font-weight: 900;
+}
+
+.egg-checklist {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.egg-checklist li {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: #fff;
+  font-weight: 850;
+}
+
+.egg-checklist li.is-done {
+  border-color: #9bcf90;
+  background: #eff9eb;
+  color: var(--leaf-dark);
+}
+
+.egg-count-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.egg-count-grid .panel {
+  display: grid;
+  gap: 4px;
+  text-align: center;
+}
+
+.companion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
+  gap: 12px;
+}
+
+.companion-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(40, 70, 45, 0.08);
+  text-align: center;
+}
+
+.companion-card.is-locked {
+  background: #f7f7f1;
+}
+
+.companion-art {
+  display: grid;
+  place-items: center;
+  min-height: 112px;
+}
+
+.companion-svg {
+  width: min(100%, 132px);
+  height: auto;
+  pointer-events: none;
+}
+
+.companion-silhouette {
+  opacity: 0.68;
+  filter: grayscale(1);
+}
+
+.companion-home-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.companion-home-art .companion-svg {
+  width: 82px;
+}
+
+.hatch-result {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.egg-hatch-pop .companion-svg {
+  width: 160px;
+  animation: hatchPop 0.7s ease-out;
 }
 
 .task-card {
@@ -884,6 +1092,33 @@ h3 {
 @keyframes dustFloat {
   0%, 100% { opacity: 0.25; transform: translate(0, 0) scale(0.82); }
   50% { opacity: 0.92; transform: translate(3px, -6px) scale(1.08); }
+}
+
+@keyframes startupSparkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.75); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes eggGlow {
+  0%, 100% { opacity: 0.18; transform: scale(0.96); }
+  50% { opacity: 0.58; transform: scale(1.06); }
+}
+
+@keyframes eggBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+
+@keyframes eggWiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-2deg); }
+  75% { transform: rotate(2deg); }
+}
+
+@keyframes hatchPop {
+  0% { opacity: 0; transform: scale(0.5) translateY(18px); }
+  70% { opacity: 1; transform: scale(1.08) translateY(-4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes flutter {

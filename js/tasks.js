@@ -45,8 +45,9 @@
     });
     record.earnedStarsToday = Number(record.earnedStarsToday || 0) + Number(task.rewardStars || 0);
     record.updatedAt = KA.date.localIsoString();
+    var eggGrowth = KA.eggs && KA.eggs.recordTaskBonusIfEligible ? KA.eggs.recordTaskBonusIfEligible() : null;
     KA.state.saveAppData();
-    return { ok: true, task: task, ledger: ledger };
+    return { ok: true, task: task, ledger: ledger, eggGrowth: eggGrowth };
   }
 
   function undoTask(taskId) {
