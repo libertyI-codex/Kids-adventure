@@ -10,6 +10,16 @@
   var bgmGain = null;
   var forestEditSession = null;
   var forestDragState = null;
+  var startupState = {
+    startupStarted: false,
+    appInitialized: false,
+    firstRenderCompleted: false,
+    splashFinished: false,
+    startedAt: 0,
+    minMs: 1200,
+    maxMs: 4000,
+    error: null
+  };
 
   function escapeHtml(value) {
     return String(value == null ? "" : value)
@@ -1346,55 +1356,154 @@
     KA.router.register("data", renderData);
   }
 
-  function initStartupSplash() {
+  function unlockAppShell() {
+    var shell = appEl || document.getElementById("app");
+    var body = document.body;
+    var html = document.documentElement;
+    if (shell) {
+      shell.hidden = false;
+      shell.removeAttribute("hidden");
+      shell.removeAttribute("aria-hidden");
+      shell.removeAttribute("inert");
+      try { shell.inert = false; } catch (error) { /* Safari fallback */ }
+      shell.style.display = "";
+      shell.style.visibility = "";
+      shell.style.opacity = "";
+      shell.style.pointerEvents = "";
+      shell.style.transform = "";
+    }
+    if (body) {
+      body.classList.remove("startup-active");
+      body.classList.remove("is-starting");
+      body.style.overflow = "";
+      body.style.position = "";
+      body.style.pointerEvents = "";
+    }
+    if (html) {
+      html.classList.remove("startup-active");
+      html.classList.remove("is-starting");
+      html.style.overflow = "";
+    }
+  }
+
+  function hasAppContent() {
+    var shell = appEl || document.getElementById("app");
+    return Boolean(shell && shell.innerHTML && shell.innerHTML.replace(/\s/g, "").length);
+  }
+
+  function renderStartupRecovery(error) {
+    var shell = appEl || document.getElementById("app");
+    if (!shell) return;
+    if (global.console && console.error) {
+      console.error("KodomoAdventure startup failed", error);
+    }
+    shell.innerHTML = [
+      '<main class="screen startup-recovery" role="main">',
+      '<section class="panel panel-pad">',
+      '<h1>うまく よみこめませんでした</h1>',
+      '<p class="muted">データは そのままです。もういちど ひらいてみてください。</p>',
+      '<div class="quick-actions">',
+      button("もういちど よみこむ", "btn-primary", 'data-startup-reload'),
+      button("ホームを ひらく", "btn-soft", 'data-startup-home'),
+      '</div>',
+      '</section>',
+      '</main>'
+    ].join("");
+    var reload = shell.querySelector("[data-startup-reload]");
+    var home = shell.querySelector("[data-startup-home]");
+    if (reload) {
+      reload.addEventListener("click", function () {
+        global.location.reload();
+      });
+    }
+    if (home) {
+      home.addEventListener("click", function () {
+        try {
+          KA.state.init();
+          registerRoutes();
+          KA.router.navigate("home");
+        } catch (innerError) {
+          if (global.console && console.error) console.error("KodomoAdventure recovery home failed", innerError);
+          renderStartupRecovery(innerError);
+        }
+      });
+    }
+    startupState.firstRenderCompleted = true;
+  }
+
+  function finishStartupScreen(options) {
+    var opts = options || {};
     var splash = document.getElementById("startup-splash");
-    if (!splash) return function () {};
-    var startedAt = Date.now();
-    var minMs = Number(splash.getAttribute("data-min-ms") || 1200);
-    var maxMs = Number(splash.getAttribute("data-max-ms") || 4000);
-    var ready = false;
-    var closed = false;
-    function close(force) {
-      if (closed) return;
-      if (!ready && !force) return;
-      var wait = force ? 0 : Math.max(0, minMs - (Date.now() - startedAt));
-      global.setTimeout(function () {
-        if (closed) return;
-        closed = true;
+    if (startupState.splashFinished) {
+      unlockAppShell();
+      return;
+    }
+    if (!startupState.firstRenderCompleted && !opts.force) return;
+    var elapsed = Date.now() - (startupState.startedAt || Date.now());
+    var wait = opts.force ? 0 : Math.max(0, startupState.minMs - elapsed);
+    global.setTimeout(function () {
+      if (startupState.splashFinished) {
+        unlockAppShell();
+        return;
+      }
+      if (!hasAppContent()) {
+        renderStartupRecovery(startupState.error || new Error("first render did not complete"));
+      }
+      unlockAppShell();
+      startupState.splashFinished = true;
+      if (splash) {
         splash.classList.add("is-hiding");
         splash.setAttribute("aria-hidden", "true");
         global.setTimeout(function () {
           if (splash.parentNode) splash.parentNode.removeChild(splash);
         }, 450);
-      }, wait);
-    }
+      }
+    }, wait);
+  }
+
+  function initStartupSplash() {
+    var splash = document.getElementById("startup-splash");
+    startupState.startupStarted = true;
+    startupState.startedAt = Date.now();
+    startupState.splashFinished = false;
+    if (!splash) return finishStartupScreen;
+    startupState.minMs = Number(splash.getAttribute("data-min-ms") || 1200);
+    startupState.maxMs = Number(splash.getAttribute("data-max-ms") || 4000);
+    document.body.classList.add("startup-active");
     splash.addEventListener("click", function () {
-      close(false);
+      finishStartupScreen({});
     });
     global.setTimeout(function () {
-      ready = true;
-      close(true);
-    }, maxMs);
-    return function () {
-      ready = true;
-      close(false);
-    };
+      finishStartupScreen({ force: true, reason: "timeout" });
+    }, startupState.maxMs);
+    return finishStartupScreen;
   }
 
   function initApp() {
     var closeStartupSplash = initStartupSplash();
+    var initError = null;
     appEl = document.getElementById("app");
     modalRoot = document.getElementById("modal-root");
     toastRoot = document.getElementById("toast-root");
-    KA.state.init();
-    registerRoutes();
-    var startRoute = KA.state.getUiState().lastRoute || "home";
-    if (["parent", "data", "magic", "coloring-editor", "star"].indexOf(startRoute) >= 0) {
-      startRoute = "home";
+    try {
+      KA.state.init();
+      registerRoutes();
+      var startRoute = KA.state.getUiState().lastRoute || "home";
+      if (["parent", "data", "magic", "coloring-editor", "star"].indexOf(startRoute) >= 0) {
+        startRoute = "home";
+      }
+      KA.router.navigate(startRoute);
+      startupState.firstRenderCompleted = hasAppContent();
+      document.addEventListener("pointerdown", syncBgmState, { once: true });
+    } catch (error) {
+      initError = error;
+      startupState.error = error;
+      renderStartupRecovery(error);
+    } finally {
+      startupState.appInitialized = true;
+      unlockAppShell();
+      closeStartupSplash({ error: initError });
     }
-    KA.router.navigate(startRoute);
-    closeStartupSplash();
-    document.addEventListener("pointerdown", syncBgmState, { once: true });
   }
 
   KA.app = {
@@ -1404,7 +1513,9 @@
     infoDialog: infoDialog,
     playTone: playTone,
     syncBgmState: syncBgmState,
-    escapeHtml: escapeHtml
+    escapeHtml: escapeHtml,
+    finishStartupScreen: finishStartupScreen,
+    startupState: startupState
   };
 
   document.addEventListener("DOMContentLoaded", initApp);

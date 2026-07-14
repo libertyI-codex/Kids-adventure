@@ -4,7 +4,8 @@
   var KA = global.KodomoAdventure = global.KodomoAdventure || {};
 
   function pad(value) {
-    return String(value).padStart(2, "0");
+    var text = String(value);
+    return text.length >= 2 ? text : "0" + text;
   }
 
   function localDateKey(date) {

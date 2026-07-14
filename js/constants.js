@@ -10,8 +10,8 @@
   KA.constants = {
     APP_DISPLAY_NAME: "結羽ちゃんの冒険",
     PROJECT_NAME: "こどもの冒険",
-    APP_VERSION: "1.0.0-prototype.12",
-    VERSION_LABEL: "Ver.1.0 試作12",
+    APP_VERSION: "1.0.0-prototype.12-hotfix.1",
+    VERSION_LABEL: "Ver.1.0 試作12 修正版1",
     SCHEMA_VERSION: 1,
     PROFILE_ID: "profile_yuwa",
     WORLD_ID: "world_forest",
