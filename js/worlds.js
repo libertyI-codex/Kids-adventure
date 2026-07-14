@@ -188,6 +188,43 @@
         { zone: "cloud_side", x: 30, y: 58 },
         { zone: "sky_side", x: 72, y: 36 }
       ]
+    },
+    world_secret_base: {
+      blue: [
+        { zone: "window_light", x: 48, y: 48 },
+        { zone: "table_side", x: 74, y: 63 },
+        { zone: "rug_center", x: 52, y: 72 }
+      ],
+      green: [
+        { zone: "plant_corner", x: 84, y: 72 },
+        { zone: "rug_center", x: 46, y: 74 },
+        { zone: "cushion_side", x: 36, y: 80 }
+      ],
+      pink: [
+        { zone: "table_side", x: 72, y: 68 },
+        { zone: "map_wall", x: 54, y: 50 },
+        { zone: "cushion_side", x: 42, y: 82 }
+      ],
+      red: [
+        { zone: "table_front", x: 68, y: 76 },
+        { zone: "treasure_side", x: 30, y: 82 },
+        { zone: "rug_center", x: 54, y: 70 }
+      ],
+      yellow: [
+        { zone: "lamp_light", x: 62, y: 48 },
+        { zone: "window_light", x: 46, y: 46 },
+        { zone: "rug_center", x: 50, y: 76 }
+      ],
+      orange: [
+        { zone: "kitchen_front", x: 32, y: 72 },
+        { zone: "table_front", x: 73, y: 75 },
+        { zone: "treasure_side", x: 28, y: 82 }
+      ],
+      other: [
+        { zone: "rug_center", x: 52, y: 72 },
+        { zone: "kitchen_front", x: 35, y: 70 },
+        { zone: "table_side", x: 74, y: 68 }
+      ]
     }
   };
 

@@ -590,6 +590,28 @@
         '</svg>'
       ].join("");
     }
+    if (id === "world_secret_base") {
+      return [
+        '<svg class="forest-bg world-bg world-bg-secret-base" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">',
+        '<rect width="100" height="100" fill="#ffe8bd"/>',
+        '<path d="M0 0 H100 V63 H0 Z" fill="#f7d59b"/><path d="M0 63 H100 V100 H0 Z" fill="#d59b5b"/>',
+        '<g stroke="#c4894e" stroke-width=".45" opacity=".55"><path d="M0 10 H100 M0 22 H100 M0 34 H100 M0 46 H100 M0 58 H100"/><path d="M10 0 V63 M23 0 V63 M37 0 V63 M51 0 V63 M65 0 V63 M79 0 V63 M93 0 V63"/></g>',
+        '<path d="M0 63 C20 66 38 62 54 65 C72 68 88 64 100 66 V100 H0 Z" fill="#cf9153"/><g stroke="#b6783e" stroke-width=".6" opacity=".5"><path d="M0 72 H100 M0 82 H100 M0 92 H100"/><path d="M12 64 L6 100 M36 64 L31 100 M62 65 L68 100 M85 64 L93 100"/></g>',
+        '<path d="M8 6 H92 V13 H8 Z" fill="#8b5a2b"/><path d="M20 13 C22 24 18 35 22 46" stroke="#8b5a2b" stroke-width="1.4" fill="none" opacity=".45"/><path d="M62 13 C64 24 60 36 64 48" stroke="#8b5a2b" stroke-width="1.4" fill="none" opacity=".45"/>',
+        '<path d="M68 11 C76 5 90 9 91 20 C94 24 92 32 86 34 H67 C60 31 61 19 68 11 Z" fill="#9be7ff" stroke="#a66d38" stroke-width="1.2"/><path d="M78 9 V34 M62 22 H92" stroke="#fff7dd" stroke-width=".9"/><path d="M64 36 C71 39 83 39 90 36" stroke="#f2b96e" stroke-width="2" fill="none"/>',
+        '<path d="M43 7 C48 2 58 4 60 11 C63 19 57 24 51 25 C43 24 38 18 40 11 Z" fill="#fff4a3" opacity=".9"/><path d="M50 24 V32" stroke="#d19047" stroke-width="1.2"/><path d="M46 32 H55" stroke="#d19047" stroke-width="1.2"/>',
+        '<path d="M42 26 H60 V43 H42 Z" fill="#f5e7c2" stroke="#a66d38" stroke-width=".9"/><path d="M45 30 L52 27 L57 32 L54 39 L47 39 Z" fill="#d9c17e" stroke="#9a7d3d" stroke-width=".6"/><path d="M44 44 H59" stroke="#8b5a2b" stroke-width="1.1"/>',
+        '<path d="M8 28 H35 V35 H8 Z" fill="#b77943" stroke="#7a4a26" stroke-width=".9"/><path d="M9 35 H37 V65 H9 Z" fill="#f0c07a" stroke="#7a4a26" stroke-width=".9"/><path d="M11 39 H20 V48 H11 Z M22 39 H35 V48 H22 Z" fill="#f8e2b6" stroke="#a66d38" stroke-width=".55"/><path d="M11 50 H20 V63 H11 Z M22 50 H35 V63 H22 Z" fill="#d89b5d" stroke="#a66d38" stroke-width=".55"/><circle cx="15.5" cy="56" r=".7" fill="#7a4a26"/><circle cx="29" cy="56" r=".7" fill="#7a4a26"/>',
+        '<path d="M14 30 H22 C22 33 20 35 18 35 C16 35 14 33 14 30 Z" fill="#d9f6ff" stroke="#7097a1" stroke-width=".65"/><path d="M18 30 C18 27 22 27 22 30" fill="none" stroke="#5b7d86" stroke-width=".7"/><path d="M24 30 H34 V34 H24 Z" fill="#2f2f34" opacity=".75"/><circle cx="27" cy="32" r="1.2" fill="#f59e0b"/><circle cx="31" cy="32" r="1.2" fill="#f59e0b"/>',
+        '<path d="M10 20 H34 V27 H10 Z" fill="#a76836" stroke="#73451f" stroke-width=".8"/><g fill="#fff8dc" stroke="#8a6030" stroke-width=".45"><path d="M13 23 C13 20 18 20 18 23 Z"/><rect x="21" y="21" width="3.5" height="4" rx=".5"/><rect x="27" y="21" width="4" height="4" rx=".5"/></g><path d="M35 21 C37 24 36 28 34 31" fill="none" stroke="#6f421d" stroke-width=".75"/><path d="M36 19 L39 21 L37 23" fill="none" stroke="#6f421d" stroke-width=".75"/>',
+        '<path d="M57 67 C64 59 82 59 90 67 L86 73 H61 Z" fill="#b87943" stroke="#70421f" stroke-width="1"/><path d="M60 73 H87 V78 H60 Z" fill="#8b5a2b"/><path d="M64 78 V92 M83 78 V92" stroke="#70421f" stroke-width="2.2" stroke-linecap="round"/><path d="M55 76 C51 80 51 89 57 91 C60 86 60 80 57 76 Z" fill="#c79255" stroke="#70421f" stroke-width=".8"/><path d="M88 77 C94 80 94 89 88 92 C85 87 85 80 88 77 Z" fill="#c79255" stroke="#70421f" stroke-width=".8"/>',
+        '<path d="M68 62 H75 L77 68 H66 Z" fill="#fff1b8" stroke="#9a6b31" stroke-width=".65"/><path d="M79 62 C84 60 88 63 87 68 H80 Z" fill="#f8e0a2" stroke="#9a6b31" stroke-width=".65"/><path d="M62 63 H67 V69 H62 Z" fill="#b8e4ff" stroke="#6d8ba0" stroke-width=".55"/><path d="M61 61 L72 56 L82 61" fill="none" stroke="#80512a" stroke-width=".9"/><path d="M70 56 H81 V61 H70 Z" fill="#f3e7bf" stroke="#80512a" stroke-width=".55"/>',
+        '<path d="M37 74 C45 69 58 69 67 75 C64 87 43 89 35 79 Z" fill="#f5b3a5" opacity=".78" stroke="#bd7b65" stroke-width=".8"/><path d="M27 82 H39 V90 H27 Z" fill="#d8a15c" stroke="#73451f" stroke-width=".75"/><path d="M29 78 H37 V82 H29 Z" fill="#facc15" stroke="#73451f" stroke-width=".65"/><path d="M25 74 C31 70 36 72 40 76 C34 80 29 79 25 74 Z" fill="#8ccf6a"/>',
+        '<g fill="#fef3c7" stroke="#93642f" stroke-width=".45"><path d="M8 70 H21 V78 H8 Z"/><path d="M12 66 H26 V72 H12 Z"/><path d="M17 73 H28 V82 H17 Z"/></g><path d="M12 72 L21 72 M17 76 L25 76" stroke="#93642f" stroke-width=".45"/>',
+        '<g fill="#fff7a8"><circle cx="22" cy="15" r="1"/><circle cx="32" cy="13" r=".8"/><circle cx="72" cy="48" r=".85"/><circle cx="88" cy="46" r=".7"/></g><path d="M11 16 C16 13 22 13 28 16 C22 18 16 18 11 16 Z" fill="#ef6fa6"/><path d="M11 16 C16 19 22 19 28 16" fill="none" stroke="#fbbf24" stroke-width=".65"/>',
+        '</svg>'
+      ].join("");
+    }
     return [
       '<svg class="forest-bg world-bg world-bg-forest" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">',
       '<rect width="100" height="100" fill="#BDEEFF"/><circle cx="85" cy="12" r="6" fill="#FACC15"/><path d="M0 54 C18 45 32 58 48 50 C66 40 82 48 100 38 L100 100 L0 100 Z" fill="#9BE18D"/>',

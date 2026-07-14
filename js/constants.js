@@ -10,8 +10,8 @@
   KA.constants = {
     APP_DISPLAY_NAME: "結羽ちゃんの冒険",
     PROJECT_NAME: "こどもの冒険",
-    APP_VERSION: "1.0.0-prototype.9",
-    VERSION_LABEL: "Ver.1.0 試作9",
+    APP_VERSION: "1.0.0-prototype.10",
+    VERSION_LABEL: "Ver.1.0 試作10",
     SCHEMA_VERSION: 1,
     PROFILE_ID: "profile_yuwa",
     WORLD_ID: "world_forest",
@@ -505,6 +505,20 @@
         unlockedAt: null,
         designVersion: 2,
         displayOrder: 5,
+        unlockCondition: null
+      },
+      {
+        id: "world_secret_base",
+        worldId: "world_secret_base",
+        name: "ひみつきち",
+        title: "みんなのひみつきち",
+        icon: "🏠",
+        description: "キッチンとテーブルがある、みんなのひみつきち！",
+        theme: "secret_base",
+        unlocked: true,
+        unlockedAt: null,
+        designVersion: 1,
+        displayOrder: 6,
         unlockCondition: null
       }
     ],
