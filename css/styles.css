@@ -636,6 +636,43 @@ h3 {
   cursor: pointer;
 }
 
+.artwork-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.artwork-svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+
+.artwork-effects {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.butterfly-dust .dust {
+  position: absolute;
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.82);
+  box-shadow: 0 0 9px rgba(250, 204, 21, 0.52);
+  animation: dustFloat 2.8s ease-in-out infinite;
+}
+
+.butterfly-dust .dust-1 { left: 12%; top: 22%; animation-delay: 0s; }
+.butterfly-dust .dust-2 { right: 13%; top: 24%; animation-delay: 0.3s; background: rgba(244, 114, 182, 0.78); }
+.butterfly-dust .dust-3 { left: 22%; bottom: 22%; animation-delay: 0.6s; background: rgba(56, 189, 248, 0.75); }
+.butterfly-dust .dust-4 { right: 22%; bottom: 18%; animation-delay: 0.9s; }
+.butterfly-dust .dust-5 { left: 45%; top: 8%; animation-delay: 1.2s; width: 4px; height: 4px; }
+.butterfly-dust .dust-6 { right: 42%; bottom: 8%; animation-delay: 1.5s; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.86); }
+
 .forest-object.is-editable {
   outline: 2px dashed rgba(47, 120, 55, 0.72);
   outline-offset: 5px;
@@ -676,6 +713,10 @@ h3 {
   user-select: none;
   -webkit-touch-callout: none;
   touch-action: none;
+}
+
+.forest-stage.is-editing .artwork-effects {
+  display: none;
 }
 
 .forest-object svg {
@@ -838,6 +879,11 @@ h3 {
 @keyframes sparkleMove {
   from { transform: translate3d(0, 0, 0) rotate(0deg); }
   to { transform: translate3d(24px, 18px, 0) rotate(8deg); }
+}
+
+@keyframes dustFloat {
+  0%, 100% { opacity: 0.25; transform: translate(0, 0) scale(0.82); }
+  50% { opacity: 0.92; transform: translate(3px, -6px) scale(1.08); }
 }
 
 @keyframes flutter {

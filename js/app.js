@@ -535,18 +535,68 @@
   function worldBackgroundSvg(worldId) {
     var id = KA.worlds.safeWorldId(worldId);
     if (id === "world_sea") {
-      return '<svg class="forest-bg world-bg world-bg-sea" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="seaWater" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ee7ff"/><stop offset=".55" stop-color="#48bde2"/><stop offset="1" stop-color="#2388bd"/></linearGradient></defs><rect width="100" height="100" fill="url(#seaWater)"/><path d="M10 0 L26 0 L15 70 L3 70 Z M44 0 L58 0 L50 68 L38 68 Z M76 0 L90 0 L82 70 L70 70 Z" fill="#fff" opacity=".18"/><g fill="#dff8ff" opacity=".72"><circle cx="18" cy="28" r="1.7"/><circle cx="25" cy="44" r="1.1"/><circle cx="70" cy="24" r="1.4"/><circle cx="84" cy="49" r="1.7"/><circle cx="57" cy="36" r="1"/></g><path d="M0 82 C18 76 32 86 50 80 C70 74 84 84 100 78 L100 100 L0 100 Z" fill="#f4d58a"/><path d="M13 78 C18 68 23 68 28 78 Z M79 80 C84 69 92 70 96 80 Z" fill="#6f7f88"/><path d="M18 81 C16 68 20 60 24 50 C25 64 27 71 23 82 Z M74 82 C72 69 76 60 82 52 C82 66 85 75 80 84 Z" fill="#2ea66b"/><g fill="#ff7fa8"><path d="M33 82 C30 74 34 69 39 75 C44 70 49 74 45 82 Z"/><path d="M64 83 C61 75 66 70 70 76 C75 72 80 76 76 84 Z"/></g></svg>';
+      return [
+        '<svg class="forest-bg world-bg world-bg-sea" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">',
+        '<defs><linearGradient id="seaWater" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ee7ff"/><stop offset=".55" stop-color="#48bde2"/><stop offset="1" stop-color="#2388bd"/></linearGradient></defs>',
+        '<rect width="100" height="100" fill="url(#seaWater)"/><path d="M10 0 L26 0 L15 70 L3 70 Z M44 0 L58 0 L50 68 L38 68 Z M76 0 L90 0 L82 70 L70 70 Z" fill="#fff" opacity=".18"/>',
+        '<g fill="#dff8ff" opacity=".72"><circle cx="18" cy="28" r="1.7"/><circle cx="25" cy="44" r="1.1"/><circle cx="70" cy="24" r="1.4"/><circle cx="84" cy="49" r="1.7"/><circle cx="57" cy="36" r="1"/></g>',
+        '<path d="M0 82 C18 76 32 86 50 80 C70 74 84 84 100 78 L100 100 L0 100 Z" fill="#f4d58a"/><path d="M13 78 C18 68 23 68 28 78 Z M79 80 C84 69 92 70 96 80 Z" fill="#6f7f88"/>',
+        '<path d="M18 81 C16 68 20 60 24 50 C25 64 27 71 23 82 Z M74 82 C72 69 76 60 82 52 C82 66 85 75 80 84 Z" fill="#2ea66b"/><g fill="#ff7fa8"><path d="M33 82 C30 74 34 69 39 75 C44 70 49 74 45 82 Z"/><path d="M64 83 C61 75 66 70 70 76 C75 72 80 76 76 84 Z"/></g>',
+        '</svg>'
+      ].join("");
     }
     if (id === "world_island") {
-      return '<svg class="forest-bg world-bg world-bg-island" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="#aee7ff"/><circle cx="84" cy="13" r="6" fill="#facc15"/><path d="M0 55 C20 48 36 57 52 50 C72 42 88 50 100 44 L100 72 L0 72 Z" fill="#6ccce6"/><path d="M0 72 C18 63 40 63 58 70 C74 78 90 76 100 70 L100 100 L0 100 Z" fill="#f5d48a"/><path d="M18 73 C35 55 68 55 85 73 C66 80 36 80 18 73 Z" fill="#7ed36f"/><path d="M42 77 C50 73 59 78 64 91" fill="none" stroke="#d19a52" stroke-width="3" stroke-linecap="butt"/><path d="M78 64 L83 36" stroke="#8b5a2b" stroke-width="4"/><path d="M81 38 C70 32 66 24 81 28 C86 17 94 23 87 34 C99 32 100 43 87 42 C91 53 79 54 81 38 Z" fill="#2f9f54"/><g fill="#ef6fa6"><circle cx="67" cy="73" r="1.2"/><circle cx="72" cy="76" r="1.1"/><circle cx="31" cy="75" r="1.2"/></g></svg>';
+      return [
+        '<svg class="forest-bg world-bg world-bg-island" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">',
+        '<rect width="100" height="100" fill="#aee7ff"/><circle cx="84" cy="13" r="6" fill="#facc15"/>',
+        '<path d="M0 55 C20 48 36 57 52 50 C72 42 88 50 100 44 L100 72 L0 72 Z" fill="#6ccce6"/>',
+        '<path d="M0 72 C18 63 40 63 58 70 C74 78 90 76 100 70 L100 100 L0 100 Z" fill="#f5d48a"/>',
+        '<path d="M15 72 C31 55 69 54 88 72 C73 82 31 83 15 72 Z" fill="#f7dd99"/>',
+        '<path d="M24 70 C39 56 66 57 81 70 C65 77 39 78 24 70 Z" fill="#7ed36f"/>',
+        '<path d="M42 77 C50 73 59 78 64 91" fill="none" stroke="#d19a52" stroke-width="3" stroke-linecap="round"/>',
+        '<path d="M73 68 C74 58 76 48 80 39 C82 49 83 58 81 69 Z" fill="#8b5a2b" stroke="#6f421d" stroke-width="1.2"/>',
+        '<path d="M69 69 C73 66 80 66 85 70 C81 72 73 72 69 69 Z" fill="#6f9d45"/>',
+        '<path d="M80 41 C68 37 63 29 79 31 C84 20 94 25 88 37 C100 36 100 48 88 45 C91 56 78 56 80 41 Z" fill="#2f9f54"/>',
+        '<g fill="#ef6fa6"><circle cx="67" cy="73" r="1.2"/><circle cx="72" cy="76" r="1.1"/><circle cx="31" cy="75" r="1.2"/></g>',
+        '</svg>'
+      ].join("");
     }
     if (id === "world_castle") {
-      return '<svg class="forest-bg world-bg world-bg-castle" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="#dff3ff"/><circle cx="84" cy="12" r="5" fill="#facc15"/><path d="M10 20 H25 V38 H10 Z M75 20 H90 V38 H75 Z M25 28 H75 V48 H25 Z" fill="#f8f5ff" stroke="#b7abd8" stroke-width="1"/><path d="M12 20 L17 10 L23 20 Z M77 20 L83 10 L88 20 Z" fill="#e5dcff"/><path d="M48 29 V16 L62 20 L48 24 Z" fill="#ef6fa6"/><path d="M43 48 C43 39 57 39 57 48 V60 H43 Z" fill="#a78bfa"/><path d="M0 58 H100 V100 H0 Z" fill="#91d887"/><path d="M36 63 C44 60 56 60 64 63 L56 100 H44 Z" fill="#d8d1c4"/><path d="M42 78 H58 M39 91 H61" stroke="#aaa094" stroke-width="1.5"/><circle cx="50" cy="67" r="5" fill="#7bcfe4"/><g fill="#ef6fa6"><circle cx="23" cy="78" r="1.3"/><circle cx="28" cy="80" r="1.2"/><circle cx="76" cy="77" r="1.3"/><circle cx="82" cy="80" r="1.1"/></g></svg>';
+      return [
+        '<svg class="forest-bg world-bg world-bg-castle" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">',
+        '<rect width="100" height="100" fill="#dff3ff"/><path d="M0 58 H100 V100 H0 Z" fill="#91d887"/>',
+        '<path d="M11 33 H25 V57 H11 Z M75 33 H89 V57 H75 Z M24 40 H76 V61 H24 Z" fill="#f8f5ff" stroke="#9f94c7" stroke-width="1.1"/>',
+        '<path d="M9 33 L18 18 L27 33 Z M73 33 L82 18 L91 33 Z" fill="#d8ccff" stroke="#9f94c7" stroke-width="1.1"/>',
+        '<path d="M31 31 H69 V43 H31 Z" fill="#fff" stroke="#9f94c7" stroke-width="1.1"/><path d="M31 31 L36 24 L41 31 M45 31 L50 24 L55 31 M59 31 L64 24 L69 31" fill="#e5dcff" stroke="#9f94c7" stroke-width="1"/>',
+        '<path d="M48 32 V18 L62 22 L48 26 Z" fill="#ef6fa6"/><path d="M49 61 C49 50 62 50 62 61 V73 H49 Z" fill="#a78bfa" stroke="#7c6bb8" stroke-width="1.1"/>',
+        '<g fill="#9fd4ff" stroke="#8fa4c7" stroke-width=".8"><path d="M16 40 C16 35 21 35 21 40 V47 H16 Z"/><path d="M79 40 C79 35 84 35 84 40 V47 H79 Z"/><path d="M36 44 C36 39 41 39 41 44 V51 H36 Z"/><path d="M59 44 C59 39 64 39 64 44 V51 H59 Z"/></g>',
+        '<path d="M33 68 C43 62 57 62 67 68 L58 100 H42 Z" fill="#d8d1c4"/><path d="M43 78 H57 M39 91 H61" stroke="#aaa094" stroke-width="1.4"/>',
+        '<circle cx="33" cy="76" r="5" fill="#7bcfe4" stroke="#58aabd" stroke-width="1"/><path d="M13 80 C19 75 27 76 31 82 C24 86 17 85 13 80 Z M70 82 C76 75 86 76 91 82 C84 87 75 87 70 82 Z" fill="#f7d0e4"/>',
+        '<g fill="#ef6fa6"><circle cx="22" cy="79" r="1.2"/><circle cx="27" cy="82" r="1.1"/><circle cx="77" cy="80" r="1.2"/><circle cx="83" cy="83" r="1.1"/></g>',
+        '</svg>'
+      ].join("");
     }
     if (id === "world_sky_island") {
-      return '<svg class="forest-bg world-bg world-bg-sky" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="#bdeeff"/><path d="M12 30 C18 20 32 22 35 31 C45 29 52 36 47 43 H10 C4 39 6 32 12 30 Z M70 22 C75 13 88 15 91 24 C99 25 103 33 96 39 H66 C60 35 62 25 70 22 Z" fill="#fff" opacity=".9"/><path d="M55 16 C70 18 82 29 87 43" fill="none" stroke="#f472b6" stroke-width="3"/><path d="M55 22 C67 24 77 32 82 44" fill="none" stroke="#facc15" stroke-width="3"/><path d="M55 28 C65 30 72 36 77 45" fill="none" stroke="#38bdf8" stroke-width="3"/><path d="M18 70 C36 50 70 50 86 70 C74 82 32 83 18 70 Z" fill="#7ed36f"/><path d="M24 73 C40 88 63 88 80 72 C70 95 34 96 24 73 Z" fill="#8b6f47"/><path d="M60 70 C62 82 58 91 53 100" fill="none" stroke="#7bcfe4" stroke-width="4" opacity=".85"/><g fill="#fff" opacity=".86"><circle cx="20" cy="84" r="5"/><circle cx="28" cy="86" r="6"/><circle cx="78" cy="85" r="6"/><circle cx="88" cy="86" r="5"/></g><g fill="#fff7a8"><circle cx="37" cy="35" r="1"/><circle cx="45" cy="24" r="1.2"/><circle cx="83" cy="55" r="1.1"/></g></svg>';
+      return [
+        '<svg class="forest-bg world-bg world-bg-sky" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">',
+        '<rect width="100" height="100" fill="#bdeeff"/>',
+        '<path d="M12 25 C18 16 32 18 35 27 C45 25 52 32 47 39 H10 C4 35 6 27 12 25 Z M70 18 C75 10 88 12 91 21 C99 22 103 30 96 36 H66 C60 32 62 21 70 18 Z M10 78 C17 70 31 72 34 80 C42 79 47 85 42 91 H9 C3 88 4 80 10 78 Z" fill="#fff" opacity=".86"/>',
+        '<path d="M54 14 C70 17 82 29 88 45" fill="none" stroke="#f472b6" stroke-width="2.7"/><path d="M54 20 C67 23 77 33 83 47" fill="none" stroke="#facc15" stroke-width="2.7"/><path d="M54 26 C64 29 72 38 78 48" fill="none" stroke="#38bdf8" stroke-width="2.7"/>',
+        '<path d="M19 62 C35 45 68 45 86 62 C75 72 32 72 19 62 Z" fill="#7ed36f" stroke="#579c49" stroke-width="1"/>',
+        '<path d="M25 65 C38 78 65 78 80 65 C73 86 34 87 25 65 Z" fill="#8b6f47"/><path d="M36 69 C44 84 55 91 62 69 C55 100 43 100 36 69 Z" fill="#6f5638"/>',
+        '<path d="M60 62 C63 74 58 82 54 91" fill="none" stroke="#7bcfe4" stroke-width="3.5" opacity=".85" stroke-linecap="round"/>',
+        '<g fill="#fff" opacity=".88"><circle cx="26" cy="80" r="5"/><circle cx="34" cy="82" r="6"/><circle cx="73" cy="80" r="6"/><circle cx="84" cy="82" r="5"/></g>',
+        '<g fill="#fff7a8"><circle cx="37" cy="35" r="1"/><circle cx="45" cy="24" r="1.2"/><circle cx="83" cy="55" r="1.1"/></g>',
+        '</svg>'
+      ].join("");
     }
-    return '<svg class="forest-bg world-bg world-bg-forest" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" fill="#BDEEFF"/><circle cx="85" cy="12" r="6" fill="#FACC15"/><path d="M0 54 C18 45 32 58 48 50 C66 40 82 48 100 38 L100 100 L0 100 Z" fill="#9BE18D"/><path d="M0 72 C18 64 40 79 58 68 C74 58 88 70 100 60 L100 100 L0 100 Z" fill="#7ACB77"/><path d="M8 64 C17 44 20 30 26 18 C34 32 39 48 45 66 Z" fill="#4F9F54"/><path d="M66 64 C74 42 79 28 86 14 C93 32 98 48 100 67 Z" fill="#3F8F46"/><path d="M0 82 C20 76 42 84 58 80 C76 76 90 82 100 78 L100 100 L0 100 Z" fill="#5FBF66"/><path d="M2 84 C12 78 24 78 36 84 C26 90 12 90 2 84 Z" fill="#7BCFE4" opacity=".9"/><g fill="#EF6FA6"><circle cx="70" cy="76" r="1.4"/><circle cx="74" cy="79" r="1.2"/><circle cx="79" cy="75" r="1.3"/><circle cx="84" cy="81" r="1.1"/></g></svg>';
+    return [
+      '<svg class="forest-bg world-bg world-bg-forest" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">',
+      '<rect width="100" height="100" fill="#BDEEFF"/><circle cx="85" cy="12" r="6" fill="#FACC15"/><path d="M0 54 C18 45 32 58 48 50 C66 40 82 48 100 38 L100 100 L0 100 Z" fill="#9BE18D"/>',
+      '<path d="M0 72 C18 64 40 79 58 68 C74 58 88 70 100 60 L100 100 L0 100 Z" fill="#7ACB77"/><path d="M8 64 C17 44 20 30 26 18 C34 32 39 48 45 66 Z" fill="#4F9F54"/><path d="M66 64 C74 42 79 28 86 14 C93 32 98 48 100 67 Z" fill="#3F8F46"/>',
+      '<path d="M0 82 C20 76 42 84 58 80 C76 76 90 82 100 78 L100 100 L0 100 Z" fill="#5FBF66"/><path d="M2 84 C12 78 24 78 36 84 C26 90 12 90 2 84 Z" fill="#7BCFE4" opacity=".9"/><g fill="#EF6FA6"><circle cx="70" cy="76" r="1.4"/><circle cx="74" cy="79" r="1.2"/><circle cx="79" cy="75" r="1.3"/><circle cx="84" cy="81" r="1.1"/></g>',
+      '</svg>'
+    ].join("");
   }
 
   function worldMiniPreview(worldId) {
@@ -775,6 +825,19 @@
     });
   }
 
+  function artworkEffects(placement) {
+    var type = placement.objectType || "";
+    if (type === "butterfly") {
+      return [
+        '<span class="artwork-effects butterfly-dust" aria-hidden="true">',
+        '<span class="dust dust-1"></span><span class="dust dust-2"></span><span class="dust dust-3"></span>',
+        '<span class="dust dust-4"></span><span class="dust dust-5"></span><span class="dust dust-6"></span>',
+        '</span>'
+      ].join("");
+    }
+    return '<span class="artwork-effects" aria-hidden="true"></span>';
+  }
+
   function renderForest(params) {
     if (params && params.worldId) {
       KA.worlds.setSelectedWorldId(params.worldId);
@@ -788,7 +851,7 @@
       if (!artwork) return "";
       var attrs = editing ? 'data-draggable-placement="' + escapeHtml(placement.placementId) + '"' : 'data-artwork-detail="' + escapeHtml(artwork.artworkId) + '"';
       var classes = "forest-object anim-" + escapeHtml(placement.animation) + (editing ? " is-editable" : "");
-      return '<button class="' + classes + '" style="left:' + Number(placement.xPercent || placement.x) + '%; top:' + Number(placement.yPercent || placement.y) + '%; --scale:' + placement.scale + '; z-index:' + Number(placement.zIndex || 1) + '" ' + attrs + ' aria-label="' + escapeHtml(artwork.title) + '">' + KA.coloring.renderTemplate(artwork.templateId, artwork.regionColors, "") + '</button>';
+      return '<button class="' + classes + '" style="left:' + Number(placement.xPercent || placement.x) + '%; top:' + Number(placement.yPercent || placement.y) + '%; --scale:' + placement.scale + '; z-index:' + Number(placement.zIndex || 1) + '" ' + attrs + ' aria-label="' + escapeHtml(artwork.title) + '"><span class="artwork-wrapper" data-artwork-wrapper="' + escapeHtml(artwork.artworkId) + '"><span class="artwork-svg">' + KA.coloring.renderTemplate(artwork.templateId, artwork.regionColors, "") + '</span>' + artworkEffects(placement) + '</span></button>';
     }).join("");
     var headerActions = editing ?
       '<div class="forest-tools">' + button("できた", "btn-primary", 'data-finish-forest-edit') + button("もとにもどす", "btn-soft", 'data-reset-forest-layout') + button("やめる", "btn-soft", 'data-cancel-forest-edit') + '</div>' :

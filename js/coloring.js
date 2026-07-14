@@ -108,19 +108,19 @@
     var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
     return [
       '<svg viewBox="0 0 240 180" role="img" aria-label="うさぎ" class="' + (className || "") + '">',
-      '<path class="color-region" data-region-id="tail" d="M43 119 C23 110 27 88 48 82 C66 79 78 95 72 112 C68 125 54 128 43 119 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="body" d="M62 102 C72 73 105 59 145 65 C180 70 199 92 196 121 C190 154 151 168 109 158 C73 150 51 128 62 102 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="back_leg" d="M89 124 C69 131 62 151 75 163 C85 172 117 171 130 160 C137 144 121 126 89 124 Z" fill="' + c("back_leg", c("body", "#FFFFFF")) + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="belly" d="M114 112 C132 132 166 133 188 114 C188 138 162 153 131 149 C112 146 103 128 114 112 Z" fill="' + c("belly", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="4" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="front_leg" d="M169 121 C178 130 184 143 181 156 L163 160 C166 147 160 136 151 126 Z" fill="' + c("front_leg", c("body", "#FFFFFF")) + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="head" d="M157 68 C168 48 195 42 215 55 C232 66 232 91 214 103 C191 117 160 105 154 82 C153 77 154 72 157 68 Z" fill="' + c("head", c("body", "#FFFFFF")) + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="nose" d="M210 74 C226 70 238 78 234 90 C227 99 212 98 204 88 C203 82 205 77 210 74 Z" fill="' + c("nose", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="4" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="ear_left_outer" d="M164 60 C145 24 153 4 181 43 C184 53 178 61 164 60 Z" fill="' + c("ear_left_outer", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="ear_left_inner" d="M166 50 C158 27 163 17 176 43 C177 49 173 52 166 50 Z" fill="' + c("ear_left_inner", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="3" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="ear_right_outer" d="M187 58 C187 18 203 4 213 48 C211 61 201 66 187 58 Z" fill="' + c("ear_right_outer", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="ear_right_inner" d="M192 50 C193 28 202 19 207 48 C205 54 199 55 192 50 Z" fill="' + c("ear_right_inner", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="3" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="cheek" d="M184 87 C195 82 207 88 207 99 C196 106 184 101 184 87 Z" fill="' + c("cheek", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="3" stroke-linejoin="miter"/>',
-      '<circle cx="194" cy="68" r="4.5" fill="#202124"/><path d="M225 88 C220 92 214 92 209 88 M205 85 L194 82 M205 93 L194 96" fill="none" stroke="#202124" stroke-width="3" stroke-linecap="butt"/>',
+      '<path class="color-region" data-region-id="tail" d="M43 116 C25 114 22 94 39 86 C55 77 73 87 70 105 C66 118 55 123 43 116 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="body" d="M62 106 C72 78 101 61 139 63 C169 65 190 83 194 108 C198 137 172 157 131 158 C93 158 61 137 58 116 C57 112 59 109 62 106 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="back_leg" d="M83 122 C68 130 61 151 75 162 C91 174 124 165 132 149 C137 137 120 126 101 128 C93 130 89 126 83 122 Z" fill="' + c("back_leg", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="belly" d="M112 110 C130 128 163 130 185 112 C184 135 158 149 128 146 C110 144 102 126 112 110 Z" fill="' + c("belly", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="front_leg" d="M163 120 C173 128 178 141 174 154 C168 158 159 159 151 156 C158 143 154 132 145 124 Z" fill="' + c("front_leg", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="head" d="M154 72 C162 54 184 44 204 51 C223 57 232 75 225 91 C219 106 196 112 174 103 C158 96 149 84 154 72 Z" fill="' + c("head", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="nose" d="M218 76 C231 75 237 83 232 91 C226 97 214 94 207 87 C208 81 212 78 218 76 Z" fill="' + c("nose", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="ear_left_outer" d="M161 62 C148 31 156 9 176 45 C180 55 174 63 161 62 Z" fill="' + c("ear_left_outer", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="ear_left_inner" d="M164 54 C158 33 162 22 174 47 C175 53 171 56 164 54 Z" fill="' + c("ear_left_inner", "#FFFFFF") + '" stroke="#374151" stroke-width="2.8" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="ear_right_outer" d="M184 58 C183 24 199 8 210 47 C209 60 198 66 184 58 Z" fill="' + c("ear_right_outer", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="ear_right_inner" d="M190 51 C190 31 199 21 204 48 C202 54 196 55 190 51 Z" fill="' + c("ear_right_inner", "#FFFFFF") + '" stroke="#374151" stroke-width="2.8" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="cheek" d="M185 86 C196 82 207 87 207 98 C197 104 186 99 185 86 Z" fill="' + c("cheek", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
+      '<circle cx="195" cy="69" r="3.6" fill="#202124"/><path d="M224 90 C218 94 212 93 207 88 M205 86 L195 84 M205 94 L195 97" fill="none" stroke="#202124" stroke-width="2.6" stroke-linecap="round"/>',
       '</svg>'
     ].join("");
   }
@@ -152,16 +152,16 @@
     var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
     return [
       '<svg viewBox="0 0 240 180" role="img" aria-label="イルカ" class="' + (className || "") + '">',
-      '<path class="color-region" data-region-id="tail_fluke_top" d="M46 78 C23 52 31 31 60 51 C67 33 89 38 85 64 C73 69 59 73 46 78 Z" fill="' + c("tail_fluke_top", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="tail_fluke_bottom" d="M47 86 C22 102 28 126 58 110 C66 130 89 120 84 96 C71 92 59 89 47 86 Z" fill="' + c("tail_fluke_bottom", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="tail_stem" d="M78 66 C103 67 119 73 132 84 C118 96 101 101 78 98 C86 87 86 76 78 66 Z" fill="' + c("tail_stem", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="body_top" d="M119 83 C139 48 183 39 214 56 C226 63 233 70 239 72 C231 84 211 88 195 82 C177 96 153 116 124 123 C100 113 97 96 119 83 Z" fill="' + c("body_top", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="snout" d="M210 58 C226 51 238 57 238 69 C228 79 215 78 202 69 C203 64 206 61 210 58 Z" fill="' + c("snout", c("body_top", "#FFFFFF")) + '" stroke="#3F3F46" stroke-width="4" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="belly" d="M121 94 C145 107 173 101 197 81 C181 110 151 129 123 121 C110 117 109 102 121 94 Z" fill="' + c("belly", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="4" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="dorsal_fin" d="M150 56 C160 27 181 33 174 69 C164 69 156 64 150 56 Z" fill="' + c("dorsal_fin", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="pectoral_fin" d="M153 102 C158 135 182 134 180 99 C170 96 160 98 153 102 Z" fill="' + c("pectoral_fin", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="cheek" d="M194 75 C204 71 214 77 214 87 C204 94 194 89 194 75 Z" fill="' + c("cheek", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="3" stroke-linejoin="miter"/>',
-      '<circle cx="198" cy="64" r="4.5" fill="#202124"/><path d="M211 78 C218 83 226 81 232 74" fill="none" stroke="#202124" stroke-width="3" stroke-linecap="butt"/>',
+      '<path class="color-region" data-region-id="tail_fluke_top" d="M39 76 C18 55 28 35 58 52 C65 35 86 40 85 63 C70 67 54 71 39 76 Z" fill="' + c("tail_fluke_top", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="tail_fluke_bottom" d="M39 84 C16 100 25 122 57 107 C64 126 86 118 84 95 C69 91 54 87 39 84 Z" fill="' + c("tail_fluke_bottom", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="tail_stem" d="M78 64 C101 66 119 73 134 84 C118 94 101 99 78 96 C85 86 86 74 78 64 Z" fill="' + c("tail_stem", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="body_top" d="M117 82 C138 53 172 42 201 51 C219 57 227 68 235 70 C224 81 206 85 191 80 C174 96 151 113 123 119 C101 110 96 95 117 82 Z" fill="' + c("body_top", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="snout" d="M204 58 C220 52 235 57 236 68 C225 76 212 76 199 68 C199 63 201 60 204 58 Z" fill="' + c("snout", c("body_top", "#FFFFFF")) + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="belly" d="M120 94 C143 106 169 100 191 81 C177 108 149 125 123 118 C111 115 108 102 120 94 Z" fill="' + c("belly", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="dorsal_fin" d="M149 58 C158 33 178 35 173 69 C163 68 155 64 149 58 Z" fill="' + c("dorsal_fin", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="pectoral_fin" d="M151 101 C157 128 178 129 177 100 C168 96 158 97 151 101 Z" fill="' + c("pectoral_fin", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="cheek" d="M190 73 C200 70 209 76 209 85 C200 91 190 86 190 73 Z" fill="' + c("cheek", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
+      '<circle cx="197" cy="63" r="3.6" fill="#202124"/><path d="M208 77 C216 81 224 79 230 73" fill="none" stroke="#202124" stroke-width="2.6" stroke-linecap="round"/>',
       '</svg>'
     ].join("");
   }
@@ -171,19 +171,19 @@
     var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
     return [
       '<svg viewBox="0 0 240 180" role="img" aria-label="きょうりゅう" class="' + (className || "") + '">',
-      '<path class="color-region" data-region-id="tail" d="M77 108 C47 119 18 111 3 88 C30 80 59 84 91 99 C89 106 84 109 77 108 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="body" d="M72 91 C91 62 136 53 171 71 C202 87 205 128 174 151 C143 173 94 163 74 132 C65 119 64 103 72 91 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="neck" d="M153 77 C162 55 179 45 197 50 C193 73 181 90 164 101 C156 97 151 88 153 77 Z" fill="' + c("neck", c("body", "#FFFFFF")) + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="head" d="M188 43 C207 30 233 35 238 56 C239 72 225 87 204 86 C182 84 171 68 177 54 C179 49 183 46 188 43 Z" fill="' + c("head", c("body", "#FFFFFF")) + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="jaw" d="M193 70 C208 76 226 74 238 62 C240 78 224 94 199 91 C187 89 184 77 193 70 Z" fill="' + c("jaw", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="4" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="belly" d="M95 111 C116 133 148 137 178 115 C179 141 154 157 122 152 C101 149 88 129 95 111 Z" fill="' + c("belly", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="4" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="arm" d="M164 101 L187 109 L181 123 L158 113 Z" fill="' + c("arm", c("body", "#FFFFFF")) + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="back_leg" d="M103 131 C88 144 89 166 106 174 L132 174 C138 151 128 135 103 131 Z M145 126 C132 140 135 161 152 170 L175 170 C178 149 168 130 145 126 Z" fill="' + c("back_leg", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="foot" d="M102 164 L137 164 L145 176 L95 176 Z M150 161 L181 161 L190 172 L146 172 Z" fill="' + c("foot", c("back_leg", "#FFFFFF")) + '" stroke="#3F3F46" stroke-width="4" stroke-linejoin="miter"/>',
-      '<g class="color-region" data-region-id="back_spines" fill="' + c("back_spines", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="4" stroke-linejoin="miter"><path d="M87 84 L96 57 L109 81 Z"/><path d="M121 66 L134 39 L144 70 Z"/><path d="M154 70 L172 50 L171 82 Z"/></g>',
-      '<path class="color-region" data-region-id="cheek" d="M203 71 C213 67 224 72 225 83 C214 90 203 84 203 71 Z" fill="' + c("cheek", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="3" stroke-linejoin="miter"/>',
-      '<g class="color-region" data-region-id="body_mark" fill="' + c("body_mark", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="2.5"><path d="M94 91 L107 84 L116 96 L102 104 Z"/><path d="M132 84 L146 79 L155 92 L141 99 Z"/></g>',
-      '<circle cx="207" cy="55" r="4.5" fill="#202124"/><path d="M216 76 C208 82 198 81 191 75" fill="none" stroke="#202124" stroke-width="3" stroke-linecap="butt"/>',
+      '<path class="color-region" data-region-id="tail" d="M79 112 C50 126 22 119 5 101 C34 91 61 94 92 105 C92 112 87 116 79 112 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="body" d="M73 92 C92 68 128 59 162 73 C190 84 199 116 180 140 C158 167 111 164 84 140 C67 124 63 104 73 92 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="neck" d="M154 76 C164 57 184 47 201 51 C197 70 184 87 165 97 C157 94 151 86 154 76 Z" fill="' + c("neck", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="head" d="M190 45 C207 34 230 40 237 56 C241 69 232 82 214 84 C193 87 176 76 178 61 C179 54 184 49 190 45 Z" fill="' + c("head", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="jaw" d="M194 70 C209 75 225 72 236 64 C237 78 222 90 200 88 C188 86 185 76 194 70 Z" fill="' + c("jaw", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="belly" d="M95 111 C116 130 148 133 176 113 C177 136 153 151 123 148 C103 146 90 129 95 111 Z" fill="' + c("belly", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="arm" d="M163 99 C174 101 184 107 187 116 C180 121 168 119 158 112 C158 106 160 102 163 99 Z" fill="' + c("arm", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="back_leg" d="M104 128 C91 140 91 160 107 169 L131 169 C137 149 128 133 104 128 Z M145 124 C132 138 135 157 151 166 L174 166 C177 146 168 128 145 124 Z" fill="' + c("back_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="foot" d="M103 160 L136 160 C144 165 145 172 139 176 L96 176 C94 170 97 164 103 160 Z M151 157 L178 157 C187 162 190 169 184 173 L146 173 C144 166 146 161 151 157 Z" fill="' + c("foot", c("back_leg", "#FFFFFF")) + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="back_spines" d="M93 80 C105 68 118 64 131 64 C124 72 113 78 103 85 C99 84 96 82 93 80 Z M145 67 C157 66 168 70 178 77 C168 80 158 79 148 73 C147 71 146 69 145 67 Z" fill="' + c("back_spines", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="cheek" d="M203 70 C212 67 221 72 222 81 C213 86 203 81 203 70 Z" fill="' + c("cheek", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="body_mark" d="M96 92 C104 86 114 87 121 96 C113 103 102 102 96 92 Z M131 86 C141 82 151 86 156 96 C146 101 136 98 131 86 Z" fill="' + c("body_mark", "#FFFFFF") + '" stroke="#374151" stroke-width="2.5" stroke-linejoin="round"/>',
+      '<circle cx="207" cy="56" r="3.6" fill="#202124"/><path d="M214 75 C207 81 198 80 191 74" fill="none" stroke="#202124" stroke-width="2.6" stroke-linecap="round"/>',
       '</svg>'
     ].join("");
   }
@@ -193,19 +193,80 @@
     var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
     return [
       '<svg viewBox="0 0 240 180" role="img" aria-label="うま" class="' + (className || "") + '">',
-      '<path class="color-region" data-region-id="tail" d="M49 85 C23 78 15 52 38 47 C58 43 70 62 61 91 C57 104 51 115 44 124 C42 106 43 94 49 85 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="body" d="M57 79 C78 55 134 48 169 65 C184 72 190 93 181 112 C166 139 118 147 80 132 C54 121 44 95 57 79 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="neck" d="M156 67 C160 42 176 22 194 24 C207 26 211 42 202 58 C193 75 172 82 159 98 Z" fill="' + c("neck", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="head" d="M189 24 C205 11 228 17 235 35 C238 55 224 72 202 67 C185 63 178 40 189 24 Z" fill="' + c("head", c("neck", "#FFFFFF")) + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<g class="color-region" data-region-id="ears" fill="' + c("ears", c("head", "#FFFFFF")) + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"><path d="M190 27 L191 7 L205 26 Z"/><path d="M206 26 L220 9 L224 34 Z"/></g>',
-      '<path class="color-region" data-region-id="mane" d="M158 72 C154 48 166 29 190 23 C182 43 181 63 166 93 Z" fill="' + c("mane", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="front_leg_far" d="M154 116 L165 144 L153 169 L138 169 L147 145 L139 119 Z" fill="' + c("front_leg_far", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="front_leg_near" d="M132 121 L128 149 L138 169 L120 169 L111 149 L119 119 Z" fill="' + c("front_leg_near", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="back_leg_far" d="M78 111 L74 140 L58 169 L42 169 L58 139 L62 108 Z" fill="' + c("back_leg_far", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<path class="color-region" data-region-id="back_leg_near" d="M101 116 L112 143 L103 169 L86 169 L95 145 L88 117 Z" fill="' + c("back_leg_near", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="5" stroke-linejoin="miter"/>',
-      '<g class="color-region" data-region-id="hooves" fill="' + c("hooves", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="3" stroke-linejoin="miter"><path d="M40 166 L63 166 L67 176 L38 176 Z"/><path d="M84 166 L106 166 L110 176 L82 176 Z"/><path d="M118 166 L140 166 L144 176 L115 176 Z"/><path d="M137 166 L158 166 L162 176 L134 176 Z"/></g>',
-      '<path class="color-region" data-region-id="muzzle" d="M218 43 C233 42 238 52 233 63 C224 72 207 66 204 54 C207 49 212 45 218 43 Z" fill="' + c("muzzle", "#FFFFFF") + '" stroke="#3F3F46" stroke-width="4" stroke-linejoin="miter"/>',
-      '<circle cx="207" cy="37" r="4.5" fill="#202124"/><path d="M219 60 C212 66 201 66 194 60" fill="none" stroke="#202124" stroke-width="3" stroke-linecap="butt"/>',
+      '<path class="color-region" data-region-id="tail" d="M48 80 C25 72 18 48 38 43 C58 39 70 56 63 82 C58 100 48 112 38 124 C39 105 41 91 48 80 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="body" d="M58 78 C78 58 129 52 165 66 C184 74 190 94 180 113 C164 136 116 142 79 129 C55 120 45 95 58 78 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="neck" d="M154 69 C159 46 177 28 194 28 C207 29 212 43 205 57 C195 72 174 81 160 98 Z" fill="' + c("neck", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="head" d="M189 28 C205 15 225 19 234 36 C238 54 226 69 205 66 C187 63 179 43 189 28 Z" fill="' + c("head", c("neck", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<g class="color-region" data-region-id="ears" fill="' + c("ears", c("head", "#FFFFFF")) + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"><path d="M190 30 C189 20 194 12 204 27 Z"/><path d="M206 28 C211 18 220 14 222 34 Z"/></g>',
+      '<path class="color-region" data-region-id="mane" d="M157 73 C156 53 171 34 192 28 C184 45 181 65 166 94 Z" fill="' + c("mane", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="front_leg_far" d="M155 111 C164 124 168 142 159 166 L144 166 C151 143 147 127 139 113 Z" fill="' + c("front_leg_far", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="front_leg_near" d="M130 116 C129 133 134 148 143 166 L126 166 C116 148 113 132 119 115 Z" fill="' + c("front_leg_near", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="back_leg_far" d="M77 108 C75 128 66 147 54 166 L39 166 C53 145 58 126 62 106 Z" fill="' + c("back_leg_far", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="back_leg_near" d="M100 113 C112 127 115 145 106 166 L90 166 C96 145 94 130 87 115 Z" fill="' + c("back_leg_near", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<g class="color-region" data-region-id="hooves" fill="' + c("hooves", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"><path d="M38 164 L58 164 L62 174 L36 174 Z"/><path d="M88 164 L108 164 L112 174 L86 174 Z"/><path d="M124 164 L144 164 L148 174 L122 174 Z"/><path d="M142 164 L162 164 L166 174 L140 174 Z"/></g>',
+      '<path class="color-region" data-region-id="muzzle" d="M216 43 C231 42 237 51 232 61 C224 69 208 64 204 54 C207 49 211 45 216 43 Z" fill="' + c("muzzle", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<circle cx="207" cy="38" r="3.6" fill="#202124"/><path d="M219 60 C212 65 202 65 195 59" fill="none" stroke="#202124" stroke-width="2.6" stroke-linecap="round"/>',
+      '</svg>'
+    ].join("");
+  }
+
+  function svgLion(colors, className) {
+    var colorsForTemplate = normalizeRegionColors("coloring_lion", colors);
+    var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
+    return [
+      '<svg viewBox="0 0 240 180" role="img" aria-label="ライオン" class="' + (className || "") + '">',
+      '<path class="color-region" data-region-id="tail" d="M48 91 C27 80 25 56 45 55 C62 57 62 77 52 93 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="tail_tip" d="M36 52 C26 42 33 30 47 34 C58 37 59 51 48 57 C44 58 40 56 36 52 Z" fill="' + c("tail_tip", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="body" d="M61 78 C82 58 130 55 162 70 C183 80 189 106 174 126 C154 148 111 149 78 132 C55 120 47 95 61 78 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="chest" d="M146 83 C160 99 159 120 141 133 C129 121 128 98 146 83 Z" fill="' + c("chest", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="back_leg" d="M83 119 C76 135 69 149 59 166 L43 166 C57 145 61 128 64 111 Z" fill="' + c("back_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="front_leg" d="M149 114 C157 128 158 145 150 166 L134 166 C140 145 137 129 130 114 Z" fill="' + c("front_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="paw" d="M42 164 L62 164 L66 174 L39 174 Z M132 164 L153 164 L158 174 L130 174 Z" fill="' + c("paw", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="mane" d="M154 42 C167 24 194 29 201 48 C220 52 226 75 211 89 C214 109 192 122 176 111 C158 119 139 105 142 85 C126 73 135 50 154 42 Z" fill="' + c("mane", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="ears" d="M157 50 C154 37 164 31 174 43 C174 52 166 55 157 50 Z M191 45 C199 33 211 38 211 52 C202 57 194 54 191 45 Z" fill="' + c("ears", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="face" d="M161 54 C178 44 200 51 206 69 C211 86 198 101 179 101 C159 101 148 86 153 70 C154 63 157 58 161 54 Z" fill="' + c("face", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="nose" d="M186 76 C197 75 203 82 198 90 C190 96 180 91 179 82 C181 79 183 77 186 76 Z" fill="' + c("nose", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
+      '<circle cx="174" cy="68" r="3.4" fill="#202124"/><path d="M190 91 C184 96 175 96 169 90" fill="none" stroke="#202124" stroke-width="2.5" stroke-linecap="round"/>',
+      '</svg>'
+    ].join("");
+  }
+
+  function svgPanda(colors, className) {
+    var colorsForTemplate = normalizeRegionColors("coloring_panda", colors);
+    var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
+    return [
+      '<svg viewBox="0 0 240 180" role="img" aria-label="パンダ" class="' + (className || "") + '">',
+      '<path class="color-region" data-region-id="ear_left" d="M75 49 C63 32 76 17 94 25 C104 36 96 50 75 49 Z" fill="' + c("ear_left", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="ear_right" d="M146 25 C164 17 177 33 164 50 C144 50 136 36 146 25 Z" fill="' + c("ear_right", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="body" d="M73 99 C82 73 110 63 140 70 C168 77 181 103 173 132 C164 162 126 174 94 160 C71 150 62 123 73 99 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="back_legs" d="M69 135 C55 143 55 166 77 171 L105 171 C105 149 91 135 69 135 Z M169 136 C184 145 182 166 160 171 L132 171 C132 150 147 136 169 136 Z" fill="' + c("back_legs", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="front_legs" d="M84 98 C70 112 69 134 83 146 C94 139 98 119 94 102 Z M157 99 C171 112 172 134 158 146 C147 139 143 119 147 102 Z" fill="' + c("front_legs", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="belly" d="M96 103 C109 92 133 93 145 105 C154 122 146 148 121 151 C96 148 87 121 96 103 Z" fill="' + c("belly", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="face" d="M78 47 C92 28 149 28 162 48 C178 74 159 104 120 104 C82 104 62 74 78 47 Z" fill="' + c("face", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="eye_patch_left" d="M88 61 C94 49 111 50 114 65 C111 78 94 81 88 68 C87 66 87 63 88 61 Z" fill="' + c("eye_patch_left", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="eye_patch_right" d="M126 65 C129 50 146 49 153 61 C157 75 140 83 129 74 C126 72 125 69 126 65 Z" fill="' + c("eye_patch_right", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="nose" d="M113 77 C119 72 128 74 131 80 C127 89 116 89 111 81 C111 79 112 78 113 77 Z" fill="' + c("nose", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
+      '<circle cx="103" cy="64" r="3" fill="#202124"/><circle cx="138" cy="64" r="3" fill="#202124"/><path d="M121 88 C115 93 106 91 101 85 M121 88 C127 93 136 91 141 85" fill="none" stroke="#202124" stroke-width="2.4" stroke-linecap="round"/>',
+      '</svg>'
+    ].join("");
+  }
+
+  function svgGrasshopper(colors, className) {
+    var colorsForTemplate = normalizeRegionColors("coloring_grasshopper", colors);
+    var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
+    return [
+      '<svg viewBox="0 0 240 180" role="img" aria-label="バッタ" class="' + (className || "") + '">',
+      '<path class="color-region" data-region-id="antennae" d="M169 55 C191 30 211 22 230 24 M169 59 C193 45 214 44 235 54" fill="none" stroke="' + c("antennae", "#374151") + '" stroke-width="4" stroke-linecap="round"/>',
+      '<path class="color-region" data-region-id="abdomen" d="M49 82 C75 57 119 55 150 79 C143 104 110 119 75 112 C55 108 43 96 49 82 Z" fill="' + c("abdomen", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="thorax" d="M135 78 C151 62 174 65 184 83 C181 103 156 111 138 97 C133 91 132 84 135 78 Z" fill="' + c("thorax", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="head" d="M178 70 C193 58 215 65 219 83 C219 99 203 109 186 103 C172 98 168 80 178 70 Z" fill="' + c("head", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="wing" d="M74 73 C101 52 136 63 152 85 C125 93 97 92 74 73 Z" fill="' + c("wing", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="back_leg" d="M83 108 C68 132 50 151 29 166 L17 153 C39 136 57 116 70 92 C82 94 91 100 83 108 Z M72 92 C94 127 114 145 142 163 L132 175 C103 158 78 134 59 102 Z" fill="' + c("back_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="middle_leg" d="M132 98 C121 118 114 135 112 155 L99 155 C101 133 109 112 123 94 Z" fill="' + c("middle_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="front_leg" d="M170 100 C164 119 164 135 171 151 L158 154 C149 135 150 116 160 98 Z" fill="' + c("front_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
+      '<path class="color-region" data-region-id="body_segments" d="M73 86 C83 97 95 103 109 107 M98 75 C106 90 120 98 137 100 M128 76 C137 88 150 94 164 95" fill="none" stroke="' + c("body_segments", "#374151") + '" stroke-width="4" stroke-linecap="round"/>',
+      '<path class="color-region" data-region-id="eye" d="M197 75 C204 72 211 77 211 84 C204 89 196 85 197 75 Z" fill="' + c("eye", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
+      '<circle cx="203" cy="80" r="2.8" fill="#202124"/>',
       '</svg>'
     ].join("");
   }
@@ -218,6 +279,9 @@
     if (templateId === "coloring_dolphin_001") return svgDolphin(regionColors, className);
     if (templateId === "coloring_dinosaur_001") return svgDinosaur(regionColors, className);
     if (templateId === "coloring_horse_001") return svgHorse(regionColors, className);
+    if (templateId === "coloring_lion") return svgLion(regionColors, className);
+    if (templateId === "coloring_panda") return svgPanda(regionColors, className);
+    if (templateId === "coloring_grasshopper") return svgGrasshopper(regionColors, className);
     return "";
   }
 

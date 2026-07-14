@@ -330,6 +330,9 @@
     if (type === "dolphin") return "swim";
     if (type === "dinosaur") return "hop";
     if (type === "horse") return "trot";
+    if (type === "lion") return "trot";
+    if (type === "panda") return "sit";
+    if (type === "grasshopper") return "hop";
     return "sway";
   }
 
@@ -338,6 +341,9 @@
     if (templateId === "coloring_dolphin_001") return "world_sea";
     if (templateId === "coloring_dinosaur_001") return "world_island";
     if (templateId === "coloring_horse_001") return "world_island";
+    if (templateId === "coloring_lion") return "world_island";
+    if (templateId === "coloring_panda") return "world_forest";
+    if (templateId === "coloring_grasshopper") return "world_forest";
     return "world_forest";
   }
 
@@ -349,6 +355,9 @@
     if (templateId === "coloring_dolphin_001") return ["world_sea"];
     if (templateId === "coloring_dinosaur_001") return ["world_island"];
     if (templateId === "coloring_horse_001") return ["world_island", "world_castle"];
+    if (templateId === "coloring_lion") return ["world_island", "world_castle"];
+    if (templateId === "coloring_panda") return ["world_forest", "world_island"];
+    if (templateId === "coloring_grasshopper") return ["world_forest", "world_island", "world_sky_island"];
     return ["world_forest"];
   }
 
