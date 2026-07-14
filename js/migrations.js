@@ -427,6 +427,7 @@
     markMigration(appData, "prototype6_svg_and_forest_placement");
     markMigration(appData, "prototype7_multi_worlds");
     markMigration(appData, "prototype8_artwork_background_and_coloring");
+    markMigration(appData, "prototype9_adopted_layered_coloring");
     appData.updatedAt = appData.updatedAt || KA.date.localIsoString();
     changed = before !== JSON.stringify(appData);
     return { data: appData, changed: changed };

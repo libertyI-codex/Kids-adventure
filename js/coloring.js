@@ -68,6 +68,662 @@
     return next;
   }
 
+  var LAYERED_ANIMAL_SVG = {
+      "coloring_rabbit_001": {
+          "templateId": "coloring_rabbit_001",
+          "viewBox": "0 0 240 180",
+          "sourceLabel": "合格済み候補",
+          "candidateVersion": 9,
+          "designVersion": 9,
+          "regions": [
+              {
+                  "id": "tail",
+                  "d": "M48 121 C34 120 29 108 36 98 C45 86 64 88 69 103 C73 117 61 126 48 121 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "body",
+                  "d": "M61 119 C63 92 91 72 126 75 C154 77 177 96 181 122 C185 148 159 164 118 161 C84 159 58 142 61 119 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "back_leg",
+                  "d": "M84 124 C66 132 58 150 74 160 C94 173 127 160 139 140 C125 130 103 127 84 124 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "belly",
+                  "d": "M109 114 C128 130 156 130 174 118 C173 139 148 151 120 146 C105 143 101 127 109 114 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "front_leg",
+                  "d": "M149 120 C159 131 161 147 153 157 C145 158 139 155 135 151 C143 141 141 130 133 123 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "head",
+                  "d": "M153 85 C158 68 174 58 193 62 C210 66 221 78 218 92 C214 106 195 113 176 106 C160 101 149 94 153 85 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "nose",
+                  "d": "M212 84 C222 84 229 90 225 96 C219 101 210 97 207 90 C208 87 210 85 212 84 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "ear_left_outer",
+                  "d": "M162 70 C150 39 152 12 168 7 C179 27 181 54 171 76 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "ear_left_inner",
+                  "d": "M165 63 C158 39 160 22 168 16 C174 32 176 52 169 67 Z",
+                  "fallback": "#F8D7E8"
+              },
+              {
+                  "id": "ear_right_outer",
+                  "d": "M181 68 C180 34 194 9 207 14 C209 43 201 66 187 77 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "ear_right_inner",
+                  "d": "M187 62 C187 37 196 22 204 19 C204 41 199 58 189 67 Z",
+                  "fallback": "#F8D7E8"
+              },
+              {
+                  "id": "cheek",
+                  "d": "M185 87 C195 83 204 88 205 98 C196 104 186 99 185 87 Z",
+                  "fallback": "#FDE2E2"
+              }
+          ],
+          "outer": [
+              "M38 98 C47 86 64 88 70 102 C78 84 103 73 132 76 C144 77 157 82 168 91 C174 95 179 105 181 121 C185 148 159 164 118 161 C87 159 63 144 61 122 C56 125 48 125 40 121 C29 115 29 105 38 98 Z",
+              "M153 85 C158 68 174 58 193 62 C210 66 221 78 218 92 C214 106 195 113 176 106 C160 101 149 94 153 85 Z",
+              "M162 70 C150 39 152 12 168 7 C179 27 181 54 171 76 Z M181 68 C180 34 194 9 207 14 C209 43 201 66 187 77 Z"
+          ],
+          "inner": [
+              {
+                  "d": "M165 63 C158 39 160 22 168 16"
+              },
+              {
+                  "d": "M187 62 C187 37 196 22 204 19"
+              },
+              {
+                  "d": "M151 91 C144 93 137 93 130 91"
+              },
+              {
+                  "d": "M109 114 C128 130 156 130 174 118"
+              },
+              {
+                  "d": "M84 124 C104 127 125 130 139 140"
+              },
+              {
+                  "d": "M149 120 C143 141 145 151 153 157"
+              },
+              {
+                  "d": "M207 90 C213 95 220 97 225 96"
+              }
+          ],
+          "face": "<circle cx=\"194\" cy=\"73\" r=\"2.7\" fill=\"#111827\"/><path d=\"M212 93 C207 96 201 95 197 91 M204 88 L194 86 M204 96 L195 99\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\" stroke-linecap=\"round\"/>",
+          "hitAreas": [
+              "ear_left_outer",
+              "ear_left_inner",
+              "ear_right_outer",
+              "ear_right_inner",
+              "front_leg"
+          ]
+      },
+      "coloring_dolphin_001": {
+          "templateId": "coloring_dolphin_001",
+          "viewBox": "0 0 240 180",
+          "sourceLabel": "合格済み候補",
+          "candidateVersion": 9,
+          "designVersion": 9,
+          "regions": [
+              {
+                  "id": "tail_fluke_top",
+                  "d": "M51 79 C30 66 24 49 43 52 C56 55 62 66 56 79 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "tail_fluke_bottom",
+                  "d": "M51 91 C28 103 29 121 49 119 C60 113 63 101 56 91 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "tail_stem",
+                  "d": "M54 80 C77 78 95 82 110 90 C96 98 77 100 54 93 C60 89 60 84 54 80 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "body_top",
+                  "d": "M101 88 C124 61 165 50 196 60 C212 65 222 73 236 76 C222 87 203 91 185 86 C167 102 139 116 106 112 C84 110 75 101 101 88 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "belly",
+                  "d": "M102 96 C126 110 157 106 185 86 C171 111 138 124 107 112 C95 107 93 100 102 96 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "snout",
+                  "d": "M196 63 C215 58 232 64 236 76 C221 82 207 80 194 72 C193 68 194 65 196 63 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "dorsal_fin",
+                  "d": "M143 62 C151 40 170 38 174 67 C163 68 152 66 143 62 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "pectoral_fin",
+                  "d": "M146 102 C154 126 174 127 178 101 C166 96 155 98 146 102 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "cheek",
+                  "d": "M187 74 C196 72 204 77 204 86 C196 91 188 86 187 74 Z",
+                  "fallback": "#DFF7FF"
+              }
+          ],
+          "outer": [
+              "M43 52 C56 55 62 66 56 79 C74 78 93 82 110 90 C134 62 169 51 196 60 C214 66 224 73 236 76 C221 88 203 91 185 86 C171 105 142 120 107 112 C91 107 78 101 56 93 C61 106 57 116 49 119 C29 121 28 103 51 91 C30 66 24 49 43 52 Z",
+              "M143 62 C151 40 170 38 174 67",
+              "M146 102 C154 126 174 127 178 101"
+          ],
+          "inner": [
+              {
+                  "d": "M102 96 C126 110 157 106 185 86"
+              },
+              {
+                  "d": "M196 63 C215 58 232 64 236 76"
+              },
+              {
+                  "d": "M54 80 C77 78 95 82 110 90"
+              },
+              {
+                  "d": "M54 93 C77 100 96 98 110 90"
+              },
+              {
+                  "d": "M202 78 C211 82 222 81 230 76"
+              }
+          ],
+          "face": "<circle cx=\"195\" cy=\"67\" r=\"2.5\" fill=\"#111827\"/>",
+          "hitAreas": [
+              "tail_fluke_top",
+              "tail_fluke_bottom",
+              "tail_stem",
+              "dorsal_fin",
+              "pectoral_fin"
+          ]
+      },
+      "coloring_horse_001": {
+          "templateId": "coloring_horse_001",
+          "viewBox": "0 0 240 180",
+          "sourceLabel": "合格済み候補",
+          "candidateVersion": 9,
+          "designVersion": 9,
+          "regions": [
+              {
+                  "id": "tail",
+                  "d": "M55 86 C34 88 17 103 13 128 C31 122 50 103 64 88 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "body",
+                  "d": "M56 84 C75 68 118 62 157 70 C181 75 193 88 187 105 C179 128 146 137 101 132 C71 129 47 108 56 84 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "neck",
+                  "d": "M150 72 C157 50 174 35 190 30 C198 40 193 61 174 84 C164 84 156 80 150 72 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "head",
+                  "d": "M185 29 C200 20 220 25 228 39 C227 55 213 68 193 66 C181 57 178 40 185 29 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "muzzle",
+                  "d": "M207 43 C222 42 232 49 231 59 C221 65 210 62 201 55 C202 50 204 46 207 43 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "ears",
+                  "d": "M183 32 C179 18 187 13 195 28 C193 34 188 36 183 32 Z M199 31 C204 16 214 17 214 33 C209 38 204 36 199 31 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "mane",
+                  "d": "M154 42 C146 56 147 74 158 85 C165 69 169 50 164 35 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "front_leg_near",
+                  "d": "M144 104 C153 122 154 143 149 169 L137 169 C139 147 135 127 127 108 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "front_leg_far",
+                  "d": "M161 106 C170 123 173 143 168 168 L157 168 C160 145 156 127 149 109 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "back_leg_near",
+                  "d": "M78 108 C70 124 65 145 56 169 L44 169 C49 143 57 121 68 104 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "back_leg_far",
+                  "d": "M97 112 C111 126 116 145 110 168 L98 168 C101 148 95 132 84 116 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "hooves",
+                  "d": "M42 166 L59 166 L63 172 L41 172 Z M96 166 L112 166 L115 172 L94 172 Z M135 166 L152 166 L155 172 L133 172 Z M155 165 L171 165 L174 171 L153 171 Z",
+                  "fallback": "#FFFFFF"
+              }
+          ],
+          "outer": [
+              "M13 128 C31 122 50 103 64 88 C76 68 118 62 150 72 C157 50 174 35 183 32 C179 18 187 13 195 28 C204 16 214 17 214 33 C224 36 229 46 228 55 C226 67 211 70 193 66 C185 76 176 83 158 85 C178 91 190 100 187 115 C181 134 146 138 101 132 C72 129 47 108 56 84",
+              "M68 104 C57 121 49 143 44 169 L56 169 C65 145 70 124 78 108 M84 116 C95 132 101 148 98 168 L110 168 C116 145 111 126 97 112 M127 108 C135 127 139 147 137 169 L149 169 C154 143 153 122 144 104 M149 109 C156 127 160 145 157 168 L168 168 C173 143 170 123 161 106",
+              "M183 32 C179 18 187 13 195 28 M199 31 C204 16 214 17 214 33"
+          ],
+          "inner": [
+              {
+                  "d": "M150 72 C158 79 163 83 158 85"
+              },
+              {
+                  "d": "M154 42 C146 56 147 74 158 85"
+              },
+              {
+                  "d": "M201 55 C210 62 221 65 231 59"
+              },
+              {
+                  "d": "M56 84 C79 95 122 98 158 85"
+              },
+              {
+                  "d": "M78 108 C73 124 75 136 82 146"
+              },
+              {
+                  "d": "M144 104 C137 123 138 148 149 169"
+              },
+              {
+                  "d": "M55 86 C42 96 32 112 18 125"
+              }
+          ],
+          "face": "<circle cx=\"202\" cy=\"43\" r=\"2.5\" fill=\"#111827\"/><path d=\"M215 59 C211 61 207 61 203 59\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.7\" stroke-linecap=\"round\"/>",
+          "hitAreas": [
+              "tail",
+              "front_leg_near",
+              "front_leg_far",
+              "back_leg_near",
+              "back_leg_far",
+              "hooves"
+          ]
+      },
+      "coloring_dinosaur_001": {
+          "templateId": "coloring_dinosaur_001",
+          "viewBox": "0 0 240 180",
+          "sourceLabel": "D案",
+          "candidateVersion": 9,
+          "designVersion": 9,
+          "regions": [
+              {
+                  "id": "tail",
+                  "d": "M82 94 C55 84 25 86 4 99 C30 108 58 108 87 101 C88 98 86 96 82 94 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "body",
+                  "d": "M84 82 C108 69 145 70 169 82 C188 92 191 111 178 126 C158 144 122 141 94 122 C80 112 74 93 84 82 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "belly",
+                  "d": "M98 106 C121 119 151 119 174 105 C170 123 148 134 120 130 C104 128 96 118 98 106 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "neck",
+                  "d": "M163 80 C172 67 190 62 206 67 C201 81 185 92 169 96 C164 92 161 86 163 80 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "head",
+                  "d": "M200 60 C217 52 234 57 239 70 C231 82 210 83 194 76 C190 70 193 64 200 60 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "jaw",
+                  "d": "M193 74 C207 80 226 78 238 70 C237 83 219 91 199 86 C191 83 187 78 193 74 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "arm",
+                  "d": "M164 98 C173 100 179 105 180 112 C173 116 164 114 158 109 C158 104 160 100 164 98 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "back_leg",
+                  "d": "M108 119 C98 132 94 149 101 168 L86 168 C79 148 84 130 96 116 Z M146 118 C158 130 161 148 153 168 L137 168 C145 149 139 134 130 124 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "foot",
+                  "d": "M83 165 C96 163 107 165 115 171 L106 177 L80 177 Z M134 165 C148 163 160 165 169 171 L160 177 L132 177 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "back_spines",
+                  "d": "M104 74 C112 69 119 71 122 79 C113 77 108 76 104 74 Z",
+                  "fallback": "#DDF7D4"
+              },
+              {
+                  "id": "cheek",
+                  "d": "M208 67 C216 65 223 69 224 75 C216 79 208 76 208 67 Z",
+                  "fallback": "#FDE2E2"
+              },
+              {
+                  "id": "body_mark",
+                  "d": "M119 85 C128 83 136 86 142 91 C134 95 125 94 119 85 Z",
+                  "fallback": "#DDF7D4"
+              }
+          ],
+          "outer": [
+              "M4 99 C30 108 58 108 87 101 C104 70 145 70 169 82 C174 68 190 62 206 67 C217 52 234 57 239 70 C231 82 210 83 194 76 C190 94 187 116 178 126 C158 144 122 141 94 122 C80 112 74 93 84 82",
+              "M96 116 C84 130 79 148 86 168 M108 119 C98 132 94 149 101 168 M130 124 C139 134 145 149 137 168 M146 118 C158 130 161 148 153 168",
+              "M104 74 C112 71 118 72 122 79"
+          ],
+          "inner": [
+              {
+                  "d": "M98 106 C121 119 151 119 174 105"
+              },
+              {
+                  "d": "M163 80 C168 89 171 94 169 96"
+              },
+              {
+                  "d": "M193 74 C207 80 226 78 238 70"
+              },
+              {
+                  "d": "M164 98 C173 100 179 105 180 112"
+              },
+              {
+                  "d": "M104 135 C110 148 109 160 101 168"
+              },
+              {
+                  "d": "M148 132 C154 145 154 157 147 168"
+              }
+          ],
+          "face": "<circle cx=\"211\" cy=\"64\" r=\"2.5\" fill=\"#111827\"/><path d=\"M206 79 C216 83 228 79 235 72\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\" stroke-linecap=\"round\"/>",
+          "hitAreas": [
+              "arm",
+              "foot",
+              "back_spines"
+          ]
+      },
+      "coloring_lion": {
+          "templateId": "coloring_lion",
+          "viewBox": "0 0 240 180",
+          "sourceLabel": "A改",
+          "candidateVersion": 9,
+          "designVersion": 2,
+          "regions": [
+              {
+                  "id": "tail",
+                  "d": "M55 91 C35 84 25 64 36 53 C49 56 55 75 66 94 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "tail_tip",
+                  "d": "M31 50 C22 39 31 27 45 31 C56 36 54 51 42 57 C37 57 33 54 31 50 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "body",
+                  "d": "M59 88 C80 71 120 66 154 74 C176 80 188 96 184 114 C177 138 142 149 100 138 C70 131 50 110 59 88 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "chest",
+                  "d": "M143 80 C153 96 154 118 143 133 C131 120 130 98 143 80 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "back_leg",
+                  "d": "M81 117 C73 135 68 151 59 167 L45 167 C53 144 59 126 65 111 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "front_leg",
+                  "d": "M149 112 C158 128 160 146 153 167 L140 167 C144 145 140 129 132 115 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "paw",
+                  "d": "M43 165 L63 165 L67 172 L42 172 Z M137 165 L156 165 L160 172 L135 172 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "mane",
+                  "d": "M143 58 C149 42 164 35 176 40 C188 31 204 37 208 53 C222 61 222 78 211 87 C211 104 193 116 177 110 C161 119 142 108 144 90 C130 82 130 64 143 58 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "face",
+                  "d": "M160 59 C176 49 197 54 204 70 C209 86 196 100 178 99 C160 98 151 85 154 70 C155 65 157 61 160 59 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "ears",
+                  "d": "M153 58 C150 45 160 39 171 49 C170 57 162 61 153 58 Z M190 50 C198 39 210 44 209 58 C201 62 192 59 190 50 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "nose",
+                  "d": "M184 76 C194 75 200 82 196 89 C189 94 181 91 179 83 C180 80 182 77 184 76 Z",
+                  "fallback": "#FFFFFF"
+              }
+          ],
+          "outer": [
+              "M31 50 C22 39 31 27 45 31 C56 36 54 51 42 57 C49 67 56 80 66 94 C80 71 120 66 143 74 C133 64 132 52 143 58 C149 42 164 35 176 40 C188 31 204 37 208 53 C222 61 222 78 211 87 C211 104 193 116 177 110 C185 120 190 131 184 140 C169 155 129 149 100 138 C70 131 50 110 59 88",
+              "M65 111 C59 126 53 144 45 167 L59 167 C68 151 73 135 81 117 M132 115 C140 129 144 145 140 167 L153 167 C160 146 158 128 149 112",
+              "M153 58 C150 45 160 39 171 49 M190 50 C198 39 210 44 209 58"
+          ],
+          "inner": [
+              {
+                  "d": "M143 80 C153 96 154 118 143 133"
+              },
+              {
+                  "d": "M160 59 C176 49 197 54 204 70"
+              },
+              {
+                  "d": "M143 58 C151 70 151 83 144 90"
+              },
+              {
+                  "d": "M177 110 C169 102 166 90 168 79"
+              },
+              {
+                  "d": "M55 91 C45 84 39 67 36 53"
+              },
+              {
+                  "d": "M81 117 C77 133 70 152 59 167"
+              },
+              {
+                  "d": "M149 112 C143 128 145 147 153 167"
+              }
+          ],
+          "face": "<circle cx=\"174\" cy=\"68\" r=\"2.5\" fill=\"#111827\"/><path d=\"M184 76 C194 75 200 82 196 89 C189 94 181 91 179 83 Z\" fill=\"#111827\"/><path d=\"M187 91 C182 96 174 96 169 90\" fill=\"none\" stroke=\"#111827\" stroke-width=\"1.8\" stroke-linecap=\"round\"/>",
+          "hitAreas": [
+              "tail",
+              "tail_tip",
+              "front_leg",
+              "back_leg"
+          ]
+      },
+      "coloring_grasshopper": {
+          "templateId": "coloring_grasshopper",
+          "viewBox": "0 0 240 180",
+          "sourceLabel": "C改",
+          "candidateVersion": 9,
+          "designVersion": 2,
+          "regions": [
+              {
+                  "id": "abdomen",
+                  "d": "M54 91 C80 71 118 70 148 86 C139 107 108 119 77 112 C58 108 48 100 54 91 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "thorax",
+                  "d": "M141 84 C156 72 176 76 184 93 C179 109 157 114 141 101 C136 94 136 88 141 84 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "head",
+                  "d": "M180 75 C194 66 211 75 214 90 C211 104 196 111 183 105 C171 99 170 84 180 75 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "wing",
+                  "d": "M78 84 C109 70 139 75 157 94 C129 101 101 97 78 84 Z",
+                  "fallback": "#EAFBE6"
+              },
+              {
+                  "id": "back_leg",
+                  "d": "M86 100 C77 84 72 65 78 51 C88 50 95 60 95 75 C94 88 93 99 90 108 Z M78 52 C61 75 53 101 50 126 L59 131 C66 105 80 80 95 65 Z M84 108 C104 130 127 143 154 151 L149 162 C120 154 91 134 70 112 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "middle_leg",
+                  "d": "M130 101 C121 118 118 136 120 154 L111 154 C108 132 114 113 124 98 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "front_leg",
+                  "d": "M169 103 C164 117 168 130 179 140 L171 146 C157 137 154 119 162 101 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "antennae",
+                  "d": "M170 59 C191 44 212 38 232 41 L233 47 C213 44 192 51 172 65 Z M171 66 C193 60 214 64 232 76 L228 82 C210 72 191 68 173 72 Z",
+                  "fallback": "#A3E635"
+              },
+              {
+                  "id": "body_segments",
+                  "d": "M78 92 C89 101 101 106 115 109 L110 114 C95 111 83 104 73 96 Z M105 83 C113 96 127 103 142 104 L138 109 C122 108 108 99 101 87 Z M130 84 C139 96 151 102 164 103 L160 108 C146 108 134 100 126 88 Z",
+                  "fallback": "#BBF7D0"
+              },
+              {
+                  "id": "eye",
+                  "d": "M196 82 C202 79 208 84 207 90 C201 94 195 90 196 82 Z",
+                  "fallback": "#FFFFFF"
+              }
+          ],
+          "outer": [
+              "M232 41 C213 44 192 51 172 65 M232 76 C210 72 191 68 173 72",
+              "M54 91 C80 71 118 70 148 86 C156 72 176 76 184 93 C183 85 177 77 173 72 C194 66 211 75 214 90 C211 104 196 111 183 105 C172 114 156 114 141 101 C130 113 109 119 91 116 C111 134 134 145 154 151 L149 162 C120 154 91 134 70 112 C65 120 62 127 59 131 L50 126 C53 101 61 75 78 52 C78 48 86 47 92 52 C97 59 96 70 95 75 C94 88 93 99 90 108 C73 113 56 108 54 91 Z",
+              "M78 84 C109 70 139 75 157 94"
+          ],
+          "inner": [
+              {
+                  "d": "M78 84 C109 70 139 75 157 94"
+              },
+              {
+                  "d": "M78 92 C89 101 101 106 115 109"
+              },
+              {
+                  "d": "M105 83 C113 96 127 103 142 104"
+              },
+              {
+                  "d": "M130 84 C139 96 151 102 164 103"
+              },
+              {
+                  "d": "M130 101 C121 118 118 136 120 154"
+              },
+              {
+                  "d": "M169 103 C164 117 168 130 179 140"
+              },
+              {
+                  "d": "M78 52 C61 75 53 101 50 126"
+              },
+              {
+                  "d": "M86 100 C77 84 72 65 78 51"
+              },
+              {
+                  "d": "M84 108 C104 130 127 143 154 151"
+              }
+          ],
+          "face": "<path d=\"M196 82 C202 79 208 84 207 90 C201 94 195 90 196 82 Z\" fill=\"#ffffff\"/><circle cx=\"201\" cy=\"86\" r=\"2.1\" fill=\"#111827\"/>",
+          "hitAreas": [
+              "front_leg",
+              "middle_leg",
+              "back_leg",
+              "antennae"
+          ]
+      }
+  };
+
+  function escapeSvgAttr(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function layeredDefinition(templateId) {
+    return LAYERED_ANIMAL_SVG[templateId] || null;
+  }
+
+  function getLayeredDefinition(templateId) {
+    var definition = layeredDefinition(templateId);
+    return definition ? JSON.parse(JSON.stringify(definition)) : null;
+  }
+
+  function renderLayeredRegion(region, fill) {
+    return '<path class="color-region" data-region-id="' + escapeSvgAttr(region.id) + '" tabindex="0" d="' + escapeSvgAttr(region.d) + '" fill="' + escapeSvgAttr(fill) + '"/>';
+  }
+
+  function renderHitAreas(definition) {
+    var ids = definition.hitAreas || [];
+    if (!ids.length) return "";
+    return definition.regions.filter(function (region) {
+      return ids.indexOf(region.id) >= 0;
+    }).map(function (region) {
+      return '<path class="hit-area" data-region-id="' + escapeSvgAttr(region.id) + '" d="' + escapeSvgAttr(region.d) + '" fill="none" stroke="transparent" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" pointer-events="stroke" tabindex="-1"/>';
+    }).join("");
+  }
+
+  function svgLayeredAnimal(templateId, label, colors, className) {
+    var definition = layeredDefinition(templateId);
+    if (!definition) return "";
+    var colorsForTemplate = normalizeRegionColors(templateId, colors);
+    var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
+    return [
+      '<svg viewBox="' + escapeSvgAttr(definition.viewBox) + '" role="img" aria-label="' + escapeSvgAttr(label) + '" class="' + escapeSvgAttr(className || "") + '">',
+      '<g class="color-regions">',
+      definition.regions.map(function (region) {
+        return renderLayeredRegion(region, c(region.id, region.fallback || "#FFFFFF"));
+      }).join(""),
+      '</g>',
+      '<g class="hit-areas" aria-hidden="true">',
+      renderHitAreas(definition),
+      '</g>',
+      '<g class="outer-outline" fill="none" stroke="#1F2937" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" pointer-events="none">',
+      definition.outer.map(function (d) { return '<path d="' + escapeSvgAttr(d) + '"/>'; }).join(""),
+      '</g>',
+      '<g class="inner-lines" fill="none" stroke="#2F3A42" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" pointer-events="none">',
+      definition.inner.map(function (item) { return '<path d="' + escapeSvgAttr(item.d || item) + '"/>'; }).join(""),
+      '</g>',
+      '<g class="face-details" pointer-events="none">',
+      definition.face || "",
+      '</g>',
+      '</svg>'
+    ].join("");
+  }
+
   function svgButterfly(colors, className) {
     var c = function (id, fallback) { return colorFor(colors, id, fallback); };
     return [
@@ -104,25 +760,7 @@
   }
 
   function svgRabbit(colors, className) {
-    var colorsForTemplate = normalizeRegionColors("coloring_rabbit_001", colors);
-    var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
-    return [
-      '<svg viewBox="0 0 240 180" role="img" aria-label="うさぎ" class="' + (className || "") + '">',
-      '<path class="color-region" data-region-id="tail" d="M43 116 C25 114 22 94 39 86 C55 77 73 87 70 105 C66 118 55 123 43 116 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="body" d="M62 106 C72 78 101 61 139 63 C169 65 190 83 194 108 C198 137 172 157 131 158 C93 158 61 137 58 116 C57 112 59 109 62 106 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="back_leg" d="M83 122 C68 130 61 151 75 162 C91 174 124 165 132 149 C137 137 120 126 101 128 C93 130 89 126 83 122 Z" fill="' + c("back_leg", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="belly" d="M112 110 C130 128 163 130 185 112 C184 135 158 149 128 146 C110 144 102 126 112 110 Z" fill="' + c("belly", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="front_leg" d="M163 120 C173 128 178 141 174 154 C168 158 159 159 151 156 C158 143 154 132 145 124 Z" fill="' + c("front_leg", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="head" d="M154 72 C162 54 184 44 204 51 C223 57 232 75 225 91 C219 106 196 112 174 103 C158 96 149 84 154 72 Z" fill="' + c("head", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="nose" d="M218 76 C231 75 237 83 232 91 C226 97 214 94 207 87 C208 81 212 78 218 76 Z" fill="' + c("nose", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="ear_left_outer" d="M161 62 C148 31 156 9 176 45 C180 55 174 63 161 62 Z" fill="' + c("ear_left_outer", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="ear_left_inner" d="M164 54 C158 33 162 22 174 47 C175 53 171 56 164 54 Z" fill="' + c("ear_left_inner", "#FFFFFF") + '" stroke="#374151" stroke-width="2.8" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="ear_right_outer" d="M184 58 C183 24 199 8 210 47 C209 60 198 66 184 58 Z" fill="' + c("ear_right_outer", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="ear_right_inner" d="M190 51 C190 31 199 21 204 48 C202 54 196 55 190 51 Z" fill="' + c("ear_right_inner", "#FFFFFF") + '" stroke="#374151" stroke-width="2.8" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="cheek" d="M185 86 C196 82 207 87 207 98 C197 104 186 99 185 86 Z" fill="' + c("cheek", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
-      '<circle cx="195" cy="69" r="3.6" fill="#202124"/><path d="M224 90 C218 94 212 93 207 88 M205 86 L195 84 M205 94 L195 97" fill="none" stroke="#202124" stroke-width="2.6" stroke-linecap="round"/>',
-      '</svg>'
-    ].join("");
+    return svgLayeredAnimal("coloring_rabbit_001", "うさぎ", colors, className);
   }
 
   function svgCat(colors, className) {
@@ -148,87 +786,19 @@
   }
 
   function svgDolphin(colors, className) {
-    var colorsForTemplate = normalizeRegionColors("coloring_dolphin_001", colors);
-    var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
-    return [
-      '<svg viewBox="0 0 240 180" role="img" aria-label="イルカ" class="' + (className || "") + '">',
-      '<path class="color-region" data-region-id="tail_fluke_top" d="M39 76 C18 55 28 35 58 52 C65 35 86 40 85 63 C70 67 54 71 39 76 Z" fill="' + c("tail_fluke_top", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="tail_fluke_bottom" d="M39 84 C16 100 25 122 57 107 C64 126 86 118 84 95 C69 91 54 87 39 84 Z" fill="' + c("tail_fluke_bottom", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="tail_stem" d="M78 64 C101 66 119 73 134 84 C118 94 101 99 78 96 C85 86 86 74 78 64 Z" fill="' + c("tail_stem", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="body_top" d="M117 82 C138 53 172 42 201 51 C219 57 227 68 235 70 C224 81 206 85 191 80 C174 96 151 113 123 119 C101 110 96 95 117 82 Z" fill="' + c("body_top", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="snout" d="M204 58 C220 52 235 57 236 68 C225 76 212 76 199 68 C199 63 201 60 204 58 Z" fill="' + c("snout", c("body_top", "#FFFFFF")) + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="belly" d="M120 94 C143 106 169 100 191 81 C177 108 149 125 123 118 C111 115 108 102 120 94 Z" fill="' + c("belly", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="dorsal_fin" d="M149 58 C158 33 178 35 173 69 C163 68 155 64 149 58 Z" fill="' + c("dorsal_fin", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="pectoral_fin" d="M151 101 C157 128 178 129 177 100 C168 96 158 97 151 101 Z" fill="' + c("pectoral_fin", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="cheek" d="M190 73 C200 70 209 76 209 85 C200 91 190 86 190 73 Z" fill="' + c("cheek", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
-      '<circle cx="197" cy="63" r="3.6" fill="#202124"/><path d="M208 77 C216 81 224 79 230 73" fill="none" stroke="#202124" stroke-width="2.6" stroke-linecap="round"/>',
-      '</svg>'
-    ].join("");
+    return svgLayeredAnimal("coloring_dolphin_001", "イルカ", colors, className);
   }
 
   function svgDinosaur(colors, className) {
-    var colorsForTemplate = normalizeRegionColors("coloring_dinosaur_001", colors);
-    var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
-    return [
-      '<svg viewBox="0 0 240 180" role="img" aria-label="きょうりゅう" class="' + (className || "") + '">',
-      '<path class="color-region" data-region-id="tail" d="M79 112 C50 126 22 119 5 101 C34 91 61 94 92 105 C92 112 87 116 79 112 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="body" d="M73 92 C92 68 128 59 162 73 C190 84 199 116 180 140 C158 167 111 164 84 140 C67 124 63 104 73 92 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="neck" d="M154 76 C164 57 184 47 201 51 C197 70 184 87 165 97 C157 94 151 86 154 76 Z" fill="' + c("neck", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="head" d="M190 45 C207 34 230 40 237 56 C241 69 232 82 214 84 C193 87 176 76 178 61 C179 54 184 49 190 45 Z" fill="' + c("head", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="jaw" d="M194 70 C209 75 225 72 236 64 C237 78 222 90 200 88 C188 86 185 76 194 70 Z" fill="' + c("jaw", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="belly" d="M95 111 C116 130 148 133 176 113 C177 136 153 151 123 148 C103 146 90 129 95 111 Z" fill="' + c("belly", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="arm" d="M163 99 C174 101 184 107 187 116 C180 121 168 119 158 112 C158 106 160 102 163 99 Z" fill="' + c("arm", c("body", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="back_leg" d="M104 128 C91 140 91 160 107 169 L131 169 C137 149 128 133 104 128 Z M145 124 C132 138 135 157 151 166 L174 166 C177 146 168 128 145 124 Z" fill="' + c("back_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="foot" d="M103 160 L136 160 C144 165 145 172 139 176 L96 176 C94 170 97 164 103 160 Z M151 157 L178 157 C187 162 190 169 184 173 L146 173 C144 166 146 161 151 157 Z" fill="' + c("foot", c("back_leg", "#FFFFFF")) + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="back_spines" d="M93 80 C105 68 118 64 131 64 C124 72 113 78 103 85 C99 84 96 82 93 80 Z M145 67 C157 66 168 70 178 77 C168 80 158 79 148 73 C147 71 146 69 145 67 Z" fill="' + c("back_spines", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="cheek" d="M203 70 C212 67 221 72 222 81 C213 86 203 81 203 70 Z" fill="' + c("cheek", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="body_mark" d="M96 92 C104 86 114 87 121 96 C113 103 102 102 96 92 Z M131 86 C141 82 151 86 156 96 C146 101 136 98 131 86 Z" fill="' + c("body_mark", "#FFFFFF") + '" stroke="#374151" stroke-width="2.5" stroke-linejoin="round"/>',
-      '<circle cx="207" cy="56" r="3.6" fill="#202124"/><path d="M214 75 C207 81 198 80 191 74" fill="none" stroke="#202124" stroke-width="2.6" stroke-linecap="round"/>',
-      '</svg>'
-    ].join("");
+    return svgLayeredAnimal("coloring_dinosaur_001", "きょうりゅう", colors, className);
   }
 
   function svgHorse(colors, className) {
-    var colorsForTemplate = normalizeRegionColors("coloring_horse_001", colors);
-    var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
-    return [
-      '<svg viewBox="0 0 240 180" role="img" aria-label="うま" class="' + (className || "") + '">',
-      '<path class="color-region" data-region-id="tail" d="M48 80 C25 72 18 48 38 43 C58 39 70 56 63 82 C58 100 48 112 38 124 C39 105 41 91 48 80 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="body" d="M58 78 C78 58 129 52 165 66 C184 74 190 94 180 113 C164 136 116 142 79 129 C55 120 45 95 58 78 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="neck" d="M154 69 C159 46 177 28 194 28 C207 29 212 43 205 57 C195 72 174 81 160 98 Z" fill="' + c("neck", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="head" d="M189 28 C205 15 225 19 234 36 C238 54 226 69 205 66 C187 63 179 43 189 28 Z" fill="' + c("head", c("neck", "#FFFFFF")) + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<g class="color-region" data-region-id="ears" fill="' + c("ears", c("head", "#FFFFFF")) + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"><path d="M190 30 C189 20 194 12 204 27 Z"/><path d="M206 28 C211 18 220 14 222 34 Z"/></g>',
-      '<path class="color-region" data-region-id="mane" d="M157 73 C156 53 171 34 192 28 C184 45 181 65 166 94 Z" fill="' + c("mane", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="front_leg_far" d="M155 111 C164 124 168 142 159 166 L144 166 C151 143 147 127 139 113 Z" fill="' + c("front_leg_far", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="front_leg_near" d="M130 116 C129 133 134 148 143 166 L126 166 C116 148 113 132 119 115 Z" fill="' + c("front_leg_near", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="back_leg_far" d="M77 108 C75 128 66 147 54 166 L39 166 C53 145 58 126 62 106 Z" fill="' + c("back_leg_far", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="back_leg_near" d="M100 113 C112 127 115 145 106 166 L90 166 C96 145 94 130 87 115 Z" fill="' + c("back_leg_near", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<g class="color-region" data-region-id="hooves" fill="' + c("hooves", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"><path d="M38 164 L58 164 L62 174 L36 174 Z"/><path d="M88 164 L108 164 L112 174 L86 174 Z"/><path d="M124 164 L144 164 L148 174 L122 174 Z"/><path d="M142 164 L162 164 L166 174 L140 174 Z"/></g>',
-      '<path class="color-region" data-region-id="muzzle" d="M216 43 C231 42 237 51 232 61 C224 69 208 64 204 54 C207 49 211 45 216 43 Z" fill="' + c("muzzle", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<circle cx="207" cy="38" r="3.6" fill="#202124"/><path d="M219 60 C212 65 202 65 195 59" fill="none" stroke="#202124" stroke-width="2.6" stroke-linecap="round"/>',
-      '</svg>'
-    ].join("");
+    return svgLayeredAnimal("coloring_horse_001", "うま", colors, className);
   }
 
   function svgLion(colors, className) {
-    var colorsForTemplate = normalizeRegionColors("coloring_lion", colors);
-    var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
-    return [
-      '<svg viewBox="0 0 240 180" role="img" aria-label="ライオン" class="' + (className || "") + '">',
-      '<path class="color-region" data-region-id="tail" d="M48 91 C27 80 25 56 45 55 C62 57 62 77 52 93 Z" fill="' + c("tail", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="tail_tip" d="M36 52 C26 42 33 30 47 34 C58 37 59 51 48 57 C44 58 40 56 36 52 Z" fill="' + c("tail_tip", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="body" d="M61 78 C82 58 130 55 162 70 C183 80 189 106 174 126 C154 148 111 149 78 132 C55 120 47 95 61 78 Z" fill="' + c("body", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="chest" d="M146 83 C160 99 159 120 141 133 C129 121 128 98 146 83 Z" fill="' + c("chest", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="back_leg" d="M83 119 C76 135 69 149 59 166 L43 166 C57 145 61 128 64 111 Z" fill="' + c("back_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="front_leg" d="M149 114 C157 128 158 145 150 166 L134 166 C140 145 137 129 130 114 Z" fill="' + c("front_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="paw" d="M42 164 L62 164 L66 174 L39 174 Z M132 164 L153 164 L158 174 L130 174 Z" fill="' + c("paw", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="mane" d="M154 42 C167 24 194 29 201 48 C220 52 226 75 211 89 C214 109 192 122 176 111 C158 119 139 105 142 85 C126 73 135 50 154 42 Z" fill="' + c("mane", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="ears" d="M157 50 C154 37 164 31 174 43 C174 52 166 55 157 50 Z M191 45 C199 33 211 38 211 52 C202 57 194 54 191 45 Z" fill="' + c("ears", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="face" d="M161 54 C178 44 200 51 206 69 C211 86 198 101 179 101 C159 101 148 86 153 70 C154 63 157 58 161 54 Z" fill="' + c("face", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="nose" d="M186 76 C197 75 203 82 198 90 C190 96 180 91 179 82 C181 79 183 77 186 76 Z" fill="' + c("nose", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
-      '<circle cx="174" cy="68" r="3.4" fill="#202124"/><path d="M190 91 C184 96 175 96 169 90" fill="none" stroke="#202124" stroke-width="2.5" stroke-linecap="round"/>',
-      '</svg>'
-    ].join("");
+    return svgLayeredAnimal("coloring_lion", "ライオン", colors, className);
   }
 
   function svgPanda(colors, className) {
@@ -252,23 +822,7 @@
   }
 
   function svgGrasshopper(colors, className) {
-    var colorsForTemplate = normalizeRegionColors("coloring_grasshopper", colors);
-    var c = function (id, fallback) { return colorFor(colorsForTemplate, id, fallback); };
-    return [
-      '<svg viewBox="0 0 240 180" role="img" aria-label="バッタ" class="' + (className || "") + '">',
-      '<path class="color-region" data-region-id="antennae" d="M169 55 C191 30 211 22 230 24 M169 59 C193 45 214 44 235 54" fill="none" stroke="' + c("antennae", "#374151") + '" stroke-width="4" stroke-linecap="round"/>',
-      '<path class="color-region" data-region-id="abdomen" d="M49 82 C75 57 119 55 150 79 C143 104 110 119 75 112 C55 108 43 96 49 82 Z" fill="' + c("abdomen", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="thorax" d="M135 78 C151 62 174 65 184 83 C181 103 156 111 138 97 C133 91 132 84 135 78 Z" fill="' + c("thorax", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="head" d="M178 70 C193 58 215 65 219 83 C219 99 203 109 186 103 C172 98 168 80 178 70 Z" fill="' + c("head", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="wing" d="M74 73 C101 52 136 63 152 85 C125 93 97 92 74 73 Z" fill="' + c("wing", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="back_leg" d="M83 108 C68 132 50 151 29 166 L17 153 C39 136 57 116 70 92 C82 94 91 100 83 108 Z M72 92 C94 127 114 145 142 163 L132 175 C103 158 78 134 59 102 Z" fill="' + c("back_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="4" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="middle_leg" d="M132 98 C121 118 114 135 112 155 L99 155 C101 133 109 112 123 94 Z" fill="' + c("middle_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="front_leg" d="M170 100 C164 119 164 135 171 151 L158 154 C149 135 150 116 160 98 Z" fill="' + c("front_leg", "#FFFFFF") + '" stroke="#374151" stroke-width="3.5" stroke-linejoin="round"/>',
-      '<path class="color-region" data-region-id="body_segments" d="M73 86 C83 97 95 103 109 107 M98 75 C106 90 120 98 137 100 M128 76 C137 88 150 94 164 95" fill="none" stroke="' + c("body_segments", "#374151") + '" stroke-width="4" stroke-linecap="round"/>',
-      '<path class="color-region" data-region-id="eye" d="M197 75 C204 72 211 77 211 84 C204 89 196 85 197 75 Z" fill="' + c("eye", "#FFFFFF") + '" stroke="#374151" stroke-width="3" stroke-linejoin="round"/>',
-      '<circle cx="203" cy="80" r="2.8" fill="#202124"/>',
-      '</svg>'
-    ].join("");
+    return svgLayeredAnimal("coloring_grasshopper", "バッタ", colors, className);
   }
 
   function renderTemplate(templateId, regionColors, className) {
@@ -413,6 +967,7 @@
     isUnlocked: isUnlocked,
     unlock: unlock,
     renderTemplate: renderTemplate,
+    getLayeredDefinition: getLayeredDefinition,
     normalizeRegionColors: normalizeRegionColors,
     analyze: analyze,
     getDraft: getDraft,
