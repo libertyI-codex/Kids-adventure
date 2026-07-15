@@ -10,6 +10,8 @@
   var bgmGain = null;
   var forestEditSession = null;
   var forestDragState = null;
+  var parentColoringDragState = null;
+  var eggCareEffect = null;
   var startupState = {
     startupStarted: false,
     appInitialized: false,
@@ -99,6 +101,10 @@
   function navigateWithForestGuard(route, params) {
     if (isForestEditing() && KA.router.getCurrent().name === "forest" && route !== "forest") {
       forestLeaveDialog(route, params);
+      return;
+    }
+    if (KA.router.getCurrent().name === "parent" && route !== "parent" && isParentColoringDirty()) {
+      parentColoringLeaveDialog(route, params);
       return;
     }
     KA.router.navigate(route, params);
@@ -223,6 +229,8 @@
       var now = audioContext.currentTime;
       var notes = kind === "star" ? [784, 988] :
         kind === "egg" ? [523, 659, 784] :
+        kind === "warm" ? [440, 554, 659] :
+        kind === "song" ? [523, 659, 784, 659] :
         kind === "hatch" ? [392, 523, 659, 1046] :
         kind === "complete" || kind === "magic" ? [659, 784, 988] : [520];
       notes.forEach(function (frequency, index) {
@@ -410,13 +418,14 @@
     var body = ['<div class="screen-header"><div><h2>ぬりえ</h2><p class="muted">ほしでひらいて、すきな色をぬろう。</p></div><div>' + starPill() + '</div></div>', '<section class="coloring-grid">'];
     templates.forEach(function (template) {
       var unlocked = KA.coloring.isUnlocked(template.templateId);
+      var requiredStars = KA.coloring.getEffectiveColoringStarCost(template.templateId);
       body.push([
         '<article class="coloring-card">',
         '<div class="coloring-preview preview-wrap">' + KA.coloring.renderTemplate(template.templateId, {}, "") + '</div>',
         '<h3>' + escapeHtml(template.icon + " " + template.title) + '</h3>',
-        '<p><span class="badge star">⭐ ' + template.requiredStars + '</span> ' + (unlocked ? '<span class="badge">ひらいた</span>' : '<span class="badge">まだ</span>') + '</p>',
+        '<p><span class="badge star">⭐ ' + requiredStars + '</span> ' + (unlocked ? '<span class="badge">ひらいた</span>' : '<span class="badge">まだ</span>') + '</p>',
         unlocked ? button("ぬる", "btn-primary", 'data-edit-coloring="' + template.templateId + '"') :
-          button(totals.spendableStars >= template.requiredStars ? "かいほうする" : "もうすこし", totals.spendableStars >= template.requiredStars ? "btn-sun" : "btn-soft", 'data-unlock-coloring="' + template.templateId + '"'),
+          button(totals.spendableStars >= requiredStars ? "かいほうする" : "もうすこし", totals.spendableStars >= requiredStars ? "btn-sun" : "btn-soft", 'data-unlock-coloring="' + template.templateId + '"'),
         '</article>'
       ].join(""));
     });
@@ -430,11 +439,12 @@
     Array.prototype.forEach.call(appEl.querySelectorAll("[data-unlock-coloring]"), function (el) {
       el.addEventListener("click", function () {
         var template = KA.coloring.getTemplate(el.getAttribute("data-unlock-coloring"));
-        if (KA.state.getAppData().profile.starTotals.spendableStars < template.requiredStars) {
+        var requiredStars = KA.coloring.getEffectiveColoringStarCost(template.templateId);
+        if (KA.state.getAppData().profile.starTotals.spendableStars < requiredStars) {
           toast("もうすこしで かいほうできるよ");
           return;
         }
-        confirmDialog(template.title + "をひらく？", "つかえるほしを " + template.requiredStars + " つかいます。", "ひらく", function () {
+        confirmDialog(template.title + "をひらく？", "つかえるほしを " + requiredStars + " つかいます。", "ひらく", function () {
           var result = KA.coloring.unlock(template.templateId);
           if (!result.ok) {
             toast("もうすこしで かいほうできるよ");
@@ -1065,13 +1075,19 @@
 
   function eggDailyChecklist(activity) {
     var items = [
-      { key: "petted", done: activity.petted, label: activity.petted ? "たまごを なでた" : "たまごを なでる" },
-      { key: "jobBonus", done: activity.jobBonus, label: activity.jobBonus ? "おしごとを がんばった" : "おしごとを がんばる" },
+      { key: "petted", done: activity.petted, label: activity.petted ? "たまごを なでた" : "たまごを なでよう" },
+      { key: "warmed", done: activity.warmed, label: activity.warmed ? "たまごを あたためた" : "たまごを あたためよう" },
+      { key: "sang", done: activity.sang, label: activity.sang ? "うたを うたった" : "うたを うたおう" },
+      { key: "jobBonus", done: activity.jobBonus, label: activity.jobBonus ? "おしごとを がんばった" : "おしごとを がんばろう" },
       { key: "coloringBonus", done: activity.coloringBonus, label: activity.coloringBonus ? "ぬりえを かんせいした" : "ぬりえを かんせいしよう" }
     ];
-    return '<ul class="egg-checklist">' + items.map(function (item) {
+    var checklist = '<ul class="egg-checklist">' + items.map(function (item) {
       return '<li class="' + (item.done ? "is-done" : "") + '">' + (item.done ? '✓ ' : '・') + escapeHtml(item.label) + '</li>';
     }).join("") + '</ul>';
+    if (items.every(function (item) { return item.done; })) {
+      checklist += '<p class="egg-all-done">きょうのおせわは ばっちり！<br><span>あしたも おせわしてね</span></p>';
+    }
+    return checklist;
   }
 
   function renderEggPanel(data) {
@@ -1084,16 +1100,27 @@
     if (!eggs.length) {
       return '<div class="panel panel-pad egg-focus"><h3>まだ たまごはありません</h3><p>あと ' + toNext + 'こ スターをあつめると<br>あたらしい たまごが もらえるよ！</p>' + button("おしごとへ", "btn-primary", 'data-route="tasks"') + '</div>';
     }
-    var progress = egg ? Number(egg.growthPoints || 0) : 0;
+    var target = egg ? KA.eggs.targetForEgg(egg) : KA.eggs.TARGET_GROWTH;
+    var progress = egg ? Math.max(0, Math.min(target, Number(egg.growthPoints || 0))) : 0;
     var state = egg ? egg.state : "waiting";
     var message = egg ? (state === "ready" ? "もうすぐ うまれるよ！" : state === "cracked" ? "ひびが はいってきたよ" : state === "glowing" ? "きらきら ひかっているよ" : state === "warm" ? "ぽかぽか あたたかいよ" : "やさしく そだてよう") : "じゅんばんまちの たまごが あります";
+    var firstNote = egg && egg.isFirstHatchEgg && egg.state !== "hatched" ? '<p class="egg-first-note">はじめての たまごは<br>すこし はやく うまれるよ！</p>' : '';
+    var effectClass = eggCareEffect ? " is-care-" + eggCareEffect : "";
+    function careButton(label, type, done) {
+      return button(label, "btn-primary egg-care-button" + (done ? " is-done" : ""), 'data-care-egg="' + type + '" aria-label="' + escapeHtml(label) + '"');
+    }
     return [
       '<div class="panel panel-pad egg-focus">',
-      '<div class="egg-focus-header"><div><h3>いま そだてている たまご</h3><p><span class="badge">' + escapeHtml(eggStateLabel(state)) + '</span> <span class="badge star">' + progress + ' / 6</span></p></div></div>',
-      '<div class="egg-big ' + (state === "ready" ? "is-ready" : "") + '">' + (egg ? KA.eggs.renderEggSvg(egg) : '') + '</div>',
+      '<div class="egg-focus-header"><div><h3>いま そだてている たまご</h3><p><span class="badge">' + escapeHtml(eggStateLabel(state)) + '</span> <span class="badge star">' + progress + ' / ' + target + '</span></p></div></div>',
+      '<div class="egg-big ' + (state === "ready" ? "is-ready" : "") + effectClass + '">' + (egg ? KA.eggs.renderEggSvg(egg) : '') + '</div>',
       '<p class="egg-message">' + escapeHtml(message) + '</p>',
+      firstNote,
+      '<div class="egg-care-actions">',
+      careButton("たまごを なでる", "pet", activity.petted),
+      careButton("たまごを あたためる", "warm", activity.warmed),
+      careButton("うたを うたう", "sing", activity.sang),
+      '</div>',
       '<div class="quick-actions">',
-      button("たまごを なでる", "btn-primary", 'data-pet-egg'),
       egg && egg.state === "ready" ? button("うまれる！", "btn-sun", 'data-hatch-egg="' + escapeHtml(egg.id) + '"') : '',
       '</div>',
       '</div>',
@@ -1148,21 +1175,36 @@
         KA.router.render();
       });
     });
-    var petButton = appEl.querySelector("[data-pet-egg]");
-    if (petButton) {
-      petButton.addEventListener("click", function () {
-        var result = KA.eggs.petActiveEgg();
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-care-egg]"), function (careButtonEl) {
+      careButtonEl.addEventListener("click", function () {
+        var type = careButtonEl.getAttribute("data-care-egg");
+        var result;
+        careButtonEl.disabled = true;
+        if (type === "warm") result = KA.eggs.warmActiveEgg();
+        else if (type === "sing") result = KA.eggs.singToActiveEgg();
+        else result = KA.eggs.petActiveEgg();
         if (result.ok) {
-          playTone(result.ready ? "hatch" : "egg");
-          toast(result.ready ? "うまれそうだよ！" : "あたたかくなったよ！");
+          eggCareEffect = type === "warm" ? "warm" : type === "sing" ? "sing" : "pet";
+          playTone(result.ready ? "hatch" : type === "warm" ? "warm" : type === "sing" ? "song" : "egg");
+          toast(result.ready ? "うまれそうだよ！" : result.message);
+          KA.router.render();
+          global.setTimeout(function () {
+            if (eggCareEffect && KA.router.getCurrent().name === "eggs") {
+              eggCareEffect = null;
+              KA.router.render();
+            } else {
+              eggCareEffect = null;
+            }
+          }, 1400);
         } else if (result.alreadyDone) {
-          toast("きょうは もう なでたよ");
+          toast(type === "warm" ? "きょうは もう あたためたよ" : type === "sing" ? "きょうは もう うたったよ" : "きょうは もう なでたよ");
+          KA.router.render();
         } else {
           toast("いま そだてる たまごは ないみたい");
+          KA.router.render();
         }
-        KA.router.render();
       });
-    }
+    });
     var hatchButton = appEl.querySelector("[data-hatch-egg]");
     if (hatchButton) {
       hatchButton.addEventListener("click", function () {
@@ -1187,6 +1229,266 @@
     });
   }
 
+  function toHalfWidthDigits(value) {
+    return String(value == null ? "" : value).replace(/[０-９]/g, function (char) {
+      return String.fromCharCode(char.charCodeAt(0) - 65248);
+    });
+  }
+
+  function parseParentStarInput(value) {
+    var raw = toHalfWidthDigits(value).trim();
+    var numberValue;
+    if (raw === "") return { ok: false, message: "スター数を入れてください" };
+    if (!/^\d+$/.test(raw)) return { ok: false, message: "0から999の整数にしてください" };
+    numberValue = Number(raw);
+    if (!isFinite(numberValue) || numberValue < 0 || numberValue > 999) return { ok: false, message: "0から999の範囲にしてください" };
+    return { ok: true, value: numberValue };
+  }
+
+  function parentColoringRows() {
+    if (!appEl) return [];
+    return Array.prototype.slice.call(appEl.querySelectorAll("[data-coloring-setting-row]"));
+  }
+
+  function clearParentColoringErrors() {
+    parentColoringRows().forEach(function (row) {
+      row.classList.remove("is-invalid");
+      var error = row.querySelector("[data-coloring-cost-error]");
+      if (error) error.textContent = "";
+    });
+  }
+
+  function collectParentColoringSettings(showErrors) {
+    var rows = parentColoringRows();
+    var order = [];
+    var starCosts = {};
+    var ok = true;
+    if (!rows.length) return { ok: true, settings: KA.coloring.getCurrentColoringSettings() };
+    if (showErrors) clearParentColoringErrors();
+    rows.forEach(function (row) {
+      var templateId = row.getAttribute("data-template-id");
+      var input = row.querySelector("[data-coloring-star-input]");
+      var parsed = parseParentStarInput(input ? input.value : "");
+      order.push(templateId);
+      if (parsed.ok) {
+        starCosts[templateId] = parsed.value;
+        if (input) input.value = String(parsed.value);
+      } else {
+        ok = false;
+        if (showErrors) {
+          row.classList.add("is-invalid");
+          var error = row.querySelector("[data-coloring-cost-error]");
+          if (error) error.textContent = parsed.message;
+        }
+      }
+    });
+    return { ok: ok, settings: { order: order, starCosts: starCosts } };
+  }
+
+  function normalizedParentSettingsJson(settings) {
+    return JSON.stringify(KA.coloring.normalizeColoringSettings(settings));
+  }
+
+  function isParentColoringDirty() {
+    if (!appEl || !appEl.querySelector("[data-coloring-settings-panel]")) return false;
+    var collected = collectParentColoringSettings(false);
+    if (!collected.ok) return true;
+    return normalizedParentSettingsJson(collected.settings) !== normalizedParentSettingsJson(KA.coloring.getCurrentColoringSettings());
+  }
+
+  function setParentColoringDirty() {
+    var status = appEl && appEl.querySelector("[data-coloring-settings-status]");
+    if (status) status.textContent = isParentColoringDirty() ? "未保存の変更があります" : "";
+  }
+
+  function updateParentColoringMoveButtons() {
+    var rows = parentColoringRows();
+    rows.forEach(function (row, index) {
+      var up = row.querySelector("[data-coloring-move-up]");
+      var down = row.querySelector("[data-coloring-move-down]");
+      if (up) up.disabled = index === 0;
+      if (down) down.disabled = index === rows.length - 1;
+    });
+  }
+
+  function moveParentColoringRow(row, direction) {
+    var list = appEl.querySelector("[data-coloring-settings-list]");
+    if (!row || !list) return;
+    if (direction < 0 && row.previousElementSibling) {
+      list.insertBefore(row, row.previousElementSibling);
+    } else if (direction > 0 && row.nextElementSibling) {
+      list.insertBefore(row.nextElementSibling, row);
+    }
+    updateParentColoringMoveButtons();
+    setParentColoringDirty();
+  }
+
+  function saveParentColoringSettings() {
+    var collected = collectParentColoringSettings(true);
+    if (!collected.ok) {
+      toast("ぬりえ設定を確認してください");
+      setParentColoringDirty();
+      return false;
+    }
+    KA.coloring.saveColoringSettings(collected.settings);
+    toast("ぬりえ設定を保存しました");
+    KA.router.render();
+    return true;
+  }
+
+  function parentColoringLeaveDialog(route, params) {
+    modalRoot.innerHTML = [
+      '<div class="modal" role="dialog" aria-modal="true">',
+      '<h2>ぬりえ設定を保存しますか？</h2>',
+      '<p>変更したスターの数と並び順があります。</p>',
+      '<div class="modal-actions">',
+      button("戻る", "btn-soft", 'data-dialog-cancel'),
+      button("保存しない", "btn-soft", 'data-parent-coloring-discard'),
+      button("保存する", "btn-primary", 'data-parent-coloring-save-leave'),
+      '</div>',
+      '</div>'
+    ].join("");
+    modalRoot.querySelector("[data-dialog-cancel]").addEventListener("click", closeDialog);
+    modalRoot.querySelector("[data-parent-coloring-discard]").addEventListener("click", function () {
+      closeDialog();
+      KA.router.navigate(route, params);
+    });
+    modalRoot.querySelector("[data-parent-coloring-save-leave]").addEventListener("click", function () {
+      if (!saveParentColoringSettings()) return;
+      closeDialog();
+      KA.router.navigate(route, params);
+    });
+  }
+
+  function renderParentColoringSettings() {
+    var templates = KA.coloring.getOrderedColoringTemplates();
+    var rows = templates.map(function (template, index) {
+      var templateId = escapeHtml(template.templateId);
+      var cost = KA.coloring.getEffectiveColoringStarCost(template.templateId);
+      var standard = KA.coloring.getStandardColoringStarCost(template.templateId);
+      var title = escapeHtml(template.title);
+      return [
+        '<div class="parent-coloring-row" data-coloring-setting-row data-template-id="' + templateId + '">',
+        '<button type="button" class="coloring-drag-handle" data-coloring-drag-handle aria-label="' + title + 'をドラッグで移動">↕</button>',
+        '<div class="parent-coloring-preview preview-wrap" aria-hidden="true">' + KA.coloring.renderTemplate(template.templateId, {}, "") + '</div>',
+        '<div class="parent-coloring-main">',
+        '<h3>' + escapeHtml(template.icon + " " + template.title) + '</h3>',
+        '<p class="muted">標準 ' + standard + ' / 現在 ' + cost + '</p>',
+        '<div class="coloring-star-controls">',
+        '<button type="button" class="btn btn-soft btn-small" data-coloring-star-minus aria-label="' + title + 'の必要スターを1つ減らす">－</button>',
+        '<label class="field compact-field" for="coloring-cost-' + templateId + '"><span>必要スター</span><input id="coloring-cost-' + templateId + '" data-coloring-star-input inputmode="numeric" pattern="[0-9０-９]*" value="' + cost + '" aria-describedby="coloring-cost-error-' + templateId + '"></label>',
+        '<button type="button" class="btn btn-soft btn-small" data-coloring-star-plus aria-label="' + title + 'の必要スターを1つ増やす">＋</button>',
+        '</div>',
+        '<p class="field-error" id="coloring-cost-error-' + templateId + '" data-coloring-cost-error aria-live="polite"></p>',
+        '</div>',
+        '<div class="coloring-order-controls">',
+        '<button type="button" class="btn btn-soft btn-small" data-coloring-move-up aria-label="' + title + 'を上へ移動" ' + (index === 0 ? "disabled" : "") + '>上へ</button>',
+        '<button type="button" class="btn btn-soft btn-small" data-coloring-move-down aria-label="' + title + 'を下へ移動" ' + (index === templates.length - 1 ? "disabled" : "") + '>下へ</button>',
+        '</div>',
+        '</div>'
+      ].join("");
+    }).join("");
+    return [
+      '<div class="panel panel-pad" data-coloring-settings-panel>',
+      '<div class="section-heading"><div><h2>ぬりえ設定</h2><p class="muted">ひつようなスターと、ならびじゅんを変更できます。</p></div></div>',
+      '<div class="parent-coloring-list" data-coloring-settings-list>' + rows + '</div>',
+      '<p class="muted" data-coloring-settings-status aria-live="polite"></p>',
+      '<div class="quick-actions parent-coloring-actions">',
+      button("変更を保存", "btn-primary", 'data-save-coloring-settings'),
+      button("標準設定に戻す", "btn-soft", 'data-reset-coloring-settings'),
+      '</div>',
+      '</div>'
+    ].join("");
+  }
+
+  function bindParentColoringSettings() {
+    var panel = appEl.querySelector("[data-coloring-settings-panel]");
+    if (!panel) return;
+    updateParentColoringMoveButtons();
+    Array.prototype.forEach.call(panel.querySelectorAll("[data-coloring-star-minus], [data-coloring-star-plus]"), function (el) {
+      el.addEventListener("click", function () {
+        var row = el.closest("[data-coloring-setting-row]");
+        var input = row && row.querySelector("[data-coloring-star-input]");
+        var parsed = parseParentStarInput(input ? input.value : "");
+        var value = parsed.ok ? parsed.value : KA.coloring.getEffectiveColoringStarCost(row.getAttribute("data-template-id"));
+        value += el.hasAttribute("data-coloring-star-plus") ? 1 : -1;
+        value = Math.max(0, Math.min(999, value));
+        input.value = String(value);
+        clearParentColoringErrors();
+        setParentColoringDirty();
+      });
+    });
+    Array.prototype.forEach.call(panel.querySelectorAll("[data-coloring-star-input]"), function (input) {
+      input.addEventListener("input", function () {
+        input.value = toHalfWidthDigits(input.value);
+        setParentColoringDirty();
+      });
+    });
+    Array.prototype.forEach.call(panel.querySelectorAll("[data-coloring-move-up]"), function (el) {
+      el.addEventListener("click", function () {
+        moveParentColoringRow(el.closest("[data-coloring-setting-row]"), -1);
+      });
+    });
+    Array.prototype.forEach.call(panel.querySelectorAll("[data-coloring-move-down]"), function (el) {
+      el.addEventListener("click", function () {
+        moveParentColoringRow(el.closest("[data-coloring-setting-row]"), 1);
+      });
+    });
+    Array.prototype.forEach.call(panel.querySelectorAll("[data-coloring-drag-handle]"), function (handle) {
+      handle.addEventListener("pointerdown", function (event) {
+        var row = handle.closest("[data-coloring-setting-row]");
+        if (!row) return;
+        parentColoringDragState = {
+          row: row,
+          pointerId: event.pointerId,
+          startY: event.clientY,
+          dragging: false
+        };
+        try { handle.setPointerCapture(event.pointerId); } catch (error) { /* optional */ }
+      });
+      handle.addEventListener("pointermove", function (event) {
+        var state = parentColoringDragState;
+        var list = appEl.querySelector("[data-coloring-settings-list]");
+        var target = null;
+        if (!state || state.pointerId !== event.pointerId || !list) return;
+        if (!state.dragging && Math.abs(event.clientY - state.startY) < 6) return;
+        state.dragging = true;
+        event.preventDefault();
+        state.row.classList.add("is-dragging");
+        parentColoringRows().forEach(function (row) {
+          if (row === state.row || target) return;
+          var rect = row.getBoundingClientRect();
+          if (event.clientY < rect.top + rect.height / 2) target = row;
+        });
+        if (target) list.insertBefore(state.row, target);
+        else list.appendChild(state.row);
+        updateParentColoringMoveButtons();
+        setParentColoringDirty();
+      });
+      function endDrag(event) {
+        if (!parentColoringDragState || parentColoringDragState.pointerId !== event.pointerId) return;
+        if (parentColoringDragState.row) parentColoringDragState.row.classList.remove("is-dragging");
+        try { handle.releasePointerCapture(event.pointerId); } catch (error) { /* optional */ }
+        parentColoringDragState = null;
+        updateParentColoringMoveButtons();
+      }
+      handle.addEventListener("pointerup", endDrag);
+      handle.addEventListener("pointercancel", endDrag);
+    });
+    var save = panel.querySelector("[data-save-coloring-settings]");
+    if (save) save.addEventListener("click", saveParentColoringSettings);
+    var reset = panel.querySelector("[data-reset-coloring-settings]");
+    if (reset) {
+      reset.addEventListener("click", function () {
+        confirmDialog("標準設定に戻す？", "スターの数と、ぬりえの並びを\nはじめの設定に戻します。", "戻す", function () {
+          KA.coloring.resetColoringSettings();
+          toast("標準設定に戻しました");
+          KA.router.render();
+        });
+      });
+    }
+  }
+
   function renderParent() {
     var data = KA.state.getAppData();
     var tasks = KA.tasks.allTasks();
@@ -1206,6 +1508,7 @@
       '<div class="panel panel-pad"><h2>親モード</h2><p class="muted">通常タップでは入れない保護者用の画面です。</p>',
       '<p><span class="badge">現在のたまご ' + KA.eggs.eggCount() + 'こ</span></p>',
       '<label class="field"><span>子どもの名前</span><input id="profile-name" value="' + escapeHtml(data.profile.displayName) + '"></label>' + button("名前を保存", "btn-primary", 'data-save-profile') + '</div>',
+      renderParentColoringSettings(),
       '<div class="panel panel-pad"><h2>今日のおしごと</h2><div class="grid">' + taskRows + '</div></div>',
       '<div class="panel panel-pad"><h2>今日の作品</h2><div class="grid">' + (artRows || '<p class="muted">今日の作品はまだありません。</p>') + '</div></div>',
       '<div class="panel panel-pad"><h2>設定</h2><label class="field"><span>BGM</span><select id="bgm-setting"><option value="false" ' + (!data.settings.bgmEnabled ? "selected" : "") + '>オフ</option><option value="true" ' + (data.settings.bgmEnabled ? "selected" : "") + '>オン</option></select></label><label class="field"><span>効果音</span><select id="effects-setting"><option value="true" ' + (data.settings.effectsEnabled !== false && data.settings.soundEnabled !== false ? "selected" : "") + '>オン</option><option value="false" ' + (data.settings.effectsEnabled === false || data.settings.soundEnabled === false ? "selected" : "") + '>オフ</option></select></label><label class="field"><span>アニメーション</span><select id="animation-setting"><option value="normal" ' + (data.settings.animationLevel !== "reduced" ? "selected" : "") + '>ふつう</option><option value="reduced" ' + (data.settings.animationLevel === "reduced" ? "selected" : "") + '>ひかえめ</option></select></label><p class="muted">' + escapeHtml(KA.constants.VERSION_LABEL + " / appVersion " + KA.constants.APP_VERSION) + '</p><div class="quick-actions">' + button("データ管理", "btn-soft", 'data-route="data"') + button("ホームへ戻る", "btn-primary", 'data-route="home"') + '</div></div>',
@@ -1221,6 +1524,7 @@
       toast("名前を保存しました");
       KA.router.render();
     });
+    bindParentColoringSettings();
     Array.prototype.forEach.call(appEl.querySelectorAll("[data-parent-task-active]"), function (el) {
       el.addEventListener("change", function () {
         KA.tasks.updateTask(el.getAttribute("data-parent-task-active"), { active: el.value === "true" });

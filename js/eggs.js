@@ -3,8 +3,10 @@
 
   var KA = global.KodomoAdventure = global.KodomoAdventure || {};
   var TARGET_GROWTH = 6;
+  var FIRST_HATCH_TARGET_GROWTH = 4;
   var VALID_STATES = ["waiting", "active", "warm", "glowing", "cracked", "ready", "hatched"];
   var GROWABLE_STATES = ["active", "warm", "glowing", "cracked"];
+  var DAILY_ACTIVITY_KEYS = ["petted", "warmed", "sang", "jobBonus", "coloringBonus"];
 
   function ensureInventory(appData) {
     appData.eggInventory = Array.isArray(appData.eggInventory) ? appData.eggInventory : [];
@@ -25,7 +27,10 @@
   function todayActivity(appData, dateKey) {
     var system = ensureEggSystem(appData);
     var key = dateKey || todayKey();
-    system.dailyActivity[key] = system.dailyActivity[key] || {};
+    system.dailyActivity[key] = system.dailyActivity[key] && typeof system.dailyActivity[key] === "object" && !Array.isArray(system.dailyActivity[key]) ? system.dailyActivity[key] : {};
+    DAILY_ACTIVITY_KEYS.forEach(function (activityKey) {
+      system.dailyActivity[key][activityKey] = system.dailyActivity[key][activityKey] === true;
+    });
     return system.dailyActivity[key];
   }
 
@@ -35,13 +40,36 @@
     });
   }
 
-  function stateForGrowth(points) {
+  function targetForEgg(egg) {
+    var fallback = egg && egg.isFirstHatchEgg ? FIRST_HATCH_TARGET_GROWTH : TARGET_GROWTH;
+    var target = Number(egg && egg.targetGrowthPoints);
+    if (!isFinite(target) || target <= 0) target = fallback;
+    target = Math.round(target);
+    if (target !== FIRST_HATCH_TARGET_GROWTH && target !== TARGET_GROWTH) target = fallback;
+    return target;
+  }
+
+  function stateForGrowth(points, targetGrowthPoints) {
+    var target = Number(targetGrowthPoints || TARGET_GROWTH);
+    if (target === FIRST_HATCH_TARGET_GROWTH) {
+      var firstValue = Math.max(0, Math.min(FIRST_HATCH_TARGET_GROWTH, Number(points || 0)));
+      if (firstValue >= 4) return "ready";
+      if (firstValue >= 3) return "cracked";
+      if (firstValue >= 2) return "glowing";
+      if (firstValue >= 1) return "warm";
+      return "active";
+    }
     var value = Math.max(0, Math.min(TARGET_GROWTH, Number(points || 0)));
-    if (value >= 6) return "ready";
+    if (value >= TARGET_GROWTH) return "ready";
     if (value >= 5) return "cracked";
     if (value >= 3) return "glowing";
     if (value >= 1) return "warm";
     return "active";
+  }
+
+  function getEggStateFromGrowth(egg) {
+    if (egg && egg.state === "hatched") return "hatched";
+    return stateForGrowth(egg && egg.growthPoints, targetForEgg(egg));
   }
 
   function isFormalSpecies(speciesId) {
@@ -61,7 +89,8 @@
     egg.createdAt = egg.createdAt || KA.date.localIsoString();
     egg.earnedByStars = threshold;
     if (egg.state === "new" || VALID_STATES.indexOf(egg.state) === -1) egg.state = "waiting";
-    egg.targetGrowthPoints = Number(egg.targetGrowthPoints || TARGET_GROWTH);
+    egg.isFirstHatchEgg = egg.isFirstHatchEgg === true;
+    egg.targetGrowthPoints = targetForEgg(egg);
     egg.growthPoints = Math.max(0, Math.min(egg.targetGrowthPoints, Number(egg.growthPoints || 0)));
     egg.activatedAt = egg.activatedAt || null;
     egg.readyAt = egg.readyAt || null;
@@ -78,6 +107,45 @@
       return String(a.createdAt || "").localeCompare(String(b.createdAt || ""));
     });
     return inventory;
+  }
+
+  function hasHatchHistory(appData) {
+    var companions = Array.isArray(appData.companions) ? appData.companions : [];
+    if (companions.some(function (companion) { return companion && Number(companion.hatchCount || 0) > 0; })) return true;
+    return ensureInventory(appData).some(function (egg) { return egg && egg.state === "hatched"; });
+  }
+
+  function syncFirstHatchTargets(appData) {
+    var inventory = sortEggs(ensureInventory(appData));
+    var hatchedBefore = hasHatchHistory(appData);
+    var unhatched = inventory.filter(function (egg) {
+      return egg && egg.state !== "hatched";
+    });
+    var chosen = null;
+    if (!hatchedBefore) {
+      chosen = unhatched.filter(function (egg) { return egg.isFirstHatchEgg === true; })[0] || unhatched[0] || null;
+    }
+    inventory.forEach(function (egg) {
+      if (!egg) return;
+      if (egg.state === "hatched") {
+        egg.isFirstHatchEgg = egg.isFirstHatchEgg === true;
+        egg.targetGrowthPoints = targetForEgg(egg);
+        egg.growthPoints = Math.max(0, Math.min(egg.targetGrowthPoints, Number(egg.growthPoints || 0)));
+        return;
+      }
+      egg.isFirstHatchEgg = Boolean(chosen && egg.id === chosen.id);
+      egg.targetGrowthPoints = egg.isFirstHatchEgg ? FIRST_HATCH_TARGET_GROWTH : TARGET_GROWTH;
+      egg.growthPoints = Math.max(0, Math.min(egg.targetGrowthPoints, Number(egg.growthPoints || 0)));
+      if (egg.state === "ready") {
+        egg.growthPoints = egg.targetGrowthPoints;
+        egg.readyAt = egg.readyAt || KA.date.localIsoString();
+      } else if (egg.growthPoints >= egg.targetGrowthPoints) {
+        egg.state = "ready";
+        egg.readyAt = egg.readyAt || KA.date.localIsoString();
+      } else if (egg.state !== "waiting") {
+        egg.state = getEggStateFromGrowth(egg);
+      }
+    });
   }
 
   function activeEgg(appData) {
@@ -103,7 +171,7 @@
       system.activeEggId = null;
       return null;
     }
-    next.state = stateForGrowth(next.growthPoints);
+    next.state = getEggStateFromGrowth(next);
     if (next.state === "ready" && !next.readyAt) next.readyAt = KA.date.localIsoString();
     next.activatedAt = next.activatedAt || KA.date.localIsoString();
     system.activeEggId = next.id;
@@ -128,7 +196,7 @@
       egg.state = "waiting";
     });
     if (keep) {
-      keep.state = keep.state === "ready" ? "ready" : stateForGrowth(keep.growthPoints);
+      keep.state = keep.state === "ready" ? "ready" : getEggStateFromGrowth(keep);
       keep.activatedAt = keep.activatedAt || KA.date.localIsoString();
       system.activeEggId = keep.id;
     } else {
@@ -156,6 +224,7 @@
     for (var i = 0; i < inventory.length; i += 1) {
       normalizeEgg(inventory[i], i);
     }
+    syncFirstHatchTargets(appData);
 
     var lifetime = Number((appData.profile.starTotals || {}).lifetimeStars || 0);
     var targetCount = Math.floor(Math.max(0, lifetime) / 10);
@@ -170,6 +239,7 @@
           state: "waiting",
           growthPoints: 0,
           targetGrowthPoints: TARGET_GROWTH,
+          isFirstHatchEgg: false,
           activatedAt: null,
           readyAt: null,
           hatchedAt: null,
@@ -181,10 +251,11 @@
     }
 
     sortEggs(inventory);
+    syncFirstHatchTargets(appData);
     normalizeActiveEggs(appData);
     inventory.forEach(function (egg) {
       if (!egg || egg.state === "hatched" || egg.state === "waiting") return;
-      var nextState = stateForGrowth(egg.growthPoints);
+      var nextState = getEggStateFromGrowth(egg);
       if (egg.state !== "ready") egg.state = nextState;
       if (nextState === "ready") {
         egg.state = "ready";
@@ -235,15 +306,16 @@
     if (activity[activityKey]) {
       return { ok: false, reason: "already_done", alreadyDone: true, activityKey: activityKey };
     }
-    activity[activityKey] = true;
     var egg = growableActiveEgg(data);
     if (!egg) {
       if (!opts.skipSave && KA.state && KA.state.saveAppData) KA.state.saveAppData();
       return { ok: false, reason: "no_active_egg", activityKey: activityKey };
     }
+    activity[activityKey] = true;
     var before = Number(egg.growthPoints || 0);
-    egg.growthPoints = Math.min(TARGET_GROWTH, before + 1);
-    egg.state = stateForGrowth(egg.growthPoints);
+    var target = targetForEgg(egg);
+    egg.growthPoints = Math.min(target, before + 1);
+    egg.state = getEggStateFromGrowth(egg);
     if (egg.state === "ready") {
       egg.readyAt = egg.readyAt || KA.date.localIsoString();
       egg.plannedSpeciesId = egg.plannedSpeciesId || pickPlannedCompanionSpecies(egg, data);
@@ -264,6 +336,14 @@
 
   function petActiveEgg() {
     return addGrowth("petted", "あたたかくなったよ！");
+  }
+
+  function warmActiveEgg() {
+    return addGrowth("warmed", "ぽかぽかに なったよ！");
+  }
+
+  function singToActiveEgg() {
+    return addGrowth("sang", "たまごが うれしそう！");
   }
 
   function recordTaskBonusIfEligible() {
@@ -298,8 +378,9 @@
     egg.state = "hatched";
     egg.hatchedAt = hatchedAt;
     egg.companionId = companion.id;
-    egg.growthPoints = TARGET_GROWTH;
+    egg.growthPoints = targetForEgg(egg);
     ensureEggSystem(data).activeEggId = null;
+    syncFirstHatchTargets(data);
     activateNextWaiting(data);
     KA.state.saveAppData();
     return { ok: true, egg: egg, companion: companion, species: KA.companions.getSpecies(egg.plannedSpeciesId) };
@@ -318,7 +399,8 @@
 
   function renderEggSvg(egg, className) {
     var state = egg && egg.state || "active";
-    var points = Math.max(0, Math.min(TARGET_GROWTH, Number((egg || {}).growthPoints || 0)));
+    var target = targetForEgg(egg || {});
+    var points = Math.max(0, Math.min(target, Number((egg || {}).growthPoints || 0)));
     var cracks = state === "cracked" || state === "ready" || state === "hatched";
     return [
       '<svg class="egg-svg egg-svg-' + state + ' ' + (className || "") + '" viewBox="0 0 180 210" aria-hidden="true">',
@@ -335,6 +417,8 @@
 
   KA.eggs = {
     TARGET_GROWTH: TARGET_GROWTH,
+    FIRST_HATCH_TARGET_GROWTH: FIRST_HATCH_TARGET_GROWTH,
+    DAILY_ACTIVITY_KEYS: DAILY_ACTIVITY_KEYS,
     syncEggInventory: syncEggInventory,
     ensureEggSystem: ensureEggSystem,
     getEggs: getEggs,
@@ -345,8 +429,12 @@
     hatchedCount: hatchedCount,
     nextEggAt: nextEggAt,
     stateForGrowth: stateForGrowth,
+    getEggStateFromGrowth: getEggStateFromGrowth,
+    targetForEgg: targetForEgg,
     addGrowth: addGrowth,
     petActiveEgg: petActiveEgg,
+    warmActiveEgg: warmActiveEgg,
+    singToActiveEgg: singToActiveEgg,
     recordTaskBonusIfEligible: recordTaskBonusIfEligible,
     recordColoringBonus: recordColoringBonus,
     hatchReadyEgg: hatchReadyEgg,

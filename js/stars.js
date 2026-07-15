@@ -33,6 +33,7 @@
       reason: options.reason || "",
       relatedTaskId: options.relatedTaskId || null,
       relatedColoringId: options.relatedColoringId || null,
+      paidStars: typeof options.paidStars === "undefined" ? null : Number(options.paidStars || 0),
       totalDelta: totalDelta,
       spendableDelta: spendableDelta,
       totalAfter: total.lifetimeStars,
@@ -53,8 +54,9 @@
     });
   }
 
-  function spendForColoring(template) {
-    var required = Number(template.requiredStars || 0);
+  function spendForColoring(template, effectiveCost) {
+    var required = typeof effectiveCost === "undefined" ? Number(template.requiredStars || 0) : Number(effectiveCost || 0);
+    required = Math.max(0, required);
     var current = totals().spendableStars;
     if (current < required) {
       return { ok: false, reason: "not_enough_stars" };
@@ -63,6 +65,7 @@
       type: "spend_unlock_coloring",
       reason: template.title + " をかいほう",
       relatedColoringId: template.templateId,
+      paidStars: required,
       totalDelta: 0,
       spendableDelta: -required
     });

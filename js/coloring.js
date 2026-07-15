@@ -9,10 +9,122 @@
     })[0] || null;
   }
 
-  function getTemplates() {
-    return KA.state.getAppData().coloringTemplates.slice().sort(function (a, b) {
+  function toHalfWidthDigits(value) {
+    return String(value == null ? "" : value).replace(/[０-９]/g, function (char) {
+      return String.fromCharCode(char.charCodeAt(0) - 65248);
+    });
+  }
+
+  function standardTemplates() {
+    return KA.constants.COLORING_TEMPLATES.slice().sort(function (a, b) {
       return Number(a.sortOrder || 0) - Number(b.sortOrder || 0);
     });
+  }
+
+  function standardOrder() {
+    return standardTemplates().map(function (template) { return template.templateId; });
+  }
+
+  function templateMapFrom(list) {
+    var map = {};
+    (list || []).forEach(function (template) {
+      if (template && template.templateId) map[template.templateId] = template;
+    });
+    return map;
+  }
+
+  function defaultColoringSettings() {
+    var costs = {};
+    standardTemplates().forEach(function (template) {
+      costs[template.templateId] = Number(template.requiredStars || 0);
+    });
+    return {
+      order: standardOrder(),
+      starCosts: costs
+    };
+  }
+
+  function normalizeStarCost(value, fallback) {
+    var raw = toHalfWidthDigits(value).trim();
+    var numberValue;
+    if (raw === "") return Number(fallback || 0);
+    if (!/^\d+$/.test(raw)) return Number(fallback || 0);
+    numberValue = Number(raw);
+    if (!isFinite(numberValue) || numberValue < 0 || numberValue > 999) return Number(fallback || 0);
+    return numberValue;
+  }
+
+  function normalizeColoringSettings(settings) {
+    var defaults = defaultColoringSettings();
+    var known = templateMapFrom(KA.constants.COLORING_TEMPLATES);
+    var input = settings && typeof settings === "object" && !Array.isArray(settings) ? settings : {};
+    var inputOrder = Array.isArray(input.order) ? input.order : [];
+    var inputCosts = input.starCosts && typeof input.starCosts === "object" && !Array.isArray(input.starCosts) ? input.starCosts : {};
+    var seen = {};
+    var order = [];
+    inputOrder.forEach(function (templateId) {
+      if (!known[templateId] || seen[templateId]) return;
+      seen[templateId] = true;
+      order.push(templateId);
+    });
+    defaults.order.forEach(function (templateId) {
+      if (!seen[templateId]) {
+        seen[templateId] = true;
+        order.push(templateId);
+      }
+    });
+    var starCosts = {};
+    defaults.order.forEach(function (templateId) {
+      starCosts[templateId] = normalizeStarCost(inputCosts[templateId], defaults.starCosts[templateId]);
+    });
+    return {
+      order: order,
+      starCosts: starCosts
+    };
+  }
+
+  function getCurrentColoringSettings() {
+    var data = KA.state && KA.state.getAppData ? KA.state.getAppData() : null;
+    return normalizeColoringSettings(data ? data.coloringSettings : null);
+  }
+
+  function saveColoringSettings(settings) {
+    var data = KA.state.getAppData();
+    data.coloringSettings = normalizeColoringSettings(settings);
+    KA.state.saveAppData();
+    return data.coloringSettings;
+  }
+
+  function resetColoringSettings() {
+    return saveColoringSettings(defaultColoringSettings());
+  }
+
+  function getStandardColoringStarCost(templateId) {
+    var template = getBuiltInTemplate(templateId);
+    return template ? Number(template.requiredStars || 0) : 0;
+  }
+
+  function getEffectiveColoringStarCost(templateId) {
+    var template = getBuiltInTemplate(templateId) || getTemplate(templateId);
+    var fallback = template ? Number(template.requiredStars || 0) : 0;
+    var settings = getCurrentColoringSettings();
+    return normalizeStarCost(settings.starCosts[templateId], fallback);
+  }
+
+  function getOrderedColoringTemplates() {
+    var data = KA.state.getAppData();
+    var templates = data.coloringTemplates || [];
+    var map = templateMapFrom(templates);
+    var settings = getCurrentColoringSettings();
+    var result = [];
+    settings.order.forEach(function (templateId) {
+      if (map[templateId]) result.push(map[templateId]);
+    });
+    return result;
+  }
+
+  function getTemplates() {
+    return getOrderedColoringTemplates();
   }
 
   function unlockedEntries() {
@@ -29,11 +141,13 @@
     var template = getTemplate(templateId);
     if (!template) return { ok: false, reason: "not_found" };
     if (isUnlocked(templateId)) return { ok: true, alreadyUnlocked: true };
-    var spent = KA.stars.spendForColoring(template);
+    var required = getEffectiveColoringStarCost(templateId);
+    var spent = KA.stars.spendForColoring(template, required);
     if (!spent.ok) return spent;
     KA.state.getAppData().unlocks.coloringTemplateIds.push({
       templateId: templateId,
       unlockedAt: KA.date.localIsoString(),
+      paidStars: required,
       ledgerId: spent.entry.id
     });
     KA.state.saveAppData();
@@ -965,6 +1079,14 @@
   KA.coloring = {
     getTemplate: getTemplate,
     getTemplates: getTemplates,
+    getOrderedColoringTemplates: getOrderedColoringTemplates,
+    getEffectiveColoringStarCost: getEffectiveColoringStarCost,
+    getStandardColoringStarCost: getStandardColoringStarCost,
+    getCurrentColoringSettings: getCurrentColoringSettings,
+    normalizeColoringSettings: normalizeColoringSettings,
+    defaultColoringSettings: defaultColoringSettings,
+    saveColoringSettings: saveColoringSettings,
+    resetColoringSettings: resetColoringSettings,
     isUnlocked: isUnlocked,
     unlock: unlock,
     renderTemplate: renderTemplate,

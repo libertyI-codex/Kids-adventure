@@ -107,6 +107,15 @@
         dailyActivity: {}
       },
       companions: [],
+      coloringSettings: {
+        order: KA.constants.COLORING_TEMPLATES.slice().sort(function (a, b) {
+          return Number(a.sortOrder || 0) - Number(b.sortOrder || 0);
+        }).map(function (template) { return template.templateId; }),
+        starCosts: KA.constants.COLORING_TEMPLATES.reduce(function (costs, template) {
+          costs[template.templateId] = Number(template.requiredStars || 0);
+          return costs;
+        }, {})
+      },
       coloringTemplates: KA.constants.COLORING_TEMPLATES.map(withAuditDefaults),
       artworks: [],
       worlds: defaultWorlds,
@@ -147,6 +156,65 @@
 
   function ensureObject(value) {
     return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+
+  function toHalfWidthDigits(value) {
+    return String(value == null ? "" : value).replace(/[０-９]/g, function (char) {
+      return String.fromCharCode(char.charCodeAt(0) - 65248);
+    });
+  }
+
+  function sortedColoringDefaults() {
+    return KA.constants.COLORING_TEMPLATES.slice().sort(function (a, b) {
+      return Number(a.sortOrder || 0) - Number(b.sortOrder || 0);
+    });
+  }
+
+  function coloringTemplateMap() {
+    var map = {};
+    KA.constants.COLORING_TEMPLATES.forEach(function (template) {
+      map[template.templateId] = template;
+    });
+    return map;
+  }
+
+  function normalizeStarCost(value, fallback) {
+    var raw = toHalfWidthDigits(value).trim();
+    var numberValue;
+    if (raw === "") return Number(fallback || 0);
+    if (!/^\d+$/.test(raw)) return Number(fallback || 0);
+    numberValue = Number(raw);
+    if (!isFinite(numberValue) || numberValue < 0 || numberValue > 999) return Number(fallback || 0);
+    return numberValue;
+  }
+
+  function normalizeColoringSettings(appData) {
+    var settings = ensureObject(appData.coloringSettings);
+    var orderInput = ensureArray(settings.order);
+    var starInput = ensureObject(settings.starCosts);
+    var defaults = sortedColoringDefaults();
+    var known = coloringTemplateMap();
+    var seen = {};
+    var order = [];
+    orderInput.forEach(function (templateId) {
+      if (!known[templateId] || seen[templateId]) return;
+      seen[templateId] = true;
+      order.push(templateId);
+    });
+    defaults.forEach(function (template) {
+      if (!seen[template.templateId]) {
+        seen[template.templateId] = true;
+        order.push(template.templateId);
+      }
+    });
+    var starCosts = {};
+    defaults.forEach(function (template) {
+      starCosts[template.templateId] = normalizeStarCost(starInput[template.templateId], template.requiredStars);
+    });
+    appData.coloringSettings = {
+      order: order,
+      starCosts: starCosts
+    };
   }
 
   function bootMark(stage) {
@@ -440,6 +508,7 @@
     mergeMissing(appData.settings, defaults.settings);
     appData.tasks = syncBuiltInTaskMetadata(ensureById(ensureArray(appData.tasks), KA.constants.DEFAULT_TASKS, "taskId"));
     appData.coloringTemplates = syncBuiltInColoringTemplates(ensureById(ensureArray(appData.coloringTemplates), KA.constants.COLORING_TEMPLATES, "templateId"));
+    normalizeColoringSettings(appData);
     appData.dailyRecords = ensureObject(appData.dailyRecords);
     normalizeDailyRecords(appData);
     appData.starLedger = ensureArray(appData.starLedger);
@@ -485,6 +554,8 @@
     markMigration(appData, "prototype10_secret_base_world");
     markMigration(appData, "prototype11_apple_touch_icon");
     markMigration(appData, "prototype12_egg_companions");
+    markMigration(appData, "prototype13_coloring_settings");
+    markMigration(appData, "prototype14_egg_care_first_hatch");
     appData.updatedAt = appData.updatedAt || KA.date.localIsoString();
     changed = before !== JSON.stringify(appData);
     return { data: appData, changed: changed };
