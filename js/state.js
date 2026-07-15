@@ -6,9 +6,18 @@
   var uiState = null;
   var dataIssue = null;
 
+  function bootMark(stage) {
+    if (global.KodomoAdventureBoot && global.KodomoAdventureBoot.mark) {
+      global.KodomoAdventureBoot.mark(stage);
+    }
+  }
+
   function initState() {
     var keys = KA.constants.STORAGE_KEYS;
+    bootMark("STATE_INIT_STARTED");
+    bootMark("STORAGE_READ_STARTED");
     var loaded = KA.storage.loadJson(keys.appData);
+    bootMark("STORAGE_READ_COMPLETED");
     if (!loaded.ok) {
       dataIssue = "保存データを読み込めませんでした。初期データで起動しています。";
       KA.storage.saveBackup("corrupt_appData_parse", { raw: loaded.raw, error: String(loaded.error) }, null);
@@ -19,7 +28,9 @@
       KA.storage.saveJson(keys.appData, appData);
     } else {
       try {
+        bootMark("MIGRATION_STARTED");
         var result = KA.migrations.migrate(loaded.value);
+        bootMark("MIGRATION_COMPLETED");
         appData = result.data;
         if (result.changed) saveAppData();
       } catch (error) {
@@ -28,6 +39,7 @@
       }
     }
 
+    bootMark("UI_STATE_STARTED");
     var uiLoaded = KA.storage.loadJson(keys.uiState);
     if (!uiLoaded.ok || !uiLoaded.value) {
       uiState = KA.migrations.createDefaultUiState();
@@ -49,8 +61,10 @@
       uiState.currentLocalDate = KA.date.localDateKey();
       saveUiState();
     }
+    bootMark("UI_STATE_COMPLETED");
 
     ensureTodayRecord();
+    bootMark("STATE_INIT_COMPLETED");
     return { appData: appData, uiState: uiState, dataIssue: dataIssue };
   }
 
@@ -102,11 +116,34 @@
     };
   }
 
+  function normalizeDailyRecord(record, dateKey) {
+    var defaults = makeDailyRecord(dateKey);
+    if (!record || typeof record !== "object" || Array.isArray(record)) {
+      return defaults;
+    }
+    record.recordId = record.recordId || defaults.recordId;
+    record.profileId = record.profileId || defaults.profileId;
+    record.localDate = record.localDate || defaults.localDate;
+    record.createdAt = record.createdAt || defaults.createdAt;
+    record.updatedAt = record.updatedAt || defaults.updatedAt;
+    record.completedTasks = Array.isArray(record.completedTasks) ? record.completedTasks : [];
+    record.earnedStarsToday = Number(record.earnedStarsToday || 0);
+    record.artworkIds = Array.isArray(record.artworkIds) ? record.artworkIds : [];
+    record.forestPlacementIds = Array.isArray(record.forestPlacementIds) ? record.forestPlacementIds : [];
+    record.parentNotes = record.parentNotes && typeof record.parentNotes === "object" && !Array.isArray(record.parentNotes) ? record.parentNotes : {};
+    record.corrections = Array.isArray(record.corrections) ? record.corrections : [];
+    return record;
+  }
+
   function ensureTodayRecord() {
     var today = getTodayKey();
     if (!appData.dailyRecords[today]) {
       appData.dailyRecords[today] = makeDailyRecord(today);
       saveAppData();
+    } else {
+      var before = JSON.stringify(appData.dailyRecords[today]);
+      appData.dailyRecords[today] = normalizeDailyRecord(appData.dailyRecords[today], today);
+      if (before !== JSON.stringify(appData.dailyRecords[today])) saveAppData();
     }
     if (uiState) {
       uiState.currentLocalDate = today;
@@ -119,6 +156,10 @@
     if (!appData.dailyRecords[key]) {
       appData.dailyRecords[key] = makeDailyRecord(key);
       saveAppData();
+    } else {
+      var before = JSON.stringify(appData.dailyRecords[key]);
+      appData.dailyRecords[key] = normalizeDailyRecord(appData.dailyRecords[key], key);
+      if (before !== JSON.stringify(appData.dailyRecords[key])) saveAppData();
     }
     return appData.dailyRecords[key];
   }

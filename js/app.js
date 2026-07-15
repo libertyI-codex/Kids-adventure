@@ -1015,6 +1015,24 @@
     });
   }
 
+  function renderAlbum() {
+    var artworks = (KA.state.getAppData().artworks || []).slice().sort(function (a, b) {
+      return String(b.completedAt || b.createdAt || "").localeCompare(String(a.completedAt || a.createdAt || ""));
+    });
+    var favorites = artworks.filter(function (artwork) {
+      return artwork && artwork.favorite;
+    });
+    var body = [
+      '<div class="screen-header"><div><h2>さくひん</h2><p class="muted">これまでのぬりえを見られるよ。</p></div><div><span class="badge">' + artworks.length + 'こ</span></div></div>',
+      favorites.length ? '<section class="panel panel-pad"><h3>おきにいり</h3><div class="album-grid">' + favorites.map(artCard).join("") + '</div></section>' : '',
+      '<section class="album-grid">',
+      artworks.length ? artworks.map(artCard).join("") : '<div class="panel panel-pad"><h3>まだ さくひんはありません</h3><p class="muted">ぬりえを完成するとここに出ます。</p>' + button("ぬりえへ", "btn-primary", 'data-route="coloring-list"') + '</div>',
+      '</section>'
+    ].join("");
+    layout("さくひん", body);
+    bindArtworkDetails();
+  }
+
   function renderSummary() {
     var record = KA.state.getDailyRecord();
     var taskMap = {};
@@ -1386,12 +1404,30 @@
     }
   }
 
+  function bootMark(stage) {
+    if (global.KodomoAdventureBoot && global.KodomoAdventureBoot.mark) {
+      global.KodomoAdventureBoot.mark(stage);
+    }
+  }
+
+  function bootCapture(error, stage) {
+    if (global.KodomoAdventureBoot && global.KodomoAdventureBoot.captureException) {
+      return global.KodomoAdventureBoot.captureException(error, { stage: stage || (global.KodomoAdventureBoot.currentStage && global.KodomoAdventureBoot.currentStage()) });
+    }
+    return null;
+  }
+
   function hasAppContent() {
     var shell = appEl || document.getElementById("app");
     return Boolean(shell && shell.innerHTML && shell.innerHTML.replace(/\s/g, "").length);
   }
 
   function renderStartupRecovery(error) {
+    if (global.KodomoAdventureBoot && global.KodomoAdventureBoot.showRecovery) {
+      global.KodomoAdventureBoot.showRecovery(error, { stage: global.KodomoAdventureBoot.currentStage && global.KodomoAdventureBoot.currentStage() });
+      startupState.firstRenderCompleted = true;
+      return;
+    }
     var shell = appEl || document.getElementById("app");
     if (!shell) return;
     if (global.console && console.error) {
@@ -1432,6 +1468,12 @@
   }
 
   function finishStartupScreen(options) {
+    if (global.KodomoAdventureBoot && global.KodomoAdventureBoot.finishStartupScreen) {
+      unlockAppShell();
+      global.KodomoAdventureBoot.finishStartupScreen(options || {});
+      startupState.splashFinished = true;
+      return;
+    }
     var opts = options || {};
     var splash = document.getElementById("startup-splash");
     if (startupState.splashFinished) {
@@ -1462,6 +1504,13 @@
   }
 
   function initStartupSplash() {
+    if (global.KodomoAdventureBoot && global.KodomoAdventureBoot.finishStartupScreen) {
+      startupState.startupStarted = true;
+      startupState.startedAt = Date.now();
+      startupState.splashFinished = false;
+      if (document.body) document.body.classList.add("startup-active");
+      return finishStartupScreen;
+    }
     var splash = document.getElementById("startup-splash");
     startupState.startupStarted = true;
     startupState.startedAt = Date.now();
@@ -1485,22 +1534,47 @@
     appEl = document.getElementById("app");
     modalRoot = document.getElementById("modal-root");
     toastRoot = document.getElementById("toast-root");
+    bootMark("APP_INIT_STARTED");
+    if (global.KodomoAdventureBoot && global.KodomoAdventureBoot.isSafeStart && global.KodomoAdventureBoot.isSafeStart()) {
+      try {
+        global.KodomoAdventureBoot.renderSafeStartHome();
+        startupState.firstRenderCompleted = true;
+        startupState.appInitialized = true;
+      } catch (safeError) {
+        initError = safeError;
+        startupState.error = safeError;
+        bootCapture(safeError, "INIT_RENDER_SAFE_START");
+        renderStartupRecovery(safeError);
+      } finally {
+        unlockAppShell();
+        closeStartupSplash({ error: initError });
+      }
+      return;
+    }
     try {
+      bootMark("STATE_INIT_STARTED");
       KA.state.init();
+      bootMark("STATE_INIT_COMPLETED");
+      bootMark("EVENT_BINDING_STARTED");
       registerRoutes();
+      bootMark("EVENT_BINDING_COMPLETED");
       var startRoute = KA.state.getUiState().lastRoute || "home";
       if (["parent", "data", "magic", "coloring-editor", "star"].indexOf(startRoute) >= 0) {
         startRoute = "home";
       }
+      bootMark("FIRST_RENDER_STARTED");
       KA.router.navigate(startRoute);
       startupState.firstRenderCompleted = hasAppContent();
+      bootMark("FIRST_RENDER_COMPLETED");
       document.addEventListener("pointerdown", syncBgmState, { once: true });
     } catch (error) {
       initError = error;
       startupState.error = error;
+      bootCapture(error, global.KodomoAdventureBoot && global.KodomoAdventureBoot.currentStage ? global.KodomoAdventureBoot.currentStage() : "APP_INIT_STARTED");
       renderStartupRecovery(error);
     } finally {
       startupState.appInitialized = true;
+      bootMark("APP_INIT_COMPLETED");
       unlockAppShell();
       closeStartupSplash({ error: initError });
     }

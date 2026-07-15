@@ -149,6 +149,12 @@
     return value && typeof value === "object" && !Array.isArray(value) ? value : {};
   }
 
+  function bootMark(stage) {
+    if (global.KodomoAdventureBoot && global.KodomoAdventureBoot.mark) {
+      global.KodomoAdventureBoot.mark(stage);
+    }
+  }
+
   function mergeMissing(target, defaults) {
     Object.keys(defaults).forEach(function (key) {
       if (typeof target[key] === "undefined") {
@@ -234,6 +240,9 @@
     var gathered = [];
     Object.keys(worlds).forEach(function (worldId) {
       var containerWorld = worlds[worldId];
+      if (!containerWorld || typeof containerWorld !== "object") {
+        return;
+      }
       containerWorld.placements = ensureArray(containerWorld.placements);
       containerWorld.placements.forEach(function (placement) {
         if (!placement) return;
@@ -277,6 +286,7 @@
       var placement = null;
       Object.keys(appData.worlds || {}).forEach(function (worldId) {
         if (placement) return;
+        if (!appData.worlds[worldId] || typeof appData.worlds[worldId] !== "object") return;
         var found = ensureArray(appData.worlds[worldId].placements).filter(function (item) {
           return item && item.placementId === artwork.placementId;
         })[0];
@@ -386,6 +396,28 @@
     appData.profile.starTotals.spendableStars = Math.max(0, Number(appData.profile.starTotals.spendableStars || 0));
   }
 
+  function normalizeDailyRecords(appData) {
+    appData.dailyRecords = ensureObject(appData.dailyRecords);
+    Object.keys(appData.dailyRecords).forEach(function (dateKey) {
+      var record = appData.dailyRecords[dateKey];
+      if (!record || typeof record !== "object" || Array.isArray(record)) {
+        record = {};
+        appData.dailyRecords[dateKey] = record;
+      }
+      record.recordId = record.recordId || ("daily_" + dateKey + "_" + (appData.profile.profileId || KA.constants.PROFILE_ID));
+      record.profileId = record.profileId || appData.profile.profileId || KA.constants.PROFILE_ID;
+      record.localDate = record.localDate || dateKey;
+      record.createdAt = record.createdAt || KA.date.localIsoString();
+      record.updatedAt = record.updatedAt || record.createdAt;
+      record.completedTasks = ensureArray(record.completedTasks);
+      record.earnedStarsToday = Math.max(0, Number(record.earnedStarsToday || 0));
+      record.artworkIds = ensureArray(record.artworkIds);
+      record.forestPlacementIds = ensureArray(record.forestPlacementIds);
+      record.parentNotes = ensureObject(record.parentNotes);
+      record.corrections = ensureArray(record.corrections);
+    });
+  }
+
   function ensureDataShape(appData) {
     var changed = false;
     var defaults = createDefaultAppData();
@@ -409,6 +441,7 @@
     appData.tasks = syncBuiltInTaskMetadata(ensureById(ensureArray(appData.tasks), KA.constants.DEFAULT_TASKS, "taskId"));
     appData.coloringTemplates = syncBuiltInColoringTemplates(ensureById(ensureArray(appData.coloringTemplates), KA.constants.COLORING_TEMPLATES, "templateId"));
     appData.dailyRecords = ensureObject(appData.dailyRecords);
+    normalizeDailyRecords(appData);
     appData.starLedger = ensureArray(appData.starLedger);
     appData.eggInventory = ensureArray(appData.eggInventory);
     appData.eggSystem = ensureObject(appData.eggSystem);
@@ -416,7 +449,9 @@
     appData.eggSystem.dailyActivity = ensureObject(appData.eggSystem.dailyActivity);
     appData.companions = ensureArray(appData.companions);
     if (KA.companions && KA.companions.ensureCompanions) {
+      bootMark("COMPANIONS_INIT_STARTED");
       KA.companions.ensureCompanions(appData);
+      bootMark("COMPANIONS_INIT_COMPLETED");
     }
     appData.artworks = ensureArray(appData.artworks);
     syncArtworkRegionColors(appData);
@@ -431,10 +466,14 @@
     markMigration(appData, "prototype2_default_tasks_and_coloring");
     recalculateStarTotalsIfMissing(appData);
     if (KA.eggs && KA.eggs.syncEggInventory) {
+      bootMark("EGGS_INIT_STARTED");
       KA.eggs.syncEggInventory(appData);
+      bootMark("EGGS_INIT_COMPLETED");
     }
     if (KA.companions && KA.companions.ensureCompanions) {
+      bootMark("COMPANIONS_INIT_STARTED");
       KA.companions.ensureCompanions(appData);
+      bootMark("COMPANIONS_INIT_COMPLETED");
     }
     markMigration(appData, "prototype3_horse_and_eggs");
     markMigration(appData, "prototype4_audio_palette_svg");

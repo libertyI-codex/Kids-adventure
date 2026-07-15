@@ -101,6 +101,84 @@ body.startup-active {
   margin: 0 auto;
 }
 
+.boot-recovery-root[hidden] {
+  display: none !important;
+}
+
+.boot-recovery-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: block;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  padding: calc(18px + var(--safe-top)) 16px calc(18px + var(--safe-bottom));
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 22% 16%, rgba(255, 255, 255, 0.9), transparent 25%),
+    linear-gradient(160deg, #e2f6ff 0%, #fff8dc 58%, #f3fbef 100%);
+  pointer-events: auto;
+  visibility: visible;
+  opacity: 1;
+}
+
+.boot-recovery-panel {
+  width: min(520px, 100%);
+  margin: 24px auto;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.boot-recovery-panel h1 {
+  font-size: 1.55rem;
+}
+
+.boot-error-code,
+.boot-copy-status {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.boot-recovery-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.boot-recovery-button {
+  width: 100%;
+  min-height: 56px;
+  padding: 12px 14px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-button);
+  background: #fff;
+  color: var(--ink);
+  font-weight: 900;
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  cursor: pointer;
+}
+
+.boot-recovery-button:first-child {
+  border-color: var(--leaf);
+  background: var(--leaf);
+  color: #fff;
+}
+
+.boot-safe-screen {
+  padding-top: calc(8px + var(--safe-top));
+}
+
+.boot-safe-nav {
+  z-index: 40;
+}
+
 .startup-sparkles span {
   position: absolute;
   width: 10px;

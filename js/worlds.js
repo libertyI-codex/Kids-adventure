@@ -276,7 +276,11 @@
   function world(worldId) {
     var data = KA.state.getAppData();
     var id = safeWorldId(worldId || selectedWorldId());
+    data.worlds = data.worlds && typeof data.worlds === "object" && !Array.isArray(data.worlds) ? data.worlds : {};
     data.worlds[id] = data.worlds[id] || { worldId: id, id: id, placements: [] };
+    if (typeof data.worlds[id] !== "object") {
+      data.worlds[id] = { worldId: id, id: id, placements: [] };
+    }
     data.worlds[id].placements = data.worlds[id].placements || [];
     return data.worlds[id];
   }
