@@ -556,6 +556,7 @@
     markMigration(appData, "prototype12_egg_companions");
     markMigration(appData, "prototype13_coloring_settings");
     markMigration(appData, "prototype14_egg_care_first_hatch");
+    markMigration(appData, "prototype15_bird_companion_artwork");
     appData.updatedAt = appData.updatedAt || KA.date.localIsoString();
     changed = before !== JSON.stringify(appData);
     return { data: appData, changed: changed };
