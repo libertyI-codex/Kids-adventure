@@ -1386,6 +1386,183 @@ h3 {
   font-weight: 800;
 }
 
+.kitchen-screen {
+  display: grid;
+  gap: 14px;
+}
+
+.kitchen-tabs {
+  margin-bottom: 12px;
+}
+
+.kitchen-recipe-grid,
+.ingredient-grid,
+.kitchen-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.kitchen-card,
+.ingredient-choice {
+  min-width: 0;
+  padding: 12px;
+  border: 2px solid rgba(106, 155, 87, 0.28);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+
+.ingredient-choice {
+  min-height: 132px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  color: var(--ink);
+  touch-action: manipulation;
+}
+
+.ingredient-choice small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.ingredient-choice.is-selected {
+  border-color: #f59e0b;
+  background: #fff7d6;
+}
+
+.kitchen-icon,
+.ingredient-art {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 8px;
+}
+
+.kitchen-icon.small {
+  width: 72px;
+  height: 72px;
+  margin: 0;
+}
+
+.kitchen-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.kitchen-selected-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.kitchen-start-bar {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(106, 155, 87, 0.35);
+}
+
+.ingredient-category {
+  margin-top: 14px;
+}
+
+.kitchen-progress {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(106, 155, 87, 0.16);
+  overflow: hidden;
+}
+
+.kitchen-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7acb77, #facc15);
+}
+
+.kitchen-work-area {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 210px;
+  margin: 14px 0;
+  border: 2px dashed rgba(106, 155, 87, 0.34);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, #fffdf5, #eef8e8);
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.kitchen-work-art {
+  width: min(220px, 70vw);
+  height: min(220px, 70vw);
+  animation: kitchenCook 1.1s ease-in-out infinite;
+}
+
+.kitchen-work-tools {
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+}
+
+.kitchen-work-tools span {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #facc15;
+  opacity: 0.75;
+}
+
+.kitchen-work-tools span:nth-child(1) { top: 24px; left: 24px; }
+.kitchen-work-tools span:nth-child(2) { right: 34px; top: 48px; background: #7acb77; }
+.kitchen-work-tools span:nth-child(3) { left: 44%; bottom: 28px; background: #f472b6; }
+
+.kitchen-complete-panel {
+  text-align: center;
+}
+
+.kitchen-complete-dish {
+  width: min(240px, 72vw);
+  height: min(240px, 72vw);
+  margin: 0 auto;
+  animation: hatchPop 0.8s ease both;
+}
+
+.kitchen-fed-result {
+  text-align: center;
+}
+
+.kitchen-fed-art,
+.kitchen-fed-dish {
+  display: inline-grid;
+  place-items: center;
+  width: 110px;
+  height: 110px;
+  vertical-align: middle;
+}
+
+.kitchen-fed-dish {
+  animation: kitchenBite 1.8s ease both;
+}
+
+.kitchen-notice {
+  padding: 10px 12px;
+  border-radius: var(--radius-card);
+  background: rgba(255, 247, 214, 0.82);
+  color: #6b4a00;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
 .hidden {
   display: none !important;
 }
@@ -1455,6 +1632,17 @@ h3 {
   0% { opacity: 0; transform: scale(0.5) translateY(18px); }
   70% { opacity: 1; transform: scale(1.08) translateY(-4px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes kitchenCook {
+  0%, 100% { transform: rotate(-1deg) scale(1); }
+  50% { transform: rotate(2deg) scale(1.03); }
+}
+
+@keyframes kitchenBite {
+  0% { opacity: 1; transform: translateX(0) scale(1); }
+  45% { opacity: 1; transform: translateX(-12px) scale(0.8); }
+  100% { opacity: 0.35; transform: translateX(-18px) scale(0.35); }
 }
 
 @keyframes flutter {
@@ -1562,6 +1750,27 @@ h3 {
   .egg-care-button {
     min-height: 56px;
     white-space: nowrap;
+  }
+
+  .kitchen-recipe-grid,
+  .ingredient-grid,
+  .kitchen-feed-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .kitchen-card,
+  .ingredient-choice {
+    padding: 10px 8px;
+  }
+
+  .kitchen-selected-header {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .kitchen-screen .quick-actions {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -214,6 +214,10 @@
       companion.isFavorite = Boolean(companion.isFavorite);
       companion.firstHatchedAt = companion.firstHatchedAt || companion.lastHatchedAt || null;
       companion.lastHatchedAt = companion.lastHatchedAt || companion.firstHatchedAt || null;
+      companion.mealCount = Math.max(0, Number(companion.mealCount || 0));
+      companion.bondMealProgress = Math.max(0, Math.min(2, Number(companion.bondMealProgress || 0)));
+      companion.lastBondMealDate = companion.lastBondMealDate || null;
+      companion.lastFedAt = companion.lastFedAt || null;
     });
     var favoriteSeen = false;
     appData.companions.forEach(function (companion) {
@@ -263,7 +267,11 @@
         lastHatchedAt: hatchedAt,
         hatchCount: 1,
         bondLevel: 1,
-        isFavorite: false
+        isFavorite: false,
+        mealCount: 0,
+        bondMealProgress: 0,
+        lastBondMealDate: null,
+        lastFedAt: null
       };
       list.push(companion);
     } else {

@@ -294,16 +294,28 @@
   }
 
   function favoriteCompanionCard() {
-    if (!KA.companions || !KA.companions.favoriteCompanion) return "";
-    var companion = KA.companions.favoriteCompanion(KA.state.getAppData());
-    if (!companion) return "";
+    if (!KA.companions || !KA.companions.ensureCompanions) return "";
+    var data = KA.state.getAppData();
+    var owned = KA.companions.ensureCompanions(data).filter(function (item) {
+      return item && KA.companions.isValidSpeciesId(item.speciesId) && Number(item.hatchCount || 0) > 0;
+    });
+    var companion = KA.companions.favoriteCompanion(data) || owned[0];
+    if (!companion) {
+      return [
+        '<div class="panel panel-pad companion-home-card">',
+        '<div><p class="eyebrow">いっしょに ぼうけん</p><h3>とりさんキッチン</h3>',
+        '<p class="muted">たまごから なかまが うまれたら<br>ごはんを つくれるよ！</p></div>',
+        '</div>'
+      ].join("");
+    }
     var species = KA.companions.getSpecies(companion.speciesId);
     if (!species) return "";
     return [
       '<div class="panel panel-pad companion-home-card">',
       '<div class="companion-home-art">' + KA.companions.renderCompanion(species.id) + '</div>',
       '<div><p class="eyebrow">いっしょに ぼうけん</p><h3>' + escapeHtml(species.name) + '</h3>',
-      '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span></p></div>',
+      '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span></p>',
+      '<div class="quick-actions">' + button("ごはんを つくる", "btn-primary btn-small", 'data-route="kitchen"') + '</div></div>',
       '</div>'
     ].join("");
   }
@@ -1145,8 +1157,9 @@
         '<div class="companion-art">' + KA.companions.renderCompanion(species.id, { silhouette: !owned }) + '</div>',
         '<h3>' + escapeHtml(species.name) + '</h3>',
         owned ? '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span> <span class="badge">' + Number(companion.hatchCount || 1) + 'かい</span></p>' : '<p class="muted">まだ あっていないよ</p>',
+        owned ? '<p class="muted">ごはん ' + Number(companion.mealCount || 0) + 'かい / なかよしごはん ' + Number(companion.bondMealProgress || 0) + '/3</p>' : '',
         owned ? '<p class="muted">はじめて: ' + escapeHtml((companion.firstHatchedAt || "").slice(0, 10)) + '<br>さいご: ' + escapeHtml((companion.lastHatchedAt || "").slice(0, 10)) + '</p>' : '',
-        owned ? button(companion.isFavorite ? "お気に入りを はずす" : "お気に入り", companion.isFavorite ? "btn-sun btn-small" : "btn-soft btn-small", 'data-favorite-companion="' + escapeHtml(species.id) + '" data-favorite-enabled="' + (companion.isFavorite ? "false" : "true") + '"') : '',
+        owned ? '<div class="quick-actions">' + button("ごはんを あげる", "btn-primary btn-small", 'data-kitchen-for-companion="' + escapeHtml(species.id) + '"') + button(companion.isFavorite ? "お気に入りを はずす" : "お気に入り", companion.isFavorite ? "btn-sun btn-small" : "btn-soft btn-small", 'data-favorite-companion="' + escapeHtml(species.id) + '" data-favorite-enabled="' + (companion.isFavorite ? "false" : "true") + '"') + '</div>' : '',
         '</article>'
       ].join("");
     }).join("") + '</section>';
@@ -1224,6 +1237,333 @@
         var enabled = el.getAttribute("data-favorite-enabled") === "true";
         KA.companions.setFavorite(el.getAttribute("data-favorite-companion"), enabled);
         toast(enabled ? "いっしょに ぼうけんするよ" : "お気に入りを はずしたよ");
+        KA.router.render();
+      });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-kitchen-for-companion]"), function (el) {
+      el.addEventListener("click", function () {
+        KA.router.navigate("kitchen", { companionId: el.getAttribute("data-kitchen-for-companion") });
+      });
+    });
+  }
+
+  function kitchenOwnedCompanions(data) {
+    return KA.companions.ensureCompanions(data).filter(function (companion) {
+      return companion && KA.companions.isValidSpeciesId(companion.speciesId) && Number(companion.hatchCount || 0) > 0;
+    }).sort(function (a, b) {
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      var speciesA = KA.companions.getSpecies(a.speciesId);
+      var speciesB = KA.companions.getSpecies(b.speciesId);
+      return Number((speciesA && speciesA.displayOrder) || 0) - Number((speciesB && speciesB.displayOrder) || 0);
+    });
+  }
+
+  function kitchenNotice() {
+    return '<aside class="kitchen-notice">アプリの とりは ふしぎな とりだよ。<br>ほんものの とりに<br>ひとの ごはんを あげないでね。</aside>';
+  }
+
+  function renderKitchenTabs(ui) {
+    var tab = ui.kitchenTab === "book" ? "book" : "cook";
+    return [
+      '<div class="segmented kitchen-tabs">',
+      button("りょうりをつくる", tab === "cook" ? "btn-primary" : "btn-soft", 'data-kitchen-tab="cook"'),
+      button("りょうりずかん", tab === "book" ? "btn-primary" : "btn-soft", 'data-kitchen-tab="book"'),
+      '</div>'
+    ].join("");
+  }
+
+  function renderKitchenRecipeList() {
+    return [
+      '<section class="kitchen-recipe-grid">',
+      KA.kitchen.allRecipes().map(function (recipe) {
+        return [
+          '<article class="kitchen-card recipe-card">',
+          '<div class="kitchen-icon">' + KA.kitchen.renderRecipeDish(recipe.id) + '</div>',
+          '<h3>' + escapeHtml(recipe.name) + '</h3>',
+          '<p class="muted">ざいりょう ' + recipe.ingredientIds.length + 'こ</p>',
+          button("つくる", "btn-primary btn-small", 'data-select-recipe="' + escapeHtml(recipe.id) + '"'),
+          '</article>'
+        ].join("");
+      }).join(""),
+      '</section>'
+    ].join("");
+  }
+
+  function kitchenSelectedIngredientIds(ui) {
+    return Array.isArray(ui.kitchenSelectedIngredientIds) ? ui.kitchenSelectedIngredientIds : [];
+  }
+
+  function renderIngredientSelection(recipe, ui) {
+    var selected = kitchenSelectedIngredientIds(ui);
+    var required = recipe.ingredientIds;
+    var missing = required.filter(function (id) { return selected.indexOf(id) === -1; });
+    var categories = {};
+    KA.kitchen.allIngredients().forEach(function (ingredient) {
+      if (!categories[ingredient.category]) categories[ingredient.category] = [];
+      categories[ingredient.category].push(ingredient);
+    });
+    return [
+      '<section class="panel panel-pad kitchen-select-panel">',
+      '<div class="kitchen-selected-header">',
+      '<div class="kitchen-icon small">' + KA.kitchen.renderRecipeDish(recipe.id) + '</div>',
+      '<div><p class="eyebrow">つかうものを えらぼう</p><h2>' + escapeHtml(recipe.name) + '</h2>',
+      '<p class="muted">ひつような ざいりょう: ' + required.map(function (id) { return escapeHtml(KA.kitchen.getIngredient(id).name); }).join("、") + '</p></div>',
+      '</div>',
+      Object.keys(categories).map(function (category) {
+        return [
+          '<div class="ingredient-category"><h3>' + escapeHtml(category) + '</h3>',
+          '<div class="ingredient-grid">',
+          categories[category].map(function (ingredient) {
+            var isRequired = required.indexOf(ingredient.id) >= 0;
+            var isSelected = selected.indexOf(ingredient.id) >= 0;
+            return [
+              '<button class="ingredient-choice ' + (isSelected ? "is-selected" : "") + '" data-toggle-ingredient="' + escapeHtml(ingredient.id) + '" aria-pressed="' + (isSelected ? "true" : "false") + '">',
+              '<span class="ingredient-art">' + KA.kitchen.renderIngredient(ingredient.id) + '</span>',
+              '<span>' + escapeHtml(ingredient.name) + '</span>',
+              isRequired ? '<small>つかう</small>' : '<small>ほかのりょうり</small>',
+              '</button>'
+            ].join("");
+          }).join(""),
+          '</div></div>'
+        ].join("");
+      }).join(""),
+      '<div class="kitchen-start-bar">',
+      '<p><strong>' + (required.length - missing.length) + ' / ' + required.length + '</strong> えらんだよ</p>',
+      missing.length ? '<p class="muted">あと ' + missing.map(function (id) { return escapeHtml(KA.kitchen.getIngredient(id).name); }).join("、") + ' をえらぼう。</p>' : '<p class="muted">ぜんぶ そろったよ。</p>',
+      '<div class="quick-actions">' + button("りょうりを はじめる", missing.length ? "btn-soft" : "btn-primary", 'data-start-cooking="' + escapeHtml(recipe.id) + '"' + (missing.length ? " disabled" : "")) + button("りょうりを えらびなおす", "btn-soft", 'data-kitchen-clear-recipe') + '</div>',
+      '</div>',
+      '</section>'
+    ].join("");
+  }
+
+  function renderKitchenCooking(kitchen) {
+    var cooking = kitchen.currentCooking;
+    var recipe = KA.kitchen.getRecipe(cooking.recipeId);
+    var step = recipe.steps[cooking.currentStepIndex] || recipe.steps[recipe.steps.length - 1];
+    var progress = Math.min(recipe.steps.length, Number(cooking.currentStepIndex || 0));
+    return [
+      '<section class="panel panel-pad kitchen-work-panel">',
+      '<div class="kitchen-selected-header">',
+      '<div class="kitchen-icon">' + KA.kitchen.renderRecipeDish(recipe.id) + '</div>',
+      '<div><p class="eyebrow">ちょうりちゅう</p><h2>' + escapeHtml(recipe.name) + '</h2>',
+      '<p class="muted">工程 ' + (progress + 1) + ' / ' + recipe.steps.length + '</p></div>',
+      '</div>',
+      '<div class="kitchen-progress"><span style="width:' + Math.round((progress / recipe.steps.length) * 100) + '%"></span></div>',
+      '<div class="kitchen-work-area" data-kitchen-work-area role="button" tabindex="0" aria-label="調理を進める">',
+      '<div class="kitchen-work-art">' + KA.kitchen.renderRecipeDish(recipe.id) + '</div>',
+      '<div class="kitchen-work-tools" aria-hidden="true"><span></span><span></span><span></span></div>',
+      '</div>',
+      '<h3>' + escapeHtml(step.title) + '</h3>',
+      '<p class="muted" aria-live="polite">' + escapeHtml(step.instruction) + '</p>',
+      '<div class="quick-actions">',
+      button(step.type === "cut" ? "とん とん" : step.type === "mix" ? "まぜる" : step.type === "wrap" ? "つつむ" : step.type === "layer" ? "ここに おく" : "すすめる", "btn-primary", 'data-complete-kitchen-step'),
+      button("りょうりを やめる", "btn-soft", 'data-quit-cooking'),
+      '</div>',
+      '</section>',
+      kitchenNotice()
+    ].join("");
+  }
+
+  function renderKitchenFeed(kitchen, data) {
+    var cooking = kitchen.currentCooking;
+    var recipe = KA.kitchen.getRecipe(cooking.recipeId);
+    var owned = kitchenOwnedCompanions(data);
+    var preselected = cooking.preselectedCompanionId;
+    if (preselected) {
+      owned.sort(function (a, b) {
+        if (a.speciesId === preselected) return -1;
+        if (b.speciesId === preselected) return 1;
+        return 0;
+      });
+    }
+    return [
+      '<section class="panel panel-pad kitchen-complete-panel">',
+      '<div class="kitchen-complete-dish">' + KA.kitchen.renderRecipeDish(recipe.id) + '</div>',
+      '<h2>できあがり！</h2>',
+      '<p>' + escapeHtml(recipe.name) + 'が できたよ！</p>',
+      '<h3>だれに あげる？</h3>',
+      '<div class="companion-grid kitchen-feed-grid">',
+      owned.map(function (companion) {
+        var species = KA.companions.getSpecies(companion.speciesId);
+        return [
+          '<article class="companion-card is-owned">',
+          '<div class="companion-art">' + KA.companions.renderCompanion(species.id) + '</div>',
+          '<h3>' + escapeHtml(species.name) + '</h3>',
+          '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span></p>',
+          '<p class="muted">' + (companion.lastBondMealDate === KA.date.localDateKey() ? "きょうの なかよしごはん 済み" : "きょうは まだだよ") + '</p>',
+          button("このこに あげる", "btn-primary btn-small", 'data-feed-companion="' + escapeHtml(species.id) + '"'),
+          '</article>'
+        ].join("");
+      }).join(""),
+      '</div>',
+      '</section>',
+      kitchenNotice()
+    ].join("");
+  }
+
+  function renderKitchenBook(kitchen) {
+    var stats = kitchen.recipeStats || {};
+    return [
+      '<section class="kitchen-recipe-grid kitchen-book-grid">',
+      KA.kitchen.allRecipes().map(function (recipe) {
+        var item = stats[recipe.id];
+        var cooked = Boolean(item && Number(item.cookCount || 0) > 0);
+        return [
+          '<article class="kitchen-card recipe-card ' + (cooked ? "is-cooked" : "is-locked") + '">',
+          '<div class="kitchen-icon">' + KA.kitchen.renderRecipeDish(recipe.id, { silhouette: !cooked }) + '</div>',
+          '<h3>' + escapeHtml(recipe.name) + '</h3>',
+          cooked ? '<p class="muted">はじめて: ' + escapeHtml((item.firstCookedAt || "").slice(0, 10)) + '<br>さいご: ' + escapeHtml((item.lastCookedAt || "").slice(0, 10)) + '</p><p><span class="badge">' + Number(item.cookCount || 0) + 'かい</span> <span class="badge star">あげた ' + Number(item.fedCount || 0) + 'かい</span></p>' : '<p class="muted">まだ つくっていないよ</p>',
+          '</article>'
+        ].join("");
+      }).join(""),
+      '</section>',
+      kitchenNotice()
+    ].join("");
+  }
+
+  function renderKitchen(params) {
+    var data = KA.state.getAppData();
+    KA.companions.ensureCompanions(data);
+    var kitchen = KA.kitchen.ensureKitchen(data);
+    var ui = KA.state.getUiState();
+    var owned = kitchenOwnedCompanions(data);
+    if (params && params.companionId) {
+      ui.kitchenPreselectedCompanionId = params.companionId;
+      KA.state.saveUiState();
+      if (kitchen.currentCooking && !kitchen.currentCooking.preselectedCompanionId) {
+        kitchen.currentCooking.preselectedCompanionId = params.companionId;
+        KA.state.saveAppData();
+      }
+    }
+    ui.kitchenTab = ui.kitchenTab === "book" ? "book" : "cook";
+    var body;
+    if (!owned.length) {
+      body = '<section class="panel panel-pad"><h2>とりさんキッチン</h2><p>たまごから なかまが うまれたら<br>ごはんを つくれるよ！</p><div class="quick-actions">' + button("たまごを みる", "btn-primary", 'data-route="eggs"') + '</div></section>';
+      layout("とりさんキッチン", body);
+      return;
+    }
+    if (kitchen.currentCooking && KA.kitchen.isCookingComplete(kitchen.currentCooking)) {
+      body = '<div class="screen-header"><div><h2>とりさんキッチン</h2><p class="muted">できた料理を とりさんへ あげよう。</p></div>' + button("ホーム", "btn-soft btn-small", 'data-route="home"') + '</div>' + renderKitchenFeed(kitchen, data);
+    } else if (kitchen.currentCooking) {
+      body = '<div class="screen-header"><div><h2>とりさんキッチン</h2><p class="muted">途中から つづけられるよ。</p></div>' + button("ホーム", "btn-soft btn-small", 'data-route="home"') + '</div>' + renderKitchenCooking(kitchen);
+    } else if (ui.kitchenTab === "book") {
+      body = '<div class="screen-header"><div><h2>とりさんキッチン</h2><p class="muted">つくった料理を みられるよ。</p></div>' + button("ホーム", "btn-soft btn-small", 'data-route="home"') + '</div>' + renderKitchenTabs(ui) + renderKitchenBook(kitchen);
+    } else {
+      var recipe = ui.kitchenRecipeId ? KA.kitchen.getRecipe(ui.kitchenRecipeId) : null;
+      body = '<div class="screen-header"><div><h2>とりさんキッチン</h2><p class="muted">料理をつくって、とりさんに あげよう。</p></div>' + button("ホーム", "btn-soft btn-small", 'data-route="home"') + '</div>' + renderKitchenTabs(ui) + (recipe ? renderIngredientSelection(recipe, ui) : renderKitchenRecipeList()) + kitchenNotice();
+    }
+    layout("とりさんキッチン", body, { screenClass: "kitchen-screen" });
+    bindKitchenEvents();
+  }
+
+  function bindKitchenEvents() {
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-kitchen-tab]"), function (el) {
+      el.addEventListener("click", function () {
+        var ui = KA.state.getUiState();
+        ui.kitchenTab = el.getAttribute("data-kitchen-tab");
+        ui.kitchenRecipeId = null;
+        ui.kitchenSelectedIngredientIds = [];
+        KA.state.saveUiState();
+        KA.router.render();
+      });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-select-recipe]"), function (el) {
+      el.addEventListener("click", function () {
+        var ui = KA.state.getUiState();
+        ui.kitchenRecipeId = el.getAttribute("data-select-recipe");
+        ui.kitchenSelectedIngredientIds = [];
+        KA.state.saveUiState();
+        KA.router.render();
+      });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-toggle-ingredient]"), function (el) {
+      el.addEventListener("click", function () {
+        var ingredientId = el.getAttribute("data-toggle-ingredient");
+        var ui = KA.state.getUiState();
+        var recipe = KA.kitchen.getRecipe(ui.kitchenRecipeId);
+        var selected = kitchenSelectedIngredientIds(ui).slice();
+        if (!recipe || recipe.ingredientIds.indexOf(ingredientId) === -1) {
+          toast("このりょうりには つかわないよ");
+          return;
+        }
+        if (selected.indexOf(ingredientId) >= 0) {
+          selected = selected.filter(function (id) { return id !== ingredientId; });
+        } else {
+          selected.push(ingredientId);
+          playTone("egg");
+        }
+        ui.kitchenSelectedIngredientIds = selected;
+        KA.state.saveUiState();
+        KA.router.render();
+      });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-kitchen-clear-recipe]"), function (el) {
+      el.addEventListener("click", function () {
+        var ui = KA.state.getUiState();
+        ui.kitchenRecipeId = null;
+        ui.kitchenSelectedIngredientIds = [];
+        KA.state.saveUiState();
+        KA.router.render();
+      });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-start-cooking]"), function (el) {
+      el.addEventListener("click", function () {
+        var ui = KA.state.getUiState();
+        var result = KA.kitchen.startCooking(el.getAttribute("data-start-cooking"), kitchenSelectedIngredientIds(ui), ui.kitchenPreselectedCompanionId);
+        if (!result.ok) {
+          toast(result.message || "ざいりょうを えらんでね");
+          return;
+        }
+        ui.kitchenRecipeId = null;
+        ui.kitchenSelectedIngredientIds = [];
+        KA.state.saveUiState();
+        playTone("complete");
+        KA.router.render();
+      });
+    });
+    function completeStepOnce(source) {
+      if (source && source.disabled) return;
+      if (source) source.disabled = true;
+      var result = KA.kitchen.completeCurrentStep();
+      playTone(result.completed ? "complete" : "egg");
+      toast(result.completed ? "できあがり！" : "いいかんじ！");
+      KA.router.render();
+    }
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-complete-kitchen-step]"), function (el) {
+      el.addEventListener("click", function () { completeStepOnce(el); });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-kitchen-work-area]"), function (el) {
+      el.addEventListener("pointerdown", function (event) {
+        if (el.setPointerCapture && event.pointerId != null) {
+          try { el.setPointerCapture(event.pointerId); } catch (captureError) { /* Safari fallback */ }
+        }
+      });
+      el.addEventListener("pointerup", function () { completeStepOnce(el); });
+      el.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") completeStepOnce(el);
+      });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-quit-cooking]"), function (el) {
+      el.addEventListener("click", function () {
+        confirmDialog("りょうりを やめますか？", "ざいりょうやスターは へりません。", "りょうりを やめる", function () {
+          KA.kitchen.quitCooking();
+          toast("りょうりを やめました");
+          KA.router.render();
+        }, "つづける");
+      });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-feed-companion]"), function (el) {
+      el.addEventListener("click", function () {
+        el.disabled = true;
+        var result = KA.kitchen.feedCompletedCooking(el.getAttribute("data-feed-companion"));
+        if (!result.ok) {
+          toast(result.message || "なかまを えらんでね");
+          KA.router.render();
+          return;
+        }
+        playTone(result.levelUp ? "hatch" : "complete");
+        infoDialog("おいしい！", '<div class="kitchen-fed-result"><div class="kitchen-fed-art">' + KA.companions.renderCompanion(result.companion.speciesId) + '</div><div class="kitchen-fed-dish">' + KA.kitchen.renderRecipeDish(result.recipe.id) + '</div><h3>ごちそうさま！</h3><p>' + escapeHtml(result.recipe.name) + 'を よろこんで たべたよ。</p>' + (result.levelUp ? '<p><span class="badge star">もっと なかよしに なったよ！</span></p>' : '') + '</div>');
         KA.router.render();
       });
     });
@@ -1567,6 +1907,7 @@
       '<label class="field"><span>子どもの名前</span><input id="profile-name" value="' + escapeHtml(data.profile.displayName) + '"></label>' + button("名前を保存", "btn-primary", 'data-save-profile') + '</div>',
       renderStandaloneDiagnostics(),
       renderParentColoringSettings(),
+      '<div class="panel panel-pad"><h2>とりさんキッチンの注意</h2><p class="muted">このアプリでは、空想上の鳥が人間の料理を食べます。実際の鳥には、人間用に調理された料理を与えないでください。</p></div>',
       '<div class="panel panel-pad"><h2>今日のおしごと</h2><div class="grid">' + taskRows + '</div></div>',
       '<div class="panel panel-pad"><h2>今日の作品</h2><div class="grid">' + (artRows || '<p class="muted">今日の作品はまだありません。</p>') + '</div></div>',
       '<div class="panel panel-pad"><h2>設定</h2><label class="field"><span>BGM</span><select id="bgm-setting"><option value="false" ' + (!data.settings.bgmEnabled ? "selected" : "") + '>オフ</option><option value="true" ' + (data.settings.bgmEnabled ? "selected" : "") + '>オン</option></select></label><label class="field"><span>効果音</span><select id="effects-setting"><option value="true" ' + (data.settings.effectsEnabled !== false && data.settings.soundEnabled !== false ? "selected" : "") + '>オン</option><option value="false" ' + (data.settings.effectsEnabled === false || data.settings.soundEnabled === false ? "selected" : "") + '>オフ</option></select></label><label class="field"><span>アニメーション</span><select id="animation-setting"><option value="normal" ' + (data.settings.animationLevel !== "reduced" ? "selected" : "") + '>ふつう</option><option value="reduced" ' + (data.settings.animationLevel === "reduced" ? "selected" : "") + '>ひかえめ</option></select></label><p class="muted">' + escapeHtml(KA.constants.VERSION_LABEL + " / appVersion " + KA.constants.APP_VERSION) + '</p><div class="quick-actions">' + button("データ管理", "btn-soft", 'data-route="data"') + button("ホームへ戻る", "btn-primary", 'data-route="home"') + '</div></div>',
@@ -1731,6 +2072,7 @@
     KA.router.register("forest", renderForest);
     KA.router.register("summary", renderSummary);
     KA.router.register("eggs", renderEggs);
+    KA.router.register("kitchen", renderKitchen);
     KA.router.register("album", renderAlbum);
     KA.router.register("parent", renderParent);
     KA.router.register("data", renderData);
