@@ -1,0 +1,18 @@
+{
+  "name": "こどもの冒険",
+  "short_name": "こどもの冒険",
+  "description": "ぬりえと世界とたまごであそぶ、こどもの冒険アプリ",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFF8DC",
+  "theme_color": "#7ACB77",
+  "icons": [
+    {
+      "src": "./apple-touch-icon.png?v=10p16",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -85,10 +85,14 @@
       id: "companion_peacock",
       name: "くじゃく",
       displayOrder: 4,
-      designVersion: 2,
+      designVersion: 3,
       preferredWorldIds: ["world_castle", "world_sky_island", "world_island"],
       defaultColors: { body: "#2563EB", neck: "#38BDF8", tail: "#22C55E", eye: "#FACC15" },
-      viewBox: "0 0 210 170",
+      viewBox: "-105 -100 420 260",
+      peacockTailTransform: "translate(-105 -100) scale(2)",
+      peacockBodyTransform: "translate(52.5 45) scale(0.5)",
+      peacockTailScale: 2,
+      peacockBodyScale: 0.5,
       outer: [
         "M6 124 C8 48 59 4 105 32 C151 4 202 49 204 124 C165 88 129 90 111 119 C92 90 45 88 6 124 Z",
         "M96 47 C110 38 126 48 128 64 C130 82 119 96 105 96 C90 96 80 83 83 67 C84 58 88 51 96 47 Z"
@@ -296,11 +300,73 @@
     }).join("");
   }
 
+  function renderPeacockCompanion(species, opts) {
+    var outlineStroke = species.outlineStroke || "#28312d";
+    var innerStroke = species.innerStroke || "#5b4631";
+    var tailTransform = species.peacockTailTransform;
+    var bodyTransform = species.peacockBodyTransform;
+    var tailRegions = species.regions.filter(function (region) {
+      return region.id === "tail" || region.id === "tail_eyes";
+    });
+    var bodyRegions = species.regions.filter(function (region) {
+      return region.id !== "tail" && region.id !== "tail_eyes";
+    });
+    var tailInner = species.inner.slice(0, 5);
+    var bodyInner = species.inner.slice(5);
+    if (opts.silhouette) {
+      return [
+        '<svg class="companion-svg companion-silhouette companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+        '<g class="peacock-tail-group" transform="' + tailTransform + '">',
+        '<path d="' + species.outer[0] + '" fill="#1f2937"/>',
+        '</g>',
+        '<g class="peacock-body-group" transform="' + bodyTransform + '">',
+        '<path d="' + species.outer[1] + '" fill="#1f2937"/>',
+        '<path d="' + species.regions[1].d + '" fill="#1f2937"/>',
+        '<path d="' + species.regions[2].d + '" fill="#1f2937"/>',
+        '</g>',
+        '</svg>'
+      ].join("");
+    }
+    return [
+      '<svg class="companion-svg companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+      '<g class="body-regions">',
+      '<g class="peacock-tail-group" transform="' + tailTransform + '">',
+      tailRegions.map(function (region) {
+        return '<path d="' + region.d + '" fill="' + region.fill + '"/>';
+      }).join(""),
+      '</g>',
+      '<g class="peacock-body-group" transform="' + bodyTransform + '">',
+      bodyRegions.map(function (region) {
+        if (region.fill === "none") {
+          return '<path d="' + region.d + '" fill="none" stroke="' + (species.defaultColors.leg || "#92400E") + '" stroke-width="4" stroke-linecap="round"/>';
+        }
+        return '<path d="' + region.d + '" fill="' + region.fill + '"/>';
+      }).join(""),
+      '</g>',
+      '</g>',
+      '<g class="outer-outline" fill="none" stroke="' + outlineStroke + '" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">',
+      '<g class="peacock-tail-group" transform="' + tailTransform + '"><path d="' + species.outer[0] + '"/></g>',
+      '<g class="peacock-body-group" transform="' + bodyTransform + '"><path d="' + species.outer[1] + '"/></g>',
+      '</g>',
+      '<g class="inner-lines" fill="none" stroke="' + innerStroke + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">',
+      '<g class="peacock-tail-group" transform="' + tailTransform + '">' + tailInner.map(function (d) { return '<path d="' + d + '"/>'; }).join("") + '</g>',
+      '<g class="peacock-body-group" transform="' + bodyTransform + '">' + bodyInner.map(function (d) { return '<path d="' + d + '"/>'; }).join("") + '</g>',
+      '</g>',
+      '<g class="face-details peacock-body-group" transform="' + bodyTransform + '">',
+      species.face,
+      '</g>',
+      '</svg>'
+    ].join("");
+  }
+
   function renderCompanion(speciesId, options) {
     var opts = options || {};
     var species = getSpecies(speciesId) || allSpecies()[0];
     var outlineStroke = species.outlineStroke || "#28312d";
     var innerStroke = species.innerStroke || "#5b4631";
+    if (species.id === "companion_peacock") {
+      return renderPeacockCompanion(species, opts);
+    }
     if (opts.silhouette) {
       return [
         '<svg class="companion-svg companion-silhouette" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',

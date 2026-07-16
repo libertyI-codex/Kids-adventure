@@ -1401,6 +1401,63 @@
     ].join("");
   }
 
+  function standaloneScopeBase() {
+    var manifestHref = "./manifest.webmanifest";
+    var link = null;
+    if (document.querySelector) {
+      link = document.querySelector('link[rel="manifest"]');
+    }
+    if (link && link.getAttribute("href")) {
+      manifestHref = link.getAttribute("href");
+    }
+    try {
+      return new URL("./", new URL(manifestHref, global.location.href).href).href;
+    } catch (error) {
+      var current = String(global.location && global.location.href || "");
+      return current.split("#")[0].split("?")[0].replace(/[^\/]*$/, "");
+    }
+  }
+
+  function getStandaloneDiagnostics() {
+    var currentUrl = String(global.location && global.location.href || "");
+    var scopeBase = standaloneScopeBase();
+    var navigatorStandalone = false;
+    var displayModeStandalone = false;
+    try {
+      navigatorStandalone = !!(global.navigator && global.navigator.standalone);
+    } catch (error) {
+      navigatorStandalone = false;
+    }
+    try {
+      displayModeStandalone = !!(global.matchMedia && global.matchMedia("(display-mode: standalone)").matches);
+    } catch (error) {
+      displayModeStandalone = false;
+    }
+    return {
+      launchMode: navigatorStandalone || displayModeStandalone ? "独立アプリ" : "Safari",
+      currentUrl: currentUrl,
+      scopeBase: scopeBase,
+      scopeStatus: scopeBase && currentUrl.indexOf(scopeBase) === 0 ? "scope内" : "scope外",
+      navigatorStandalone: navigatorStandalone,
+      displayModeStandalone: displayModeStandalone
+    };
+  }
+
+  function renderStandaloneDiagnostics() {
+    var info = getStandaloneDiagnostics();
+    return [
+      '<div class="panel panel-pad" data-standalone-diagnostics>',
+      '<h2>起動診断</h2>',
+      '<p class="muted">ホーム画面から独立アプリとして開けているかを確認します。</p>',
+      '<div class="grid">',
+      '<div class="parent-row"><h3>起動方法</h3><p><span class="badge">' + escapeHtml(info.launchMode) + '</span></p><p class="muted">navigator.standalone: ' + (info.navigatorStandalone ? "true" : "false") + ' / display-mode: ' + (info.displayModeStandalone ? "standalone" : "browser") + '</p></div>',
+      '<div class="parent-row"><h3>現在URL</h3><p class="muted">' + escapeHtml(info.currentUrl) + '</p></div>',
+      '<div class="parent-row"><h3>scope判定</h3><p><span class="badge">' + escapeHtml(info.scopeStatus) + '</span></p><p class="muted">scope: ' + escapeHtml(info.scopeBase) + '</p></div>',
+      '</div>',
+      '</div>'
+    ].join("");
+  }
+
   function bindParentColoringSettings() {
     var panel = appEl.querySelector("[data-coloring-settings-panel]");
     if (!panel) return;
@@ -1508,6 +1565,7 @@
       '<div class="panel panel-pad"><h2>親モード</h2><p class="muted">通常タップでは入れない保護者用の画面です。</p>',
       '<p><span class="badge">現在のたまご ' + KA.eggs.eggCount() + 'こ</span></p>',
       '<label class="field"><span>子どもの名前</span><input id="profile-name" value="' + escapeHtml(data.profile.displayName) + '"></label>' + button("名前を保存", "btn-primary", 'data-save-profile') + '</div>',
+      renderStandaloneDiagnostics(),
       renderParentColoringSettings(),
       '<div class="panel panel-pad"><h2>今日のおしごと</h2><div class="grid">' + taskRows + '</div></div>',
       '<div class="panel panel-pad"><h2>今日の作品</h2><div class="grid">' + (artRows || '<p class="muted">今日の作品はまだありません。</p>') + '</div></div>',
