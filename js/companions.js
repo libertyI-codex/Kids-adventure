@@ -85,14 +85,14 @@
       id: "companion_peacock",
       name: "くじゃく",
       displayOrder: 4,
-      designVersion: 3,
+      designVersion: 4,
       preferredWorldIds: ["world_castle", "world_sky_island", "world_island"],
       defaultColors: { body: "#2563EB", neck: "#38BDF8", tail: "#22C55E", eye: "#FACC15" },
       viewBox: "-105 -100 420 260",
       peacockTailTransform: "translate(-105 -100) scale(2)",
-      peacockBodyTransform: "translate(52.5 45) scale(0.5)",
+      peacockBodyTransform: "translate(26.25 25) scale(0.75)",
       peacockTailScale: 2,
-      peacockBodyScale: 0.5,
+      peacockBodyScale: 0.75,
       outer: [
         "M6 124 C8 48 59 4 105 32 C151 4 202 49 204 124 C165 88 129 90 111 119 C92 90 45 88 6 124 Z",
         "M96 47 C110 38 126 48 128 64 C130 82 119 96 105 96 C90 96 80 83 83 67 C84 58 88 51 96 47 Z"
