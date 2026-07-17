@@ -112,6 +112,23 @@
         recipeStats: {},
         cookingHistory: []
       },
+      birdHouse: KA.birdHouse ? KA.birdHouse.defaultBirdHouse() : {
+        unlockedItemIds: ["house_perch_basic", "house_nest_basic", "house_cushion_small", "house_food_table"],
+        unlockedAtByItemId: {},
+        unseenItemIds: [],
+        placements: {
+          wallLeft: null,
+          wallRight: null,
+          floorLeft: "house_cushion_small",
+          floorRight: null,
+          perchLeft: "house_perch_basic",
+          perchRight: null,
+          centerTable: "house_food_table",
+          nestCorner: "house_nest_basic"
+        },
+        lastVisitedAt: null,
+        lastInteractedCompanionId: null
+      },
       coloringSettings: {
         order: KA.constants.COLORING_TEMPLATES.slice().sort(function (a, b) {
           return Number(a.sortOrder || 0) - Number(b.sortOrder || 0);
@@ -531,6 +548,10 @@
     if (KA.kitchen && KA.kitchen.ensureKitchen) {
       KA.kitchen.ensureKitchen(appData);
     }
+    appData.birdHouse = ensureObject(appData.birdHouse);
+    if (KA.birdHouse && KA.birdHouse.ensureBirdHouse) {
+      KA.birdHouse.ensureBirdHouse(appData);
+    }
     appData.artworks = ensureArray(appData.artworks);
     syncArtworkRegionColors(appData);
     appData.unlocks = ensureObject(appData.unlocks);
@@ -567,6 +588,7 @@
     markMigration(appData, "prototype14_egg_care_first_hatch");
     markMigration(appData, "prototype15_bird_companion_artwork");
     markMigration(appData, "prototype18_bird_kitchen");
+    markMigration(appData, "prototype19_bird_house");
     appData.updatedAt = appData.updatedAt || KA.date.localIsoString();
     changed = before !== JSON.stringify(appData);
     return { data: appData, changed: changed };

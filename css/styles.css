@@ -1563,6 +1563,255 @@ h3 {
   line-height: 1.6;
 }
 
+.bird-house-screen {
+  display: grid;
+  gap: 14px;
+}
+
+.bird-house-actions {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.bird-house-room {
+  position: relative;
+  min-height: min(520px, 112vw);
+  overflow: hidden;
+  border: 2px solid rgba(106, 155, 87, 0.25);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, #fff7d6 0%, #fffdf4 52%, #d8b579 53%, #c9985b 100%);
+}
+
+.bird-house-bg,
+.bird-house-wall-layer,
+.bird-house-back-floor-layer,
+.bird-house-bird-layer,
+.bird-house-front-layer,
+.bird-house-slot-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.bird-house-window {
+  position: absolute;
+  top: 9%;
+  left: 43%;
+  width: 14%;
+  aspect-ratio: 1;
+  border: 6px solid #f5d189;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 30%, #fff 0 12%, #bfdbfe 13% 100%);
+}
+
+.bird-house-light {
+  position: absolute;
+  inset: 12% 16% 26%;
+  background: radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0) 62%);
+  pointer-events: none;
+}
+
+.bird-house-furniture {
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.bird-house-layer-wall { z-index: 2; }
+.bird-house-layer-back { z-index: 3; }
+.bird-house-layer-front { z-index: 8; }
+.bird-house-slot-nestCorner,
+.bird-house-slot-floorLeft,
+.bird-house-slot-floorRight { width: 86px; height: 86px; }
+.bird-house-slot-centerTable { width: 112px; height: 112px; }
+
+.bird-house-furniture-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.bird-house-bird {
+  position: absolute;
+  z-index: 6;
+  width: 118px;
+  height: 118px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  transform: translate(-50%, -50%) scale(var(--bird-scale, 1));
+  transform-origin: center;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.bird-house-bird.is-focus::before {
+  content: "";
+  position: absolute;
+  inset: 16px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.34), rgba(250, 204, 21, 0));
+}
+
+.bird-house-bird-art {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.bird-house-bird-art .companion-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.bird-house-bird-label {
+  position: absolute;
+  left: 50%;
+  bottom: -24px;
+  width: max-content;
+  max-width: 150px;
+  padding: 4px 7px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1.25;
+  box-shadow: var(--shadow-soft);
+  transform: translateX(-50%);
+}
+
+.bird-house-heart {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  color: #f43f5e;
+  font-size: 1.8rem;
+  animation: houseHeart 1.1s ease both;
+}
+
+.bird-house-bird.reaction-tilt { animation: houseTilt 1.1s ease both; }
+.bird-house-bird.reaction-hop { animation: houseHop 1.1s ease both; }
+.bird-house-bird.reaction-wing { animation: houseWing 1.1s ease both; }
+.bird-house-bird.reaction-sleep { animation: houseSleep 1.1s ease both; }
+.bird-house-bird.reaction-heart { animation: houseHop 1.1s ease both; }
+
+.bird-house-reaction {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  bottom: 14px;
+  width: min(92%, 420px);
+  padding: 10px 12px;
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--ink);
+  text-align: center;
+  font-weight: 900;
+  box-shadow: var(--shadow);
+  transform: translateX(-50%);
+}
+
+.bird-house-maybe {
+  position: absolute;
+  z-index: 5;
+  top: 12px;
+  left: 12px;
+  margin: 0;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.bird-house-slot-button {
+  position: absolute;
+  z-index: 11;
+  min-width: 82px;
+  min-height: 54px;
+  padding: 6px 8px;
+  border: 2px dashed #f59e0b;
+  border-radius: 8px;
+  background: rgba(255, 247, 214, 0.92);
+  color: var(--ink);
+  font-weight: 900;
+  box-shadow: var(--shadow-soft);
+  transform: translate(-50%, -50%);
+}
+
+.bird-house-slot-button small {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.bird-house-slot-button.is-selected {
+  border-style: solid;
+  background: #fef3c7;
+}
+
+.bird-house-item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.bird-house-item-choice,
+.bird-house-catalog-card {
+  min-width: 0;
+  padding: 12px;
+  border: 2px solid rgba(106, 155, 87, 0.26);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--ink);
+  text-align: center;
+  font: inherit;
+  font-weight: 800;
+  box-shadow: var(--shadow-soft);
+}
+
+.bird-house-item-choice {
+  min-height: 148px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.bird-house-item-choice.is-selected {
+  border-color: #f59e0b;
+  background: #fff7d6;
+}
+
+.bird-house-item-art,
+.bird-house-catalog-art {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 8px;
+}
+
+.bird-house-empty {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 8px;
+  border: 2px dashed rgba(106, 155, 87, 0.35);
+  border-radius: 8px;
+  color: var(--muted);
+}
+
+.bird-house-new ul {
+  margin: 8px 0;
+  padding-left: 1.2em;
+}
+
 .hidden {
   display: none !important;
 }
@@ -1643,6 +1892,32 @@ h3 {
   0% { opacity: 1; transform: translateX(0) scale(1); }
   45% { opacity: 1; transform: translateX(-12px) scale(0.8); }
   100% { opacity: 0.35; transform: translateX(-18px) scale(0.35); }
+}
+
+@keyframes houseHeart {
+  0% { opacity: 0; transform: translateY(12px) scale(0.7); }
+  35% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-22px) scale(1.2); }
+}
+
+@keyframes houseTilt {
+  0%, 100% { transform: translate(-50%, -50%) scale(var(--bird-scale, 1)) rotate(0deg); }
+  45% { transform: translate(-50%, -50%) scale(var(--bird-scale, 1)) rotate(-6deg); }
+}
+
+@keyframes houseHop {
+  0%, 100% { transform: translate(-50%, -50%) scale(var(--bird-scale, 1)); }
+  45% { transform: translate(-50%, calc(-50% - 14px)) scale(var(--bird-scale, 1)); }
+}
+
+@keyframes houseWing {
+  0%, 100% { transform: translate(-50%, -50%) scale(var(--bird-scale, 1)) rotate(0deg); }
+  50% { transform: translate(-50%, -50%) scale(var(--bird-scale, 1)) rotate(4deg); }
+}
+
+@keyframes houseSleep {
+  0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(var(--bird-scale, 1)); }
+  50% { opacity: 0.76; transform: translate(-50%, -49%) scale(var(--bird-scale, 1)); }
 }
 
 @keyframes flutter {
@@ -1770,6 +2045,34 @@ h3 {
   }
 
   .kitchen-screen .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .bird-house-room {
+    min-height: 460px;
+  }
+
+  .bird-house-bird {
+    width: 96px;
+    height: 96px;
+  }
+
+  .bird-house-furniture {
+    width: 76px;
+    height: 76px;
+  }
+
+  .bird-house-slot-button {
+    min-width: 70px;
+    font-size: 0.78rem;
+  }
+
+  .bird-house-item-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .bird-house-actions {
     grid-template-columns: 1fr;
   }
 }
