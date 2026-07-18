@@ -14,6 +14,7 @@
   var eggCareEffect = null;
   var birdHouseReaction = null;
   var birdHouseTapCooldown = {};
+  var outingSelection = { companionId: null, destinationId: null, confirming: false };
   var startupState = {
     startupStarted: false,
     appInitialized: false,
@@ -331,27 +332,112 @@
     return '<div class="preview-wrap" aria-hidden="true"><svg viewBox="0 0 320 160"><rect width="320" height="160" fill="#BDEEFF"/><circle cx="270" cy="32" r="20" fill="#FACC15"/><path d="M0 104 C70 84 125 120 190 96 C250 74 290 92 320 80 L320 160 L0 160 Z" fill="#8BD17E"/><path d="M50 112 L70 54 L90 112 Z" fill="#4F9F54"/><path d="M210 116 L238 44 L266 116 Z" fill="#3F8F46"/><text x="18" y="145" fill="#2F7837" font-size="18" font-weight="800">せかいのさくひん ' + count + '</text></svg></div>';
   }
 
+  function renderCompanionStatus(data) {
+    var lines = [];
+    var egg = KA.eggs && KA.eggs.activeEgg ? KA.eggs.activeEgg(data) : null;
+    var activity = KA.eggs && KA.eggs.todayActivity ? KA.eggs.todayActivity(data) : {};
+    var careKeys = ["petted", "warmed", "sang", "jobBonus", "coloringBonus"];
+    var careCount = careKeys.filter(function (key) { return activity && activity[key] === true; }).length;
+    var owned = KA.companions && KA.companions.ensureCompanions ? KA.companions.ensureCompanions(data).filter(function (companion) {
+      return companion && KA.companions.isValidSpeciesId(companion.speciesId) && Number(companion.hatchCount || 0) > 0;
+    }) : [];
+    var companion = KA.companions && KA.companions.favoriteCompanion ? KA.companions.favoriteCompanion(data) : null;
+    companion = companion || owned[0] || null;
+
+    if (egg) {
+      var target = KA.eggs.targetForEgg ? KA.eggs.targetForEgg(egg) : Number(egg.targetGrowthPoints || 6);
+      var progress = Math.max(0, Math.min(target, Number(egg.growthPoints || 0)));
+      var remaining = Math.max(0, target - progress);
+      lines.push('<li><strong>たまご</strong><span>' + (remaining ? 'あと' + remaining + 'ポイントで うまれそう！' : 'うまれる じゅんびが できたよ！') + '</span></li>');
+    } else if (!owned.length) {
+      lines.push('<li><strong>たまご</strong><span>たまごから どんな なかまが<br>うまれるかな？</span></li>');
+    }
+
+    if (companion) {
+      var species = KA.companions.getSpecies(companion.speciesId);
+      if (species) {
+        lines.push('<li><strong>なかま</strong><span>' + escapeHtml(species.name) + 'と なかよしレベル' + Number(companion.bondLevel || 1) + '</span></li>');
+        lines.push('<li><strong>ごはん</strong><span>' + (companion.lastBondMealDate === KA.date.localDateKey() ? 'きょうは ごはんを たべたよ' : 'きょうは まだ ごはんを あげていないよ') + '</span></li>');
+      }
+    }
+
+    if (egg) lines.push('<li><strong>おせわ</strong><span>きょうの おせわは ' + careCount + '/5ポイント</span></li>');
+    if (KA.outings && KA.outings.ensureOuting) {
+      var outing = KA.outings.ensureOuting(data);
+      var trip = outing.activeTrip;
+      var tripCompanion = trip && KA.companions.getCompanion(data, trip.speciesId);
+      var tripSpecies = tripCompanion && KA.companions.getSpecies(tripCompanion.speciesId);
+      var destination = trip && KA.outings.getDestination(trip.destinationId);
+      var prep = KA.outings.preparationStatus(data);
+      if (trip && trip.status === "returned") lines.push('<li><strong>おでかけ</strong><span>' + escapeHtml(tripSpecies ? tripSpecies.name : "なかま") + 'が かえってきたよ！</span></li>');
+      else if (trip && trip.status === "traveling") lines.push('<li><strong>おでかけ</strong><span>' + escapeHtml(tripSpecies ? tripSpecies.name : "なかま") + 'は ' + escapeHtml(destination ? destination.name : "おでかけさき") + 'へ おでかけちゅう！</span></li>');
+      else if (owned.length && prep.complete) lines.push('<li><strong>おでかけ</strong><span>おでかけの じゅんびが できたよ！</span></li>');
+      else if (owned.length) lines.push('<li><strong>おでかけ</strong><span>おでかけまで あと' + (3 - prep.count) + 'つ！</span></li>');
+    }
+    if (!lines.length) lines.push('<li><strong>なかま</strong><span>これからの であいが たのしみだね！</span></li>');
+    return [
+      '<section class="panel panel-pad companion-status-card" aria-labelledby="companion-status-title">',
+      '<div class="section-heading"><div><p class="eyebrow">ホームで すぐに わかるよ</p><h2 id="companion-status-title">なかまのようす</h2></div></div>',
+      '<ul class="companion-status-list">' + lines.join("") + '</ul>',
+      '</section>'
+    ].join("");
+  }
+
+  function renderOutingHomeCard(data) {
+    if (!KA.outings || !KA.outings.ensureOuting) return "";
+    var synced = KA.outings.syncTripStatus(data, KA.date.localDateKey());
+    if (synced.changed) KA.state.saveAppData();
+    var outing = KA.outings.ensureOuting(data);
+    var owned = KA.companions.ensureCompanions(data).filter(function (companion) {
+      return companion && KA.companions.isValidSpeciesId(companion.speciesId) && Number(companion.hatchCount || 0) > 0;
+    });
+    var prep = KA.outings.preparationStatus(data);
+    var trip = outing.activeTrip;
+    var species = trip ? KA.companions.getSpecies(trip.speciesId) : null;
+    var destination = trip ? KA.outings.getDestination(trip.destinationId) : null;
+    var departedToday = outing.history.some(function (item) { return item.departedDateKey === KA.date.localDateKey(); });
+    var message;
+    var action;
+    if (!owned.length) {
+      message = "たまごから なかまが うまれたら<br>いっしょに おでかけできるよ！";
+      action = button("おでかけする", "btn-soft", 'disabled aria-disabled="true"');
+    } else if (trip && trip.status === "returned") {
+      message = "おかえり！<br>おみやげが あるよ！";
+      action = button("おみやげを うけとる", "btn-primary", 'data-route="outing"');
+    } else if (trip) {
+      message = escapeHtml(species ? species.name : "なかま") + "は " + escapeHtml(destination ? destination.name : "おでかけさき") + "へ<br>おでかけしているよ！<br><small>しゅっぱつ: " + escapeHtml(KA.date.formatDisplayDate(trip.departedDateKey)) + "</small>";
+      action = button("ようすを みる", "btn-soft", 'data-route="outing"');
+    } else if (departedToday) {
+      message = "きょうの おでかけは おしまい。<br>また あした いこうね！";
+      action = button("おでかけの きろく", "btn-soft", 'data-route="outing"');
+    } else {
+      message = prep.complete ? "おでかけの じゅんびが できたよ！" : "おでかけの じゅんびを しよう！";
+      action = button(prep.complete ? "おでかけする" : "じゅんびを みる", prep.complete ? "btn-primary" : "btn-soft", 'data-route="outing"');
+    }
+    return [
+      '<section class="panel panel-pad outing-home-card" aria-labelledby="outing-home-title">',
+      '<div class="section-heading"><div><p class="eyebrow">いっしょに いこう</p><h2 id="outing-home-title">なかまと おでかけ</h2></div></div>',
+      '<p>' + message + '</p>',
+      owned.length && !trip ? '<div class="outing-prep-mini" aria-label="おでかけの準備 ' + prep.count + 'つ完了"><span>' + (prep.job ? "✓" : "□") + ' おしごと</span><span>' + (prep.care ? "✓" : "□") + ' おせわ</span><span>' + (prep.food ? "✓" : "□") + ' ごはん</span></div>' : '',
+      '<div class="quick-actions">' + action + '</div>',
+      '</section>'
+    ].join("");
+  }
+
   function renderHome() {
     var data = KA.state.getAppData();
     var record = KA.state.getDailyRecord();
     var tasks = KA.tasks.activeTasks();
-    var completed = KA.tasks.completedToday();
+    var completed = KA.tasks.completedDailyTasks();
     var body = [
-      '<section class="hero">',
+      '<section class="home-flow">',
+      '<div class="home-star-strip" role="group" aria-label="スターの数">',
+      '<div class="home-star-mini" aria-label="つかえるほし ' + Number(data.profile.starTotals.spendableStars || 0) + 'こ"><span>つかえるほし</span><strong>⭐' + Number(data.profile.starTotals.spendableStars || 0) + '</strong></div>',
+      '<div class="home-star-mini" aria-label="あつめたほし ' + Number(data.profile.starTotals.lifetimeStars || 0) + 'こ"><span>あつめたほし</span><strong>⭐' + Number(data.profile.starTotals.lifetimeStars || 0) + '</strong></div>',
+      '</div>',
+      renderCompanionStatus(data),
+      renderOutingHomeCard(data),
       '<div class="panel panel-pad">',
-      '<div class="home-stats">',
-      '<div class="stat"><span class="stat-label">つかえるほし</span><span class="stat-value">⭐ ' + data.profile.starTotals.spendableStars + '</span></div>',
-      '<div class="stat secondary"><span class="stat-label">あつめたほし</span><span class="stat-value">⭐ ' + data.profile.starTotals.lifetimeStars + '</span></div>',
-      '</div>',
-      '<div class="quick-actions">',
-      button("⭐ おしごと", "btn-primary", 'data-route="tasks"'),
-      button("🎨 ぬりえ", "btn-sun", 'data-route="coloring-list"'),
-      button("🌍 せかい", "btn-soft", 'data-route="forest"'),
-      button("🖼️ さくひん", "btn-soft", 'data-route="album"'),
-      '</div>',
-      '</div>',
-      '<div class="panel panel-pad">',
-      '<h2>きょうのようす</h2>',
       '<p><span class="badge">おしごと ' + completed.length + ' / ' + tasks.length + '</span> <span class="badge">さくひん ' + record.artworkIds.length + '</span></p>',
       button("🥚 ふしぎなたまご " + KA.eggs.eggCount() + "こ", "btn-soft egg-button", 'data-route="eggs"'),
       forestMiniPreview(),
@@ -365,7 +451,7 @@
 
   function renderTasks() {
     var tasks = KA.tasks.activeTasks();
-    var completed = KA.tasks.completedToday();
+    var completed = KA.tasks.completedDailyTasks();
     var html = [
       '<div class="screen-header"><div><h2>きょうのおしごと</h2><p class="muted">できたら大きなボタンをおしてね。</p></div><div>' + starPill() + '</div></div>',
       '<section class="grid">'
@@ -374,8 +460,9 @@
       var done = KA.tasks.isCompleted(task.taskId);
       html.push([
         '<article class="task-card ' + (done ? "is-done" : "") + '">',
-        '<div class="task-icon">' + escapeHtml(task.icon || "⭐") + '</div>',
+        '<div class="task-icon">' + KA.tasks.renderTaskIcon(task) + '</div>',
         '<div><h3>' + escapeHtml(task.title) + '</h3>',
+        task.description ? '<p class="muted task-description">' + escapeHtml(task.description) + '</p>' : '',
         '<p><span class="badge star">⭐ ' + Number(task.rewardStars || 0) + '</span> ' + (done ? '<span class="badge">できた</span>' : '<span class="badge">まだだよ</span>') + '</p>',
         '<div class="task-actions">' + button(done ? "できたよ" : "できた", done ? "btn-soft" : "btn-primary", done ? "disabled" : 'data-complete-task="' + escapeHtml(task.taskId) + '"') + '</div>',
         '</div></article>'
@@ -1077,7 +1164,12 @@
       '<h2>きょうもがんばったね</h2>',
       '<p class="muted">' + escapeHtml(KA.date.formatDisplayDate(record.localDate)) + '</p>',
       '<h3>できたおしごと</h3><ul class="summary-list">',
-      completed.length ? completed.map(function (item) { return '<li>' + escapeHtml((taskMap[item.taskId] || {}).icon || "⭐") + ' ' + escapeHtml((taskMap[item.taskId] || {}).title || item.taskId) + '</li>'; }).join("") : '<li>できたことがここに出るよ</li>',
+      completed.length ? completed.map(function (item) {
+        var task = taskMap[item.taskId] || null;
+        var title = task ? task.title : (item.taskTitle || "以前のおしごと");
+        var icon = task ? KA.tasks.renderTaskIcon(task) : escapeHtml(item.taskIcon || "⭐");
+        return '<li><span class="summary-task-icon" aria-hidden="true">' + icon + '</span> ' + escapeHtml(title) + '</li>';
+      }).join("") : '<li>できたことがここに出るよ</li>',
       '</ul><p><span class="badge star">きょうのほし ' + Number(record.earnedStarsToday || 0) + '</span></p>',
       artworkWorldMessages ? '<h3>せかいにふえたなかま</h3><ul class="summary-list">' + artworkWorldMessages + '</ul>' : '',
       '<h3>きょうのさくひん</h3><div class="album-grid">',
@@ -1333,6 +1425,7 @@
               '<span class="ingredient-art">' + KA.kitchen.renderIngredient(ingredient.id) + '</span>',
               '<span>' + escapeHtml(ingredient.name) + '</span>',
               isRequired ? '<small>つかう</small>' : '<small>ほかのりょうり</small>',
+              KA.kitchen.getIngredientInventory(ingredient.id) ? '<small class="ingredient-souvenir-count">おみやげ ' + KA.kitchen.getIngredientInventory(ingredient.id) + 'こ</small>' : '',
               '</button>'
             ].join("");
           }).join(""),
@@ -1580,6 +1673,154 @@
     });
   }
 
+  function outingPreparationPanel(prep) {
+    return [
+      '<section class="panel panel-pad outing-preparation" aria-labelledby="outing-preparation-title">',
+      '<h2 id="outing-preparation-title">おでかけの じゅんび</h2>',
+      '<div class="outing-prep-list">',
+      '<p><strong>' + (prep.job ? "✓" : "□") + ' おしごと</strong><span>' + (prep.job ? "できたよ" : "1つ できたら じゅんびOK") + '</span></p>',
+      '<p><strong>' + (prep.care ? "✓" : "□") + ' おせわ</strong><span>' + (prep.care ? "できたよ" : "なでる・あたためる・うたう") + '</span></p>',
+      '<p><strong>' + (prep.food ? "✓" : "□") + ' ごはん</strong><span>' + (prep.food ? "できたよ" : "なかまへ ごはんを あげよう") + '</span></p>',
+      '</div>',
+      '<p class="muted">' + prep.count + ' / 3 じゅんびできたよ</p>',
+      '</section>'
+    ].join("");
+  }
+
+  function outingRewardArt(rewardPlan) {
+    if (!rewardPlan) return "";
+    if (rewardPlan.type === "houseItem") return '<div class="outing-reward-art">' + KA.birdHouse.renderFurniture(rewardPlan.itemId) + '</div>';
+    if (rewardPlan.type === "ingredients") {
+      return '<div class="outing-reward-items">' + rewardPlan.items.map(function (item) {
+        return '<span>' + KA.kitchen.renderIngredient(item.ingredientId) + '<small>' + escapeHtml(KA.outings.rewardLabel({ type: "ingredients", items: [item] })) + '</small></span>';
+      }).join("") + '</div>';
+    }
+    return '<div class="outing-star-reward" aria-hidden="true">⭐</div>';
+  }
+
+  function outingHistoryHtml(outing) {
+    var history = (outing.history || []).slice(-20).reverse();
+    return [
+      '<section class="panel panel-pad outing-history">',
+      '<h2>おでかけの きろく</h2>',
+      history.length ? '<div class="outing-history-list">' + history.map(function (trip) {
+        var species = KA.companions.getSpecies(trip.speciesId);
+        var destination = KA.outings.getDestination(trip.destinationId);
+        return '<article><strong>' + escapeHtml(KA.date.formatDisplayDate(trip.departedDateKey)) + '</strong><span>' + escapeHtml(species ? species.name : "むかしの なかま") + 'と ' + escapeHtml(destination ? destination.name : "むかしの おでかけさき") + '</span><small>' + escapeHtml(KA.outings.rewardLabel(trip.rewardPlan)) + ' / うけとりずみ</small></article>';
+      }).join("") + '</div>' : '<p class="muted">まだ きろくは ないよ。</p>',
+      '</section>'
+    ].join("");
+  }
+
+  function renderActiveOuting(data, outing, trip) {
+    var species = KA.companions.getSpecies(trip.speciesId);
+    var destination = KA.outings.getDestination(trip.destinationId);
+    var returned = trip.status === "returned";
+    return [
+      '<section class="panel panel-pad outing-active ' + (returned ? "is-returned" : "is-traveling") + '">',
+      '<p class="eyebrow">' + (returned ? "おかえり！" : "おでかけちゅう") + '</p>',
+      '<div class="outing-active-scene">',
+      '<div class="outing-destination-art">' + KA.outings.renderDestinationIcon(destination ? destination.id : "") + '</div>',
+      '<div class="outing-companion-art">' + (species ? KA.companions.renderCompanion(species.id) : "") + '</div>',
+      '</div>',
+      '<h2>' + escapeHtml(species ? species.name : "なかま") + (returned ? 'が かえってきたよ！' : 'は ' + escapeHtml(destination ? destination.name : "おでかけさき") + 'へ<br>おでかけしているよ！') + '</h2>',
+      returned ? '<p>' + escapeHtml(KA.outings.returnMessage(trip)) + '</p><p><strong>おみやげ: ' + escapeHtml(KA.outings.rewardLabel(trip.rewardPlan)) + '</strong></p>' + outingRewardArt(trip.rewardPlan) + '<div class="quick-actions">' + button("おみやげを うけとる", "btn-primary", 'data-claim-outing="' + escapeHtml(trip.tripId) + '"') + '</div>' : '<p>' + escapeHtml(destination ? destination.departureMessage : "たのしんでいるよ！") + '</p><p class="muted">' + escapeHtml(KA.date.formatDisplayDate(trip.departedDateKey)) + 'に しゅっぱつ<br>つぎの ひに また あおうね！</p>',
+      '</section>',
+      outingHistoryHtml(outing)
+    ].join("");
+  }
+
+  function renderOutingSelection(data, outing, prep) {
+    var eligible = KA.outings.eligibleCompanions(data);
+    var departedToday = (outing.history || []).some(function (trip) { return trip.departedDateKey === KA.date.localDateKey(); });
+    if (departedToday) return '<section class="panel panel-pad"><h2>きょうは おでかけしたよ</h2><p>また あした いっしょに いこうね！</p></section>' + outingHistoryHtml(outing);
+    if (!prep.complete) return outingPreparationPanel(prep) + outingHistoryHtml(outing);
+    if (!eligible.length) return outingPreparationPanel(prep) + '<section class="panel panel-pad"><h2>いっしょに いく なかま</h2><p>きょう ごはんを たべた なかまから えらべるよ！</p><div class="quick-actions">' + button("ごはんを つくる", "btn-primary", 'data-route="kitchen"') + '</div></section>' + outingHistoryHtml(outing);
+    if (!eligible.some(function (companion) { return companion.speciesId === outingSelection.companionId; })) outingSelection.companionId = eligible[0].speciesId;
+    if (!KA.outings.getDestination(outingSelection.destinationId)) outingSelection.destinationId = KA.outings.allDestinations()[0].id;
+    var selectedCompanion = eligible.filter(function (companion) { return companion.speciesId === outingSelection.companionId; })[0];
+    var selectedSpecies = selectedCompanion && KA.companions.getSpecies(selectedCompanion.speciesId);
+    var selectedDestination = KA.outings.getDestination(outingSelection.destinationId);
+    if (outingSelection.confirming) {
+      return [
+        '<section class="panel panel-pad outing-confirm">',
+        '<p class="eyebrow">しゅっぱつの かくにん</p>',
+        '<div class="outing-confirm-grid"><div>' + KA.companions.renderCompanion(selectedSpecies.id) + '</div><div>' + KA.outings.renderDestinationIcon(selectedDestination.id) + '</div></div>',
+        '<h2>' + escapeHtml(selectedSpecies.name) + 'と ' + escapeHtml(selectedDestination.name) + 'へ<br>おでかけする？</h2>',
+        '<p>主なおみやげ: ' + escapeHtml(selectedDestination.rewardType === "stars" ? "スター" : selectedDestination.rewardType === "houseItem" ? "おへやの かざり" : "りょうりの そざい") + '</p>',
+        '<p class="muted">つぎの ひに かえってくるよ！</p>',
+        '<div class="quick-actions">' + button("しゅっぱつ！", "btn-primary", 'data-depart-outing') + button("もどる", "btn-soft", 'data-outing-confirm-back') + '</div>',
+        '</section>',
+        outingHistoryHtml(outing)
+      ].join("");
+    }
+    return [
+      outingPreparationPanel(prep),
+      '<section class="panel panel-pad"><h2>いっしょに いく なかま</h2><p class="muted">きょう ごはんを たべた なかまから えらべるよ！</p><div class="outing-companion-grid">',
+      eligible.map(function (companion) {
+        var species = KA.companions.getSpecies(companion.speciesId);
+        var selected = companion.speciesId === outingSelection.companionId;
+        return '<button class="outing-companion-choice ' + (selected ? "is-selected" : "") + '" data-outing-companion="' + escapeHtml(companion.speciesId) + '" aria-label="' + escapeHtml(species.name) + 'と出かける" aria-pressed="' + (selected ? "true" : "false") + '"><span>' + KA.companions.renderCompanion(species.id) + '</span><strong>' + escapeHtml(species.name) + '</strong><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ごはん済み' + (companion.isFavorite ? ' / お気に入り' : '') + '</small></button>';
+      }).join(""),
+      '</div></section>',
+      '<section class="panel panel-pad"><h2>どこへ いく？</h2><div class="outing-destination-grid">',
+      KA.outings.allDestinations().map(function (destination) {
+        var selected = destination.id === outingSelection.destinationId;
+        return '<button class="outing-destination-choice ' + (selected ? "is-selected" : "") + '" data-outing-destination="' + escapeHtml(destination.id) + '" aria-label="' + escapeHtml(destination.name) + 'へ行く" aria-pressed="' + (selected ? "true" : "false") + '"><span>' + KA.outings.renderDestinationIcon(destination.id) + '</span><strong>' + escapeHtml(destination.name) + '</strong><small>' + escapeHtml(destination.description).replace(/\n/g, '<br>') + '</small></button>';
+      }).join(""),
+      '</div><div class="quick-actions">' + button("しゅっぱつを かくにん", "btn-primary", 'data-confirm-outing') + '</div></section>',
+      outingHistoryHtml(outing)
+    ].join("");
+  }
+
+  function renderOuting() {
+    var data = KA.state.getAppData();
+    KA.companions.ensureCompanions(data);
+    var synced = KA.outings.syncTripStatus(data, KA.date.localDateKey());
+    if (synced.changed) KA.state.saveAppData();
+    var outing = KA.outings.ensureOuting(data);
+    var owned = KA.companions.ensureCompanions(data).filter(function (companion) { return companion && Number(companion.hatchCount || 0) > 0; });
+    var body = '<div class="screen-header"><div><h2>なかまと おでかけ</h2><p class="muted">じゅんびをして、つぎのひの おみやげを たのしみにしよう。</p></div>' + button("ホーム", "btn-soft btn-small", 'data-route="home"') + '</div>';
+    if (!owned.length) body += '<section class="panel panel-pad"><h2>なかまと おでかけ</h2><p>たまごから なかまが うまれたら<br>いっしょに おでかけできるよ！</p><div class="quick-actions">' + button("たまごを みる", "btn-primary", 'data-route="eggs"') + '</div></section>' + outingHistoryHtml(outing);
+    else if (outing.activeTrip) body += renderActiveOuting(data, outing, outing.activeTrip);
+    else body += renderOutingSelection(data, outing, KA.outings.preparationStatus(data));
+    layout("なかまと おでかけ", body, { screenClass: "outing-screen" });
+    bindOutingEvents();
+  }
+
+  function bindOutingEvents() {
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-outing-companion]"), function (el) {
+      el.addEventListener("click", function () { outingSelection.companionId = el.getAttribute("data-outing-companion"); outingSelection.confirming = false; KA.router.render(); });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-outing-destination]"), function (el) {
+      el.addEventListener("click", function () { outingSelection.destinationId = el.getAttribute("data-outing-destination"); outingSelection.confirming = false; KA.router.render(); });
+    });
+    var confirm = appEl.querySelector("[data-confirm-outing]");
+    if (confirm) confirm.addEventListener("click", function () { outingSelection.confirming = true; KA.router.render(); });
+    var back = appEl.querySelector("[data-outing-confirm-back]");
+    if (back) back.addEventListener("click", function () { outingSelection.confirming = false; KA.router.render(); });
+    var depart = appEl.querySelector("[data-depart-outing]");
+    if (depart) depart.addEventListener("click", function () {
+      depart.disabled = true;
+      var result = KA.outings.startTrip(outingSelection.companionId, outingSelection.destinationId);
+      if (!result.ok) { toast(result.reason === "already_departed_today" ? "きょうは もう おでかけしたよ" : "しゅっぱつの じゅんびを かくにんしてね"); KA.router.render(); return; }
+      outingSelection = { companionId: null, destinationId: null, confirming: false };
+      playTone("complete");
+      toast("しゅっぱつ！ つぎのひに また あおうね！");
+      KA.router.render();
+    });
+    var claim = appEl.querySelector("[data-claim-outing]");
+    if (claim) claim.addEventListener("click", function () {
+      claim.disabled = true;
+      var result = KA.outings.claimOutingReward(claim.getAttribute("data-claim-outing"));
+      if (!result.ok) { toast(result.reason === "already_claimed" ? "おみやげは うけとりずみだよ" : "まだ うけとれないよ"); KA.router.render(); return; }
+      playTone("star");
+      var species = KA.companions.getSpecies(result.trip.speciesId);
+      infoDialog("やったね！", '<div class="outing-claim-result"><div>' + (species ? KA.companions.renderCompanion(species.id) : "") + '</div>' + outingRewardArt(result.reward) + '<h3>' + escapeHtml(species ? species.name : "なかま") + 'が かえってきたよ！</h3><p>' + escapeHtml(KA.outings.returnMessage(result.trip)) + '</p><p><strong>' + escapeHtml(KA.outings.rewardLabel(result.reward)) + 'を うけとったよ！</strong></p><p>また いっしょに いこうね！</p></div>');
+      KA.router.render();
+    });
+  }
+
   function birdHouseOwnedCompanions(data) {
     return KA.companions.ensureCompanions(data).filter(function (companion) {
       return companion && KA.companions.isValidSpeciesId(companion.speciesId) && Number(companion.hatchCount || 0) > 0;
@@ -1660,6 +1901,9 @@
     var opts = options || {};
     var owned = birdHouseOwnedCompanions(data);
     var focusId = opts.focusSpeciesId;
+    var awayId = KA.outings && KA.outings.travelingSpeciesId ? KA.outings.travelingSpeciesId(data) : null;
+    var awaySpecies = awayId ? KA.companions.getSpecies(awayId) : null;
+    var visibleCount = KA.birdHouse.companionLayout(data, focusId).length;
     var missingMessage = owned.length > 0 && owned.length < KA.companions.allSpecies().length ? '<p class="bird-house-maybe">まだ だれかが くるかも？</p>' : '';
     return [
       '<section class="bird-house-room panel">',
@@ -1670,6 +1914,7 @@
       '<div class="bird-house-front-layer">' + renderBirdHouseFurnitureLayer(placements, "floor", "front") + '</div>',
       opts.decorate ? '<div class="bird-house-slot-layer">' + renderBirdHouseSlotButtons(placements, opts.selectedSlotId) + '</div>' : '',
       birdHouseReaction ? '<div class="bird-house-reaction" aria-live="polite">' + escapeHtml(birdHouseReaction.message) + '</div>' : '',
+      awaySpecies ? '<div class="bird-house-away-message" aria-live="polite">' + (visibleCount ? escapeHtml(awaySpecies.name) + 'は おでかけちゅう！' : 'いまは おでかけちゅうだよ！<br>かえってくるのを まとうね') + '</div>' : '',
       missingMessage,
       '</section>'
     ].join("");
@@ -2202,15 +2447,167 @@
     }
   }
 
+  function renderParentJobSettings() {
+    var data = KA.state.getAppData();
+    var settings = KA.tasks.ensureJobSettings(data);
+    var tasks = KA.tasks.allTasks();
+    var rows = tasks.map(function (task, index) {
+      var taskId = escapeHtml(task.taskId);
+      var title = escapeHtml(task.title);
+      var enabled = settings.enabledJobIds.indexOf(task.taskId) >= 0;
+      var done = KA.tasks.isCompleted(task.taskId);
+      return [
+        '<div class="parent-job-row" data-parent-job-row data-job-id="' + taskId + '">',
+        '<div class="parent-job-main">',
+        '<div class="task-icon parent-job-icon">' + KA.tasks.renderTaskIcon(task) + '</div>',
+        '<div><h3>' + title + '</h3>',
+        '<p><span class="badge">' + (task.isCustom ? 'オリジナル' : '標準') + '</span> <span class="badge ' + (enabled ? 'is-enabled' : '') + '">' + (enabled ? '有効' : 'お休み中') + '</span></p>',
+        task.description ? '<p class="muted">' + escapeHtml(task.description) + '</p>' : '',
+        '</div></div>',
+        '<div class="parent-job-controls">',
+        '<label class="job-enabled-control"><input type="checkbox" data-parent-job-enabled="' + taskId + '" ' + (enabled ? 'checked' : '') + ' aria-label="' + title + 'を有効またはお休み中にする"><span>' + (enabled ? '有効' : 'お休み中') + '</span></label>',
+        '<div class="job-order-controls">',
+        button('上へ', 'btn-soft btn-small', 'data-parent-job-up="' + taskId + '" aria-label="' + title + 'を上へ移動" ' + (index === 0 ? 'disabled' : '')),
+        button('下へ', 'btn-soft btn-small', 'data-parent-job-down="' + taskId + '" aria-label="' + title + 'を下へ移動" ' + (index === tasks.length - 1 ? 'disabled' : '')),
+        '</div>',
+        task.isCustom ? '<div class="job-edit-controls">' + button('編集', 'btn-soft btn-small', 'data-edit-custom-job="' + taskId + '"') + button('削除', 'btn-soft btn-small', 'data-delete-custom-job="' + taskId + '"') + '</div>' : '<label class="field compact-field parent-job-reward"><span>報酬スター</span><input type="number" min="0" max="9" value="' + Number(task.rewardStars || 0) + '" data-parent-task-reward="' + taskId + '"></label>',
+        '<p><span class="badge">' + (done ? '今日 完了' : '今日 未完了') + '</span></p>',
+        done ? button('完了を訂正', 'btn-danger btn-small', 'data-undo-task="' + taskId + '"') : '',
+        '</div>',
+        '</div>'
+      ].join('');
+    }).join('');
+    return [
+      '<section class="panel panel-pad parent-job-settings" aria-labelledby="parent-job-settings-title">',
+      '<div class="section-heading"><div><h2 id="parent-job-settings-title">おしごと設定</h2><p class="muted">表示する数・種類・並び順を変更できます。</p></div></div>',
+      '<div class="job-count-control">',
+      '<span>1日に ひょうじする かず</span>',
+      button('－', 'btn-soft btn-small', 'data-job-count-minus aria-label="1日に表示するおしごとを1つ減らす" ' + (settings.dailyDisplayCount <= 1 ? 'disabled' : '')),
+      '<output aria-live="polite">' + settings.dailyDisplayCount + '</output>',
+      button('＋', 'btn-soft btn-small', 'data-job-count-plus aria-label="1日に表示するおしごとを1つ増やす" ' + (settings.dailyDisplayCount >= 10 ? 'disabled' : '')),
+      '</div>',
+      '<div class="parent-job-list">' + rows + '</div>',
+      '<p class="muted" data-job-settings-status aria-live="polite"></p>',
+      '<div class="parent-job-actions">',
+      button('オリジナルを追加', 'btn-primary', 'data-add-custom-job ' + (settings.customJobs.length >= KA.tasks.MAX_CUSTOM_JOBS ? 'disabled' : '')),
+      button('おしごと設定を もとにもどす', 'btn-soft', 'data-reset-job-settings'),
+      '</div>',
+      '</section>'
+    ].join('');
+  }
+
+  function customJobEditor(taskId) {
+    var task = taskId ? KA.tasks.allTasks().filter(function (item) { return item.taskId === taskId && item.isCustom; })[0] : null;
+    var presets = KA.tasks.iconPresets();
+    var selectedIcon = task ? task.iconKey : "toybox";
+    modalRoot.innerHTML = [
+      '<div class="modal job-editor-modal" role="dialog" aria-modal="true" aria-labelledby="custom-job-editor-title">',
+      '<h2 id="custom-job-editor-title">' + (task ? 'オリジナルを編集' : 'オリジナルを追加') + '</h2>',
+      '<label class="field"><span>おしごとの名前（20文字まで）</span><input data-custom-job-name maxlength="20" value="' + escapeHtml(task ? task.title : '') + '"></label>',
+      '<label class="field"><span>短い説明（60文字まで）</span><textarea data-custom-job-description maxlength="60">' + escapeHtml(task ? task.description : '') + '</textarea></label>',
+      '<fieldset class="job-icon-fieldset"><legend>アイコン</legend><div class="job-icon-presets">',
+      presets.map(function (preset) {
+        return '<label class="job-icon-option"><input type="radio" name="custom-job-icon" value="' + preset.key + '" ' + (preset.key === selectedIcon ? 'checked' : '') + '><span class="task-icon">' + preset.svg + '</span><span>' + escapeHtml(preset.label) + '</span></label>';
+      }).join(''),
+      '</div></fieldset>',
+      '<label class="job-enabled-control"><input type="checkbox" data-custom-job-enabled ' + (!task || task.active !== false ? 'checked' : '') + '><span>有効にする</span></label>',
+      '<p class="field-error" data-custom-job-error aria-live="polite"></p>',
+      '<div class="modal-actions">',
+      button('戻る', 'btn-soft', 'data-dialog-cancel'),
+      button('保存', 'btn-primary', 'data-save-custom-job'),
+      '</div></div>'
+    ].join('');
+    modalRoot.querySelector('[data-dialog-cancel]').addEventListener('click', closeDialog);
+    modalRoot.querySelector('[data-save-custom-job]').addEventListener('click', function () {
+      var selected = modalRoot.querySelector('input[name="custom-job-icon"]:checked');
+      var input = {
+        name: modalRoot.querySelector('[data-custom-job-name]').value,
+        description: modalRoot.querySelector('[data-custom-job-description]').value,
+        iconKey: selected ? selected.value : 'star',
+        enabled: modalRoot.querySelector('[data-custom-job-enabled]').checked
+      };
+      var result = task ? KA.tasks.updateCustomJob(task.taskId, input) : KA.tasks.addCustomJob(input);
+      if (!result.ok) {
+        modalRoot.querySelector('[data-custom-job-error]').textContent = result.reason === 'limit' ? 'オリジナルのおしごとは20件までです。' : result.reason === 'minimum_one' ? 'おしごとは 1ついじょう えらんでください' : 'おしごとの名前を入力してください。';
+        return;
+      }
+      closeDialog();
+      toast('おしごと設定を保存しました');
+      KA.router.render();
+    });
+  }
+
+  function jobSettingsResetDialog() {
+    modalRoot.innerHTML = [
+      '<div class="modal" role="dialog" aria-modal="true">',
+      '<h2>おしごと設定を もとにもどす？</h2>',
+      '<p>標準のおしごと、並び順、1日の表示数を戻します。達成履歴と星は変わりません。</p>',
+      '<div class="modal-actions modal-actions-stack">',
+      button('戻る', 'btn-soft', 'data-dialog-cancel'),
+      button('標準設定だけ戻す', 'btn-primary', 'data-reset-standard-jobs'),
+      button('オリジナルもすべて削除', 'btn-soft', 'data-reset-all-jobs'),
+      '</div></div>'
+    ].join('');
+    modalRoot.querySelector('[data-dialog-cancel]').addEventListener('click', closeDialog);
+    modalRoot.querySelector('[data-reset-standard-jobs]').addEventListener('click', function () {
+      KA.tasks.resetJobSettings(false);
+      closeDialog();
+      toast('標準のおしごと設定に戻しました');
+      KA.router.render();
+    });
+    modalRoot.querySelector('[data-reset-all-jobs]').addEventListener('click', function () {
+      confirmDialog('オリジナルをすべて削除しますか？', '過去の達成履歴と星は残ります。削除したおしごとは元に戻せません。', 'すべて削除', function () {
+        KA.tasks.resetJobSettings(true);
+        toast('標準のおしごと設定に戻しました');
+        KA.router.render();
+      });
+    });
+  }
+
+  function bindParentJobSettings() {
+    var settings = KA.tasks.ensureJobSettings(KA.state.getAppData());
+    var minus = appEl.querySelector('[data-job-count-minus]');
+    var plus = appEl.querySelector('[data-job-count-plus]');
+    if (minus) minus.addEventListener('click', function () { KA.tasks.setDailyDisplayCount(settings.dailyDisplayCount - 1); KA.router.render(); });
+    if (plus) plus.addEventListener('click', function () { KA.tasks.setDailyDisplayCount(settings.dailyDisplayCount + 1); KA.router.render(); });
+    Array.prototype.forEach.call(appEl.querySelectorAll('[data-parent-job-enabled]'), function (el) {
+      el.addEventListener('change', function () {
+        var result = KA.tasks.setJobEnabled(el.getAttribute('data-parent-job-enabled'), el.checked);
+        if (!result.ok) toast('おしごとは 1ついじょう えらんでください');
+        else toast('おしごと設定を保存しました');
+        KA.router.render();
+      });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll('[data-parent-job-up]'), function (el) {
+      el.addEventListener('click', function () { KA.tasks.moveJob(el.getAttribute('data-parent-job-up'), 'up'); KA.router.render(); });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll('[data-parent-job-down]'), function (el) {
+      el.addEventListener('click', function () { KA.tasks.moveJob(el.getAttribute('data-parent-job-down'), 'down'); KA.router.render(); });
+    });
+    var add = appEl.querySelector('[data-add-custom-job]');
+    if (add) add.addEventListener('click', function () { customJobEditor(null); });
+    Array.prototype.forEach.call(appEl.querySelectorAll('[data-edit-custom-job]'), function (el) {
+      el.addEventListener('click', function () { customJobEditor(el.getAttribute('data-edit-custom-job')); });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll('[data-delete-custom-job]'), function (el) {
+      el.addEventListener('click', function () {
+        var taskId = el.getAttribute('data-delete-custom-job');
+        var task = KA.tasks.allTasks().filter(function (item) { return item.taskId === taskId; })[0];
+        confirmDialog('オリジナルを削除しますか？', (task ? task.title : 'このおしごと') + 'を今日の一覧から外します。過去の達成履歴と星は残ります。', '削除', function () {
+          KA.tasks.deleteCustomJob(taskId);
+          toast('オリジナルのおしごとを削除しました');
+          KA.router.render();
+        });
+      });
+    });
+    var reset = appEl.querySelector('[data-reset-job-settings]');
+    if (reset) reset.addEventListener('click', jobSettingsResetDialog);
+  }
+
   function renderParent() {
     var data = KA.state.getAppData();
-    var tasks = KA.tasks.allTasks();
     var record = KA.state.getDailyRecord();
     var todayArt = record.artworkIds.map(KA.coloring.getArtwork).filter(Boolean);
-    var taskRows = tasks.map(function (task) {
-      var done = KA.tasks.isCompleted(task.taskId);
-      return '<div class="parent-row"><h3>' + escapeHtml(task.icon + " " + task.title) + '</h3><div class="form-grid"><label class="field"><span>有効</span><select data-parent-task-active="' + task.taskId + '"><option value="true" ' + (task.active !== false ? "selected" : "") + '>有効</option><option value="false" ' + (task.active === false ? "selected" : "") + '>無効</option></select></label><label class="field"><span>報酬スター</span><input type="number" min="0" max="9" value="' + Number(task.rewardStars || 0) + '" data-parent-task-reward="' + task.taskId + '"></label><p><span class="badge">' + (done ? "今日 完了" : "今日 未完了") + '</span></p>' + (done ? button("完了を訂正", "btn-danger btn-small", 'data-undo-task="' + task.taskId + '"') : '') + '</div></div>';
-    }).join("");
     var artRows = todayArt.map(function (art) {
       var placement = KA.worlds.placementForArtwork(art.artworkId);
       var worldName = placement ? KA.worlds.worldLabel(placement.worldId) : "もり";
@@ -2223,8 +2620,8 @@
       '<label class="field"><span>子どもの名前</span><input id="profile-name" value="' + escapeHtml(data.profile.displayName) + '"></label>' + button("名前を保存", "btn-primary", 'data-save-profile') + '</div>',
       renderStandaloneDiagnostics(),
       renderParentColoringSettings(),
+      renderParentJobSettings(),
       '<div class="panel panel-pad"><h2>とりさんキッチンの注意</h2><p class="muted">このアプリでは、空想上の鳥が人間の料理を食べます。実際の鳥には、人間用に調理された料理を与えないでください。</p></div>',
-      '<div class="panel panel-pad"><h2>今日のおしごと</h2><div class="grid">' + taskRows + '</div></div>',
       '<div class="panel panel-pad"><h2>今日の作品</h2><div class="grid">' + (artRows || '<p class="muted">今日の作品はまだありません。</p>') + '</div></div>',
       '<div class="panel panel-pad"><h2>設定</h2><label class="field"><span>BGM</span><select id="bgm-setting"><option value="false" ' + (!data.settings.bgmEnabled ? "selected" : "") + '>オフ</option><option value="true" ' + (data.settings.bgmEnabled ? "selected" : "") + '>オン</option></select></label><label class="field"><span>効果音</span><select id="effects-setting"><option value="true" ' + (data.settings.effectsEnabled !== false && data.settings.soundEnabled !== false ? "selected" : "") + '>オン</option><option value="false" ' + (data.settings.effectsEnabled === false || data.settings.soundEnabled === false ? "selected" : "") + '>オフ</option></select></label><label class="field"><span>アニメーション</span><select id="animation-setting"><option value="normal" ' + (data.settings.animationLevel !== "reduced" ? "selected" : "") + '>ふつう</option><option value="reduced" ' + (data.settings.animationLevel === "reduced" ? "selected" : "") + '>ひかえめ</option></select></label><p class="muted">' + escapeHtml(KA.constants.VERSION_LABEL + " / appVersion " + KA.constants.APP_VERSION) + '</p><div class="quick-actions">' + button("データ管理", "btn-soft", 'data-route="data"') + button("ホームへ戻る", "btn-primary", 'data-route="home"') + '</div></div>',
       '</section>'
@@ -2240,12 +2637,7 @@
       KA.router.render();
     });
     bindParentColoringSettings();
-    Array.prototype.forEach.call(appEl.querySelectorAll("[data-parent-task-active]"), function (el) {
-      el.addEventListener("change", function () {
-        KA.tasks.updateTask(el.getAttribute("data-parent-task-active"), { active: el.value === "true" });
-        toast("おしごとを更新しました");
-      });
-    });
+    bindParentJobSettings();
     Array.prototype.forEach.call(appEl.querySelectorAll("[data-parent-task-reward]"), function (el) {
       el.addEventListener("change", function () {
         KA.tasks.updateTask(el.getAttribute("data-parent-task-reward"), { rewardStars: el.value });
@@ -2390,6 +2782,7 @@
     KA.router.register("eggs", renderEggs);
     KA.router.register("kitchen", renderKitchen);
     KA.router.register("bird-house", renderBirdHouse);
+    KA.router.register("outing", renderOuting);
     KA.router.register("album", renderAlbum);
     KA.router.register("parent", renderParent);
     KA.router.register("data", renderData);

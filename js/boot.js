@@ -2,9 +2,9 @@
   "use strict";
 
   var DIAGNOSTIC_KEY = "kodomoAdventure.bootDiagnostic.v1";
-  var HOTFIX_QUERY = "v=10p19";
-  var APP_VERSION = "1.0.0-prototype.19";
-  var VERSION_LABEL = "Ver.1.0 試作19";
+  var HOTFIX_QUERY = "v=10p21";
+  var APP_VERSION = "1.0.0-prototype.21";
+  var VERSION_LABEL = "Ver.1.0 試作21";
   var startupStartedAt = Date.now();
   var minSplashMs = 1200;
   var maxSplashMs = 4000;
@@ -278,7 +278,7 @@
   function safeStartUrl() {
     var href = String(global.location && global.location.href || "");
     href = updateQuery(href, "safeStart", "1");
-    href = updateQuery(href, "v", "10p19");
+    href = updateQuery(href, "v", "10p21");
     return href;
   }
 
@@ -298,10 +298,10 @@
       if (!pairs[i]) continue;
       var key = decodeURIComponent(pairs[i].split("=")[0]);
       if (key === "safeStart") continue;
-      if (key === "v") next.push("v=10p19");
+      if (key === "v") next.push("v=10p21");
       else next.push(pairs[i]);
     }
-    if (next.join("&").indexOf("v=10p19") < 0) next.push("v=10p19");
+    if (next.join("&").indexOf("v=10p21") < 0) next.push("v=10p21");
     return base + (next.length ? "?" + next.join("&") : "") + hash;
   }
 
@@ -411,7 +411,8 @@
       coloringTemplates: safeArray(data.coloringTemplates),
       worlds: data.worlds && typeof data.worlds === "object" ? data.worlds : {},
       eggs: safeArray(data.eggInventory),
-      companions: safeArray(data.companions)
+      companions: safeArray(data.companions),
+      outing: data.outing && typeof data.outing === "object" && !Array.isArray(data.outing) ? data.outing : {}
     };
   }
 
@@ -429,7 +430,7 @@
 
   function safePanelHtml(route, summary) {
     if (route === "tasks") {
-      return '<section class="panel panel-pad"><h2>おしごと</h2><p>保存データは消さずに、基本表示だけを開いています。</p><p><span class="badge">おしごと ' + summary.tasks.length + 'こ</span></p></section>';
+      return '<section class="panel panel-pad"><h2>おしごと</h2><p>保存データは消さずに、基本表示だけを開いています。</p><p><span class="badge">おしごと ' + (summary.tasks.length || 1) + 'こ</span></p></section>';
     }
     if (route === "coloring") {
       return '<section class="panel panel-pad"><h2>ぬりえ</h2><p>通常起動に戻ると、ぬりえを編集できます。</p><p><span class="badge">ぬりえ ' + (summary.coloringTemplates.length || 10) + 'しゅるい</span></p></section>';
@@ -447,11 +448,12 @@
       '<p class="eyebrow">あんぜんモード</p>',
       '<h1>ホーム</h1>',
       '<p>あんぜんモードで ひらいています。</p>',
-      '<div class="home-stats">',
-      '<div class="stat"><span class="stat-label">つかえるほし</span><span class="stat-value">⭐ ' + summary.stars + '</span></div>',
-      '<div class="stat secondary"><span class="stat-label">あつめたほし</span><span class="stat-value">⭐ ' + summary.lifetimeStars + '</span></div>',
+      '<div class="home-star-strip" role="group" aria-label="スターの数">',
+      '<div class="home-star-mini" aria-label="つかえるほし ' + summary.stars + 'こ"><span>つかえるほし</span><strong>⭐' + summary.stars + '</strong></div>',
+      '<div class="home-star-mini" aria-label="あつめたほし ' + summary.lifetimeStars + 'こ"><span>あつめたほし</span><strong>⭐' + summary.lifetimeStars + '</strong></div>',
       '</div>',
-      '<p class="muted">たまご・なかまずかんは、いまは ひらけません。</p>',
+      '<section class="panel panel-pad companion-status-card"><h2>なかまのようす</h2><p>' + (summary.companions.length ? 'なかま ' + summary.companions.length + 'しゅるいの データがあります。' : summary.eggs.length ? 'たまご ' + summary.eggs.length + 'こを たいせつに ほぞんしています。' : 'たまごから どんな なかまが うまれるかな？') + '</p><p class="muted">くわしいようすは、通常起動に戻ると見られます。</p></section>',
+      '<section class="panel panel-pad outing-home-card"><h2>なかまと おでかけ</h2><p>' + (summary.outing && summary.outing.activeTrip ? 'おでかけの データを そのまま ほぞんしています。' : summary.companions.length ? 'おでかけの じゅんびを かくにんできます。' : 'なかまが うまれたら おでかけできるよ！') + '</p><p class="muted">受取や出発は通常起動で行えます。</p></section>',
       '<div class="quick-actions"><button class="btn btn-primary" data-safe-normal-start>通常起動へ戻る</button></div>',
       '</section>'
     ].join("");

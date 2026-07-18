@@ -44,7 +44,10 @@
     item("house_mobile_rainbow", "虹のモビール", 9, "wall", ["wall"], "ぬりえの作品がふえると飾れるモビール。", { type: "metric", metric: "completedArtworkCount", target: 3, label: "ぬりえ作品を3まい 完成させよう" }),
     item("house_bell_toy", "おもちゃのベル", 10, "wall-floor", ["wall", "floor"], "ごはんの時間が楽しくなるベル。", { type: "metric", metric: "totalMealCount", target: 5, label: "とりへ ごはんを5かい あげよう" }),
     item("house_cushion_star", "星のクッション", 11, "floor", ["floor"], "なかよしの鳥がいると使える星形クッション。", { type: "metric", metric: "maxBondLevel", target: 5, label: "なかよしレベル5の とりを1しゅるい 見つけよう" }),
-    item("house_photo_frame", "思い出の写真立て", 12, "wall", ["wall"], "たくさん孵化した思い出を飾る写真立て。", { type: "metric", metric: "totalHatchCount", target: 8, label: "とりの合計孵化を8かいにしよう" })
+    item("house_photo_frame", "思い出の写真立て", 12, "wall", ["wall"], "たくさん孵化した思い出を飾る写真立て。", { type: "metric", metric: "totalHatchCount", target: 8, label: "とりの合計孵化を8かいにしよう" }),
+    item("house_trip_flower_wreath", "おはなのリース", 13, "wall", ["wall"], "はなのはらで見つける、丸いお花のリース。", { type: "outing", destinationId: "outing_flower_field", label: "はなのはらへ おでかけして みつけよう！" }),
+    item("house_trip_flower_cushion", "おはなのクッション", 14, "floor", ["floor"], "お花の形をした、やわらかいクッション。", { type: "outing", destinationId: "outing_flower_field", label: "はなのはらへ おでかけして みつけよう！" }),
+    item("house_trip_butterfly_mobile", "ちょうちょのモビール", 15, "wall", ["wall"], "ちょうちょがゆれる、明るいモビール。", { type: "outing", destinationId: "outing_flower_field", label: "はなのはらへ おでかけして みつけよう！" })
   ];
 
   function item(id, name, order, type, slots, description, unlockCondition) {
@@ -163,6 +166,7 @@
   function conditionProgress(item, metrics) {
     var condition = item.unlockCondition || {};
     if (condition.type === "initial") return { label: "最初から もっているよ", current: 1, target: 1, remaining: 0 };
+    if (condition.type === "outing") return { label: condition.label || item.description, current: 0, target: 1, remaining: 1 };
     var current = Math.max(0, Number(metrics[condition.metric] || 0));
     var target = Math.max(0, Number(condition.target || 0));
     return {
@@ -276,6 +280,8 @@
   function companionLayout(appData, focusSpeciesId) {
     var data = appData || KA.state.getAppData();
     var owned = ownedCompanions(data);
+    var awayId = KA.outings && KA.outings.travelingSpeciesId ? KA.outings.travelingSpeciesId(data) : null;
+    if (awayId) owned = owned.filter(function (companion) { return companion.speciesId !== awayId; });
     var favorite = KA.companions && KA.companions.favoriteCompanion ? KA.companions.favoriteCompanion(data) : null;
     var focusId = focusSpeciesId || (favorite && favorite.speciesId) || (owned[0] && owned[0].speciesId) || null;
     owned.sort(function (a, b) {
@@ -336,7 +342,10 @@
       house_mobile_rainbow: '<path d="M50 12 L50 32" stroke="' + fillA + '" stroke-width="4" stroke-linecap="round"/><path d="M24 39 C36 21 64 21 76 39" fill="none" stroke="' + (dark || "#EF4444") + '" stroke-width="6" stroke-linecap="round"/><path d="M31 42 C40 31 60 31 69 42" fill="none" stroke="' + (dark || "#FACC15") + '" stroke-width="5" stroke-linecap="round"/><path d="M38 45 C45 39 55 39 62 45" fill="none" stroke="' + (dark || "#38BDF8") + '" stroke-width="5" stroke-linecap="round"/>',
       house_bell_toy: '<path d="M38 31 C39 18 61 18 62 31 L72 63 L28 63 Z" fill="' + (dark || "#FACC15") + '"/><path d="M32 64 L68 64" stroke="' + fillA + '" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="71" r="6" fill="' + fillA + '"/>',
       house_cushion_star: '<path d="M50 18 L59 39 L82 41 L64 56 L70 79 L50 66 L30 79 L36 56 L18 41 L41 39 Z" fill="' + (dark || "#FACC15") + '"/><path d="M40 50 C48 56 56 56 64 50" fill="none" stroke="' + fillB + '" stroke-width="4" stroke-linecap="round"/>',
-      house_photo_frame: '<path d="M24 25 L76 25 L76 72 L24 72 Z" fill="' + fillA + '"/><path d="M31 32 L69 32 L69 64 L31 64 Z" fill="' + (dark || "#DBEAFE") + '"/><circle cx="44" cy="45" r="7" fill="' + (dark || "#F9A8D4") + '"/><path d="M35 62 C43 53 56 53 65 62" fill="none" stroke="' + (dark || "#7ACB77") + '" stroke-width="5" stroke-linecap="round"/>'
+      house_photo_frame: '<path d="M24 25 L76 25 L76 72 L24 72 Z" fill="' + fillA + '"/><path d="M31 32 L69 32 L69 64 L31 64 Z" fill="' + (dark || "#DBEAFE") + '"/><circle cx="44" cy="45" r="7" fill="' + (dark || "#F9A8D4") + '"/><path d="M35 62 C43 53 56 53 65 62" fill="none" stroke="' + (dark || "#7ACB77") + '" stroke-width="5" stroke-linecap="round"/>',
+      house_trip_flower_wreath: '<circle cx="50" cy="52" r="28" fill="none" stroke="' + (dark || "#65A30D") + '" stroke-width="9"/><g fill="' + (dark || "#F9A8D4") + '"><circle cx="50" cy="22" r="9"/><circle cx="76" cy="39" r="9"/><circle cx="70" cy="70" r="9"/><circle cx="31" cy="72" r="9"/><circle cx="23" cy="42" r="9"/></g><g fill="' + (dark || "#FACC15") + '"><circle cx="50" cy="22" r="3"/><circle cx="76" cy="39" r="3"/><circle cx="70" cy="70" r="3"/><circle cx="31" cy="72" r="3"/><circle cx="23" cy="42" r="3"/></g>',
+      house_trip_flower_cushion: '<g fill="' + (dark || "#F9A8D4") + '"><circle cx="50" cy="30" r="18"/><circle cx="72" cy="48" r="18"/><circle cx="64" cy="72" r="18"/><circle cx="36" cy="72" r="18"/><circle cx="28" cy="48" r="18"/></g><circle cx="50" cy="52" r="18" fill="' + (dark || "#FDE68A") + '"/><path d="M42 52 C47 57 54 57 59 52" fill="none" stroke="' + (dark || "#D97706") + '" stroke-width="4" stroke-linecap="round"/>',
+      house_trip_butterfly_mobile: '<path d="M50 10 L50 30 M22 34 L78 34" fill="none" stroke="' + fillA + '" stroke-width="4" stroke-linecap="round"/><path d="M31 48 C18 35 14 57 29 61 C18 71 39 78 44 59 Z" fill="' + (dark || "#F9A8D4") + '"/><path d="M69 48 C82 35 86 57 71 61 C82 71 61 78 56 59 Z" fill="' + (dark || "#93C5FD") + '"/><path d="M32 35 L32 48 M68 35 L68 48" stroke="' + fillA + '" stroke-width="3"/>'
     }[item.id] || '<circle cx="50" cy="50" r="30" fill="' + fillA + '"/>';
     return '<svg class="bird-house-furniture-svg" viewBox="0 0 100 100" aria-hidden="true" focusable="false">' + svg + '</svg>';
   }

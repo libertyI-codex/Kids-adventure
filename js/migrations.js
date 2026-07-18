@@ -99,6 +99,13 @@
         }
       },
       tasks: KA.constants.DEFAULT_TASKS.map(withAuditDefaults),
+      jobSettings: KA.tasks && KA.tasks.defaultJobSettings ? KA.tasks.defaultJobSettings() : {
+        dailyDisplayCount: Number(KA.constants.DEFAULT_JOB_DISPLAY_COUNT || 7),
+        enabledJobIds: KA.constants.DEFAULT_TASKS.map(function (task) { return task.taskId; }),
+        displayOrder: KA.constants.DEFAULT_TASKS.map(function (task) { return task.taskId; }),
+        customJobs: [],
+        dailySelectionsByDate: {}
+      },
       dailyRecords: {},
       starLedger: [],
       eggInventory: [],
@@ -128,6 +135,14 @@
         },
         lastVisitedAt: null,
         lastInteractedCompanionId: null
+      },
+      outing: KA.outings ? KA.outings.defaultOuting() : {
+        activeTrip: null,
+        history: [],
+        totalTripCount: 0,
+        destinationStats: {},
+        lastClaimedTripId: null,
+        claimedTripIds: []
       },
       coloringSettings: {
         order: KA.constants.COLORING_TEMPLATES.slice().sort(function (a, b) {
@@ -453,7 +468,9 @@
       if (!existing) return;
       var before = JSON.stringify(existing);
       existing.title = defaults.title;
+      existing.description = defaults.description || "";
       existing.icon = defaults.icon;
+      existing.iconKey = defaults.iconKey || null;
       existing.category = defaults.category;
       existing.sortOrder = defaults.sortOrder;
       existing.availableDays = clone(defaults.availableDays);
@@ -529,6 +546,7 @@
     appData.settings = ensureObject(appData.settings);
     mergeMissing(appData.settings, defaults.settings);
     appData.tasks = syncBuiltInTaskMetadata(ensureById(ensureArray(appData.tasks), KA.constants.DEFAULT_TASKS, "taskId"));
+    if (KA.tasks && KA.tasks.ensureJobSettings) KA.tasks.ensureJobSettings(appData);
     appData.coloringTemplates = syncBuiltInColoringTemplates(ensureById(ensureArray(appData.coloringTemplates), KA.constants.COLORING_TEMPLATES, "templateId"));
     normalizeColoringSettings(appData);
     appData.dailyRecords = ensureObject(appData.dailyRecords);
@@ -552,6 +570,10 @@
     if (KA.birdHouse && KA.birdHouse.ensureBirdHouse) {
       KA.birdHouse.ensureBirdHouse(appData);
     }
+    appData.outing = ensureObject(appData.outing);
+    if (KA.outings && KA.outings.ensureOuting) {
+      KA.outings.ensureOuting(appData);
+    }
     appData.artworks = ensureArray(appData.artworks);
     syncArtworkRegionColors(appData);
     appData.unlocks = ensureObject(appData.unlocks);
@@ -563,6 +585,8 @@
     syncArtworkWorldFallback(appData);
     appData.migrations = ensureArray(appData.migrations);
     markMigration(appData, "prototype2_default_tasks_and_coloring");
+    markMigration(appData, "prototype20_home_jobs_settings");
+    markMigration(appData, "prototype21_companion_outings");
     recalculateStarTotalsIfMissing(appData);
     if (KA.eggs && KA.eggs.syncEggInventory) {
       bootMark("EGGS_INIT_STARTED");

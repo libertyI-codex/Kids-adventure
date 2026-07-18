@@ -10,8 +10,8 @@
   KA.constants = {
     APP_DISPLAY_NAME: "結羽ちゃんの冒険",
     PROJECT_NAME: "こどもの冒険",
-    APP_VERSION: "1.0.0-prototype.19",
-    VERSION_LABEL: "Ver.1.0 試作19",
+    APP_VERSION: "1.0.0-prototype.21",
+    VERSION_LABEL: "Ver.1.0 試作21",
     SCHEMA_VERSION: 1,
     PROFILE_ID: "profile_yuwa",
     WORLD_ID: "world_forest",
@@ -20,10 +20,12 @@
       uiState: "kodomoAdventure.uiState.v1",
       backup: "kodomoAdventure.backup.v1"
     },
+    DEFAULT_JOB_DISPLAY_COUNT: 7,
     DEFAULT_TASKS: [
       {
         taskId: "task_brush_teeth",
         title: "はみがき",
+        description: "はを ぴかぴかに みがこう！",
         icon: "🪥",
         category: "morning",
         rewardStars: 1,
@@ -35,6 +37,7 @@
       {
         taskId: "task_get_dressed",
         title: "おきがえ",
+        description: "じぶんで おようふくを きてみよう！",
         icon: "👕",
         category: "morning",
         rewardStars: 1,
@@ -46,6 +49,7 @@
       {
         taskId: "task_picture_book",
         title: "えほん",
+        description: "すきな えほんを ひらいてみよう！",
         icon: "📖",
         category: "learning",
         rewardStars: 1,
@@ -57,6 +61,7 @@
       {
         taskId: "task_piano",
         title: "ピアノ",
+        description: "たのしく おとを ならしてみよう！",
         icon: "🎹",
         category: "learning",
         rewardStars: 1,
@@ -68,6 +73,7 @@
       {
         taskId: "task_drill",
         title: "ドリル",
+        description: "きょうの もんだいに ちょうせんしよう！",
         icon: "✏️",
         category: "learning",
         rewardStars: 1,
@@ -79,11 +85,25 @@
       {
         taskId: "task_soroban",
         title: "そろばん",
+        description: "そろばんを うごかして かんがえよう！",
         icon: "🧮",
         category: "learning",
         rewardStars: 1,
         active: true,
         sortOrder: 60,
+        availableDays: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+        timeOfDay: "any"
+      },
+      {
+        taskId: "job_cleanup",
+        title: "おかたづけ",
+        description: "おもちゃや つかったものを もとの ばしょへ もどそう！",
+        icon: "",
+        iconKey: "toybox",
+        category: "home",
+        rewardStars: 1,
+        active: true,
+        sortOrder: 70,
         availableDays: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
         timeOfDay: "any"
       }

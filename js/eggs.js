@@ -353,8 +353,9 @@
     if (activity.jobBonus) return { ok: false, reason: "already_done", alreadyDone: true, activityKey: "jobBonus" };
     var activeTasks = KA.tasks.activeTasks();
     if (!activeTasks.length) return { ok: false, reason: "no_active_tasks" };
+    var activeTaskIds = activeTasks.map(function (task) { return task.taskId; });
     var completed = KA.tasks.completedToday().filter(function (item) {
-      return item.status === "completed";
+      return item.status === "completed" && activeTaskIds.indexOf(item.taskId) >= 0;
     });
     var threshold = Math.min(3, activeTasks.length);
     if (completed.length < threshold) return { ok: false, reason: "not_enough_tasks", completed: completed.length, threshold: threshold };

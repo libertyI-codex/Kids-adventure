@@ -139,7 +139,8 @@
     return {
       currentCooking: null,
       recipeStats: {},
-      cookingHistory: []
+      cookingHistory: [],
+      ingredientInventory: {}
     };
   }
 
@@ -221,9 +222,32 @@
     kitchen.currentCooking = normalizeCurrentCooking(kitchen.currentCooking);
     kitchen.recipeStats = normalizeStats(kitchen.recipeStats);
     kitchen.cookingHistory = normalizeHistory(kitchen.cookingHistory);
+    var rawInventory = kitchen.ingredientInventory && typeof kitchen.ingredientInventory === "object" && !Array.isArray(kitchen.ingredientInventory) ? kitchen.ingredientInventory : {};
+    kitchen.ingredientInventory = {};
+    INGREDIENTS.forEach(function (ingredient) {
+      var quantity = Math.floor(Number(rawInventory[ingredient.id] || 0));
+      if (isFinite(quantity) && quantity > 0) kitchen.ingredientInventory[ingredient.id] = Math.min(9999, quantity);
+    });
     data.kitchen = kitchen;
     if (KA.companions && KA.companions.ensureCompanions) KA.companions.ensureCompanions(data);
     return kitchen;
+  }
+
+  function addIngredientInventory(ingredientId, quantity, appData) {
+    var ingredient = getIngredient(ingredientId);
+    if (!ingredient) return false;
+    var data = appData || KA.state.getAppData();
+    var kitchen = ensureKitchen(data);
+    var add = Math.max(0, Math.floor(Number(quantity || 0)));
+    if (!add) return false;
+    kitchen.ingredientInventory[ingredient.id] = Math.min(9999, Math.max(0, Number(kitchen.ingredientInventory[ingredient.id] || 0)) + add);
+    return true;
+  }
+
+  function getIngredientInventory(ingredientId, appData) {
+    var data = appData || KA.state.getAppData();
+    var kitchen = ensureKitchen(data);
+    return Math.max(0, Number(kitchen.ingredientInventory[ingredientId] || 0));
   }
 
   function recordCookedStats(appData, cooking) {
@@ -420,6 +444,8 @@
     completeCurrentStep: completeCurrentStep,
     isCookingComplete: isCookingComplete,
     feedCompletedCooking: feedCompletedCooking,
+    addIngredientInventory: addIngredientInventory,
+    getIngredientInventory: getIngredientInventory,
     renderIngredient: renderIngredient,
     renderRecipeDish: renderRecipeDish,
     stepTypes: ["cut", "mix", "knead", "shape", "grill", "boil", "steam", "bake", "fry", "wrap", "layer", "decorate", "plate"],
