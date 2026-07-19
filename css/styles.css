@@ -680,6 +680,13 @@ h3 {
   pointer-events: none;
 }
 
+.companion-svg.companion-transparent-box {
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
 .companion-silhouette {
   opacity: 0.68;
   filter: grayscale(1);

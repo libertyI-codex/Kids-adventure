@@ -12,6 +12,7 @@
       preferredWorldIds: ["world_secret_base", "world_forest", "world_island"],
       defaultColors: { body: "#FACC15", wing: "#FDE68A", beak: "#FB923C", leg: "#F59E0B" },
       viewBox: "0 0 160 140",
+      transparentOuterBox: true,
       outer: [
         "M78 22 C103 22 124 42 126 70 C128 101 105 122 77 122 C49 122 29 101 31 72 C33 45 53 24 78 22 Z"
       ],
@@ -60,6 +61,7 @@
       preferredWorldIds: ["world_island", "world_sky_island", "world_secret_base"],
       defaultColors: { head: "#EF4444", body: "#22C55E", wing: "#3B82F6", tail: "#FACC15", beak: "#FDE68A" },
       viewBox: "0 0 170 150",
+      transparentOuterBox: true,
       outlineStroke: "none",
       innerStroke: "none",
       outer: [
@@ -122,6 +124,7 @@
       preferredWorldIds: ["world_forest", "world_secret_base", "world_castle"],
       defaultColors: { body: "#92400E", face: "#FDE68A", wing: "#A16207", beak: "#F59E0B" },
       viewBox: "0 0 170 150",
+      transparentOuterBox: true,
       outlineStroke: "none",
       innerStroke: "none",
       outer: [
@@ -372,18 +375,19 @@
     var species = getSpecies(speciesId) || allSpecies()[0];
     var outlineStroke = species.outlineStroke || "#28312d";
     var innerStroke = species.innerStroke || "#5b4631";
+    var transparentBoxClass = species.transparentOuterBox ? " companion-transparent-box" : "";
     if (species.id === "companion_peacock") {
       return renderPeacockCompanion(species, opts);
     }
     if (opts.silhouette) {
       return [
-        '<svg class="companion-svg companion-silhouette" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+        '<svg class="companion-svg companion-silhouette' + transparentBoxClass + '" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
         pathList(species.outer, "#1f2937", "none"),
         '</svg>'
       ].join("");
     }
     return [
-      '<svg class="companion-svg companion-' + species.id.replace("companion_", "") + '" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+      '<svg class="companion-svg companion-' + species.id.replace("companion_", "") + transparentBoxClass + '" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
       '<g class="body-regions">',
       species.regions.map(function (region) {
         if (region.fill === "none") {
