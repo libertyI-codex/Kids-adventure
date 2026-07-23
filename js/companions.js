@@ -13,6 +13,7 @@
       defaultColors: { body: "#FACC15", wing: "#FDE68A", beak: "#FB923C", leg: "#F59E0B" },
       viewBox: "0 0 160 140",
       transparentOuterBox: true,
+      outlineStroke: "none",
       outer: [
         "M78 22 C103 22 124 42 126 70 C128 101 105 122 77 122 C49 122 29 101 31 72 C33 45 53 24 78 22 Z"
       ],
@@ -173,6 +174,171 @@
         "M70 124 C63 127 58 127 53 124 M103 124 C110 127 116 127 121 124"
       ],
       face: '<circle cx="76" cy="48" r="3.4" fill="#1f2937"/><path d="M55 63 C63 67 73 68 83 66" fill="none" stroke="#7c2d12" stroke-width="2" stroke-linecap="round"/>'
+    },
+    {
+      id: "companion_penguin",
+      name: "ぺんぎん",
+      displayOrder: 7,
+      designVersion: 1,
+      preferredWorldIds: ["world_sea", "world_island", "world_secret_base"],
+      defaultColors: { body: "#243B53", belly: "#F8FAFC", wing: "#334E68", beak: "#F59E0B", leg: "#F59E0B" },
+      viewBox: "0 0 170 150",
+      transparentOuterBox: true,
+      outlineStroke: "none",
+      innerStroke: "#486581",
+      outer: [
+        "M85 10 C111 10 130 34 129 62 C144 72 151 91 145 108 C139 125 122 132 106 130 C101 141 94 146 85 146 C76 146 69 141 64 130 C47 132 31 124 25 108 C19 91 26 73 41 62 C40 34 59 10 85 10 Z"
+      ],
+      regions: [
+        { id: "body", d: "M85 12 C110 12 128 34 126 66 C139 79 142 102 130 117 C118 132 101 132 85 128 C68 132 51 131 40 117 C28 101 31 79 44 66 C42 34 60 12 85 12 Z", fill: "#243B53" },
+        { id: "belly", d: "M61 52 C72 42 98 42 109 52 C121 66 120 103 105 119 C94 130 76 130 65 119 C50 103 49 67 61 52 Z", fill: "#F8FAFC" },
+        { id: "face_patch", d: "M57 34 C64 21 78 21 85 32 C92 21 107 22 113 35 C108 50 99 58 85 57 C71 58 61 50 57 34 Z", fill: "#F8FAFC" },
+        { id: "wing_left", d: "M45 61 C28 70 22 88 28 104 C39 99 48 86 53 70 Z", fill: "#334E68" },
+        { id: "wing_right", d: "M125 61 C142 70 148 88 142 104 C131 99 122 86 117 70 Z", fill: "#334E68" },
+        { id: "beak", d: "M76 51 L85 45 L95 51 L85 58 Z", fill: "#F59E0B" },
+        { id: "feet", d: "M64 127 C57 134 49 137 41 134 C48 127 56 124 65 124 Z M106 127 C113 134 121 137 129 134 C122 127 114 124 105 124 Z", fill: "#F59E0B" }
+      ],
+      inner: [
+        "M53 70 C45 79 40 89 37 99",
+        "M117 70 C125 79 130 89 133 99",
+        "M66 117 C76 123 94 123 104 117"
+      ],
+      face: '<circle cx="72" cy="39" r="3.2" fill="#17202A"/><circle cx="98" cy="39" r="3.2" fill="#17202A"/><circle cx="73" cy="38" r="1" fill="#fff"/><circle cx="99" cy="38" r="1" fill="#fff"/>'
+    },
+    {
+      id: "companion_shimaenaga",
+      name: "しまえなが",
+      displayOrder: 8,
+      designVersion: 1,
+      preferredWorldIds: ["world_forest", "world_sky_island", "world_secret_base"],
+      defaultColors: { body: "#FFFFFF", wing: "#CBD5E1", tail: "#94A3B8", beak: "#475569", leg: "#8B5E3C" },
+      viewBox: "0 0 190 140",
+      transparentOuterBox: true,
+      outlineStroke: "#B6C2CF",
+      outlineWidth: 2.4,
+      innerStroke: "#94A3B8",
+      innerWidth: 1.9,
+      outer: [
+        "M30 67 C35 39 61 21 91 25 C117 28 134 45 137 67 C153 73 169 88 181 109 C158 108 139 101 123 91 C110 112 82 122 57 113 C37 106 25 88 30 67 Z",
+        "M121 88 C148 96 168 111 178 132 C153 127 132 115 113 99 Z",
+        "M112 94 C135 108 148 123 151 137 C130 128 112 116 99 103 Z"
+      ],
+      regions: [
+        { id: "body", d: "M32 67 C36 40 61 23 90 26 C117 28 134 47 134 72 C135 97 115 115 87 116 C58 117 35 103 30 82 C29 77 30 72 32 67 Z", fill: "#FFFFFF" },
+        { id: "head", d: "M47 48 C57 27 86 20 109 30 C126 38 133 54 127 69 C116 75 104 75 92 68 C78 76 61 74 49 65 C46 59 45 53 47 48 Z", fill: "#F8FAFC" },
+        { id: "wing", d: "M80 70 C100 65 119 77 121 96 C106 106 84 98 80 70 Z", fill: "#CBD5E1" },
+        { id: "tail", d: "M121 88 C148 96 168 111 178 132 C153 127 132 115 113 99 Z M112 94 C135 108 148 123 151 137 C130 128 112 116 99 103 Z", fill: "#94A3B8" },
+        { id: "beak", d: "M48 56 L34 61 L49 65 Z", fill: "#475569" },
+        { id: "legs", d: "M67 111 L64 127 M96 113 L99 128", fill: "none" }
+      ],
+      inner: [
+        "M80 70 C91 78 105 88 119 96",
+        "M56 73 C68 79 82 79 92 68",
+        "M64 127 C58 131 52 131 47 128 M99 128 C105 132 111 132 116 129"
+      ],
+      face: '<circle cx="69" cy="54" r="2.8" fill="#334155"/><circle cx="104" cy="53" r="2.8" fill="#334155"/><circle cx="57" cy="66" r="4" fill="#FBCFE8" opacity="0.8"/><circle cx="116" cy="65" r="4" fill="#FBCFE8" opacity="0.8"/>'
+    },
+    {
+      id: "companion_parakeet",
+      name: "いんこ",
+      displayOrder: 9,
+      designVersion: 1,
+      preferredWorldIds: ["world_island", "world_sky_island", "world_secret_base"],
+      defaultColors: { body: "#84CC16", head: "#BEF264", wing: "#22C55E", tail: "#15803D", beak: "#F59E0B", leg: "#A16207" },
+      viewBox: "0 0 175 155",
+      transparentOuterBox: true,
+      outlineStroke: "none",
+      innerStroke: "#3F6212",
+      outer: [
+        "M65 21 C88 10 114 24 119 49 C121 62 117 73 109 82 C121 96 128 119 129 145 L99 116 C91 134 67 137 50 123 C32 108 31 78 47 61 C43 44 50 29 65 21 Z",
+        "M102 105 L147 148 L116 139 L91 119 Z"
+      ],
+      regions: [
+        { id: "body", d: "M55 61 C76 50 103 61 110 84 C119 111 99 132 76 130 C50 128 36 103 43 80 C46 71 50 65 55 61 Z", fill: "#84CC16" },
+        { id: "head", d: "M64 22 C86 12 110 25 115 47 C119 66 104 80 84 78 C64 77 49 62 51 45 C52 35 56 27 64 22 Z", fill: "#BEF264" },
+        { id: "cheek", d: "M86 43 C99 39 111 47 111 59 C104 67 94 67 85 61 Z", fill: "#FDE68A" },
+        { id: "wing", d: "M70 73 C94 70 111 85 111 108 C94 119 73 102 70 73 Z", fill: "#22C55E" },
+        { id: "tail", d: "M96 109 L147 148 L116 139 L86 118 Z", fill: "#15803D" },
+        { id: "beak", d: "M111 49 C127 49 134 58 127 69 C119 65 114 59 111 49 Z", fill: "#F59E0B" },
+        { id: "feet", d: "M63 127 C60 136 55 140 48 142 M82 130 C85 138 91 142 98 143", fill: "none" }
+      ],
+      inner: [
+        "M70 73 C82 84 94 96 108 107",
+        "M59 48 C66 40 77 37 87 41",
+        "M55 113 C66 123 84 127 99 118"
+      ],
+      face: '<circle cx="88" cy="43" r="3.5" fill="#1F2937"/><circle cx="89" cy="42" r="1.1" fill="#fff"/><circle cx="101" cy="57" r="2.2" fill="#3B82F6"/><circle cx="96" cy="62" r="2" fill="#3B82F6"/>'
+    },
+    {
+      id: "companion_java_sparrow",
+      name: "ぶんちょう",
+      displayOrder: 10,
+      designVersion: 1,
+      preferredWorldIds: ["world_forest", "world_secret_base", "world_castle"],
+      defaultColors: { body: "#F8FAFC", head: "#475569", wing: "#94A3B8", tail: "#475569", beak: "#FB7185", leg: "#E8798A" },
+      viewBox: "0 0 175 140",
+      transparentOuterBox: true,
+      outlineStroke: "#94A3B8",
+      outlineWidth: 2.4,
+      innerStroke: "#64748B",
+      innerWidth: 1.9,
+      outer: [
+        "M38 61 C44 39 65 26 89 28 C111 29 128 42 133 61 C148 66 159 78 164 91 C151 99 138 100 126 94 C116 113 90 121 65 114 C42 107 29 88 38 61 Z",
+        "M123 79 L159 91 L130 101 Z"
+      ],
+      regions: [
+        { id: "body", d: "M49 62 C68 49 106 51 124 68 C141 84 124 109 96 114 C67 120 41 106 40 84 C40 74 43 67 49 62 Z", fill: "#F8FAFC" },
+        { id: "head", d: "M57 39 C69 25 93 25 106 39 C118 53 108 69 91 72 C73 74 55 63 53 49 C53 45 55 41 57 39 Z", fill: "#475569" },
+        { id: "cheek", d: "M60 48 C67 38 79 37 87 45 C91 55 84 64 73 64 C65 63 60 57 60 48 Z", fill: "#FFFFFF" },
+        { id: "belly", d: "M62 76 C79 67 106 73 118 91 C104 108 76 111 57 98 C55 89 57 81 62 76 Z", fill: "#FFFDF7" },
+        { id: "wing", d: "M86 64 C107 64 124 76 126 94 C108 102 90 90 86 64 Z", fill: "#94A3B8" },
+        { id: "tail", d: "M123 79 L159 91 L130 101 Z", fill: "#475569" },
+        { id: "beak", d: "M55 49 L34 56 L56 62 Z", fill: "#FB7185" },
+        { id: "legs", d: "M71 112 L68 127 M99 112 L103 127", fill: "none" }
+      ],
+      inner: [
+        "M87 65 C98 75 111 84 124 93",
+        "M62 76 C74 81 87 81 98 75",
+        "M68 127 C62 131 56 131 51 128 M103 127 C109 131 115 131 120 128"
+      ],
+      face: '<circle cx="76" cy="46" r="3.2" fill="#17202A"/><circle cx="77" cy="45" r="1" fill="#fff"/><path d="M57 63 C64 67 72 68 79 66" fill="none" stroke="#E8798A" stroke-width="1.8" stroke-linecap="round"/>'
+    },
+    {
+      id: "companion_ice_legend_bird",
+      name: "こおりの でんせつどり",
+      displayOrder: 11,
+      designVersion: 1,
+      preferredWorldIds: ["world_sky_island", "world_castle", "world_sea"],
+      defaultColors: { body: "#60A5FA", chest: "#F8FAFC", wing: "#93C5FD", tail: "#38BDF8", beak: "#D9F4FF", leg: "#2563EB" },
+      viewBox: "0 0 230 170",
+      transparentOuterBox: true,
+      outlineStroke: "#60A5FA",
+      outlineWidth: 2.4,
+      innerStroke: "#3B82F6",
+      innerWidth: 2,
+      outer: [
+        "M91 41 C102 23 126 20 140 35 C150 45 151 60 145 71 C165 65 190 51 218 38 C210 66 191 89 157 102 C150 121 135 134 115 134 C94 134 79 121 72 102 C39 89 20 66 12 38 C40 51 65 65 85 71 C79 60 81 48 91 41 Z",
+        "M94 126 L77 165 L111 143 L115 168 L125 143 L159 165 L137 126 Z"
+      ],
+      regions: [
+        { id: "left_wing", d: "M84 69 C61 65 35 52 13 39 C22 65 42 88 75 99 C84 92 89 81 84 69 Z", fill: "#93C5FD" },
+        { id: "right_wing", d: "M146 69 C169 65 195 52 217 39 C208 65 188 88 155 99 C146 92 141 81 146 69 Z", fill: "#93C5FD" },
+        { id: "body", d: "M92 57 C104 42 128 42 140 57 C154 75 153 105 137 123 C124 138 104 138 91 123 C75 105 76 76 92 57 Z", fill: "#60A5FA" },
+        { id: "chest", d: "M99 73 C108 66 123 66 132 74 C141 87 139 111 128 123 C120 132 109 132 101 123 C89 110 89 87 99 73 Z", fill: "#F8FAFC" },
+        { id: "head", d: "M92 41 C103 23 127 21 140 36 C152 50 147 69 132 76 C117 83 96 76 88 62 C84 54 86 47 92 41 Z", fill: "#BFDBFE" },
+        { id: "crest", d: "M101 30 L111 7 L118 29 L136 12 L132 37 Z", fill: "#E0F2FE" },
+        { id: "tail", d: "M94 126 L77 165 L111 143 L115 168 L125 143 L159 165 L137 126 Z", fill: "#38BDF8" },
+        { id: "beak", d: "M138 53 L157 60 L138 67 Z", fill: "#D9F4FF" },
+        { id: "feet", d: "M103 130 L98 145 M128 130 L133 145", fill: "none" }
+      ],
+      inner: [
+        "M80 71 C57 69 36 58 21 47",
+        "M150 71 C173 69 194 58 209 47",
+        "M95 83 C105 91 125 92 136 83",
+        "M99 123 C108 130 123 130 132 123",
+        "M98 145 C91 149 85 149 79 146 M133 145 C140 149 146 149 152 146"
+      ],
+      face: '<circle cx="116" cy="48" r="3.4" fill="#1E3A8A"/><circle cx="117" cy="47" r="1.1" fill="#fff"/><path d="M100 58 C107 63 116 64 124 60" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round"/>'
     }
   ];
 
@@ -375,6 +541,8 @@
     var species = getSpecies(speciesId) || allSpecies()[0];
     var outlineStroke = species.outlineStroke || "#28312d";
     var innerStroke = species.innerStroke || "#5b4631";
+    var outlineWidth = Number(species.outlineWidth || 4.2);
+    var innerWidth = Number(species.innerWidth || 2.2);
     var transparentBoxClass = species.transparentOuterBox ? " companion-transparent-box" : "";
     if (species.id === "companion_peacock") {
       return renderPeacockCompanion(species, opts);
@@ -396,10 +564,10 @@
         return '<path d="' + region.d + '" fill="' + region.fill + '"/>';
       }).join(""),
       '</g>',
-      '<g class="outer-outline" fill="none" stroke="' + outlineStroke + '" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">',
+      '<g class="outer-outline" fill="none" stroke="' + outlineStroke + '" stroke-width="' + outlineWidth + '" stroke-linejoin="round" stroke-linecap="round">',
       species.outer.map(function (d) { return '<path d="' + d + '"/>'; }).join(""),
       '</g>',
-      '<g class="inner-lines" fill="none" stroke="' + innerStroke + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">',
+      '<g class="inner-lines" fill="none" stroke="' + innerStroke + '" stroke-width="' + innerWidth + '" stroke-linecap="round" stroke-linejoin="round">',
       species.inner.map(function (d) { return '<path d="' + d + '"/>'; }).join(""),
       '</g>',
       '<g class="face-details">',

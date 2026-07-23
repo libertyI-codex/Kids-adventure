@@ -2,9 +2,9 @@
   "use strict";
 
   var DIAGNOSTIC_KEY = "kodomoAdventure.bootDiagnostic.v1";
-  var HOTFIX_QUERY = "v=10p21h1";
-  var APP_VERSION = "1.0.0-prototype.21-hotfix1";
-  var VERSION_LABEL = "Ver.1.0 試作21 修正1";
+  var HOTFIX_QUERY = "v=10p22";
+  var APP_VERSION = "1.0.0-prototype.22";
+  var VERSION_LABEL = "Ver.1.0 試作22";
   var startupStartedAt = Date.now();
   var minSplashMs = 1200;
   var maxSplashMs = 4000;
@@ -278,7 +278,7 @@
   function safeStartUrl() {
     var href = String(global.location && global.location.href || "");
     href = updateQuery(href, "safeStart", "1");
-    href = updateQuery(href, "v", "10p21h1");
+    href = updateQuery(href, "v", "10p22");
     return href;
   }
 
@@ -298,10 +298,10 @@
       if (!pairs[i]) continue;
       var key = decodeURIComponent(pairs[i].split("=")[0]);
       if (key === "safeStart") continue;
-      if (key === "v") next.push("v=10p21h1");
+      if (key === "v") next.push("v=10p22");
       else next.push(pairs[i]);
     }
-    if (next.join("&").indexOf("v=10p21h1") < 0) next.push("v=10p21h1");
+    if (next.join("&").indexOf("v=10p22") < 0) next.push("v=10p22");
     return base + (next.length ? "?" + next.join("&") : "") + hash;
   }
 
