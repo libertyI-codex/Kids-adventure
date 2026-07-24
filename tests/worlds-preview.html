@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>こどもの冒険 世界プレビュー 試作8</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 18px;
+      background: #f5fbf2;
+      color: #24312b;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .world-tabs, .tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    button {
+      min-height: 44px;
+      padding: 8px 12px;
+      border: 1px solid #cfe0cc;
+      border-radius: 12px;
+      background: #fff;
+      font-weight: 900;
+      touch-action: manipulation;
+    }
+    button.is-active, .primary { background: #4f9f54; color: #fff; }
+    .stage-frame {
+      width: min(100%, 390px);
+      border: 1px solid #b9dcb7;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .stage {
+      position: relative;
+      height: 520px;
+      overflow: hidden;
+      background: #bdeeff;
+    }
+    .bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .object {
+      position: absolute;
+      width: 76px;
+      min-height: 76px;
+      border: 2px dashed rgba(47, 120, 55, .72);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .76);
+      transform: translate(-50%, -50%);
+      font-size: 2.1rem;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: none;
+    }
+    .object.is-dragging { cursor: grabbing; box-shadow: 0 10px 22px rgba(30, 70, 40, .24); }
+    .artwork-wrapper { position: relative; display: grid; place-items: center; width: 100%; min-height: 76px; }
+    .artwork-effects { position: absolute; inset: 0; pointer-events: none; }
+    .dust {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(250, 204, 21, .82);
+      box-shadow: 0 0 8px rgba(250, 204, 21, .55);
+      animation: dustFloat 2.8s ease-in-out infinite;
+    }
+    .dust-1 { left: 12%; top: 22%; }
+    .dust-2 { right: 13%; top: 24%; background: rgba(244, 114, 182, .78); animation-delay: .3s; }
+    .dust-3 { left: 22%; bottom: 22%; background: rgba(56, 189, 248, .75); animation-delay: .6s; }
+    .dust-4 { right: 22%; bottom: 18%; animation-delay: .9s; }
+    .object.is-dragging .artwork-effects { display: none; }
+    .meta {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      margin: 14px 0;
+    }
+    .panel {
+      border: 1px solid #d7e6d5;
+      border-radius: 14px;
+      background: #fff;
+      padding: 12px;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      padding: 12px;
+      border: 1px solid #d7e6d5;
+      border-radius: 12px;
+      background: #fff;
+    }
+    @keyframes dustFloat {
+      0%, 100% { opacity: .28; transform: translate(0, 0) scale(.82); }
+      50% { opacity: .92; transform: translate(3px, -6px) scale(1.08); }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>世界プレビュー Ver.1.0 試作8</h1>
+    <p>島の木の根元、城背景、空島の浮き方、蝶の鱗粉がドラッグに追従するかを確認するテストページです。本番画面からはリンクしません。</p>
+    <div class="world-tabs" id="tabs"></div>
+    <div class="tools">
+      <button class="primary" id="save">配置確定</button>
+      <button id="reset">自動配置へ戻す</button>
+      <button id="move">選択作品を次の世界へ移動</button>
+      <button id="wide">幅を切り替え</button>
+    </div>
+    <div class="meta" id="meta"></div>
+    <section class="stage-frame" id="frame">
+      <div class="stage" id="stage"></div>
+    </section>
+    <pre id="output"></pre>
+  </main>
+  <script>
+    (function () {
+      "use strict";
+      var worlds = [
+        { id: "world_forest", name: "もり", icon: "🌳", designVersion: 1 },
+        { id: "world_sea", name: "うみ", icon: "🌊", designVersion: 1 },
+        { id: "world_island", name: "しま", icon: "🏝️", designVersion: 2 },
+        { id: "world_castle", name: "しろ", icon: "🏰", designVersion: 2 },
+        { id: "world_sky_island", name: "そらじま", icon: "☁️", designVersion: 2 },
+        { id: "world_secret_base", name: "ひみつきち", icon: "🏠", designVersion: 1 }
+      ];
+      var placements = {
+        world_forest: [{ id: "butterfly", icon: "🦋", xPercent: 32, yPercent: 38, zIndex: 1, isManual: false, effect: true }],
+        world_sea: [{ id: "dolphin", icon: "🐬", xPercent: 52, yPercent: 48, zIndex: 1, isManual: false }],
+        world_island: [{ id: "horse", icon: "🐴", xPercent: 56, yPercent: 69, zIndex: 1, isManual: false }],
+        world_castle: [{ id: "lion", icon: "🦁", xPercent: 51, yPercent: 66, zIndex: 1, isManual: false }],
+        world_sky_island: [{ id: "grasshopper", icon: "🦗", xPercent: 60, yPercent: 60, zIndex: 1, isManual: false }],
+        world_secret_base: [
+          { id: "rabbit", icon: "🐰", xPercent: 36, yPercent: 72, zIndex: 1, isManual: false },
+          { id: "cat", icon: "🐱", xPercent: 70, yPercent: 67, zIndex: 2, isManual: false },
+          { id: "panda", icon: "🐼", xPercent: 52, yPercent: 76, zIndex: 3, isManual: false },
+          { id: "grasshopper", icon: "🦗", xPercent: 83, yPercent: 72, zIndex: 4, isManual: false }
+        ]
+      };
+      var selected = "world_forest";
+      var activeObjectId = "butterfly";
+      var drag = null;
+      var stage = document.getElementById("stage");
+      var tabs = document.getElementById("tabs");
+      var output = document.getElementById("output");
+      var meta = document.getElementById("meta");
+      var frame = document.getElementById("frame");
+
+      function bg(id) {
+        if (id === "world_sea") return '<svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="#48bde2"/><path d="M10 0 L25 0 L14 70 L3 70 Z M68 0 L84 0 L75 72 L63 72 Z" fill="#fff" opacity=".18"/><path d="M0 82 C22 76 34 86 50 80 C70 74 85 84 100 78 L100 100 L0 100 Z" fill="#f4d58a"/></svg>';
+        if (id === "world_island") return '<svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="#aee7ff"/><circle cx="84" cy="13" r="6" fill="#facc15"/><path d="M0 55 C20 48 36 57 52 50 C72 42 88 50 100 44 L100 72 L0 72 Z" fill="#6ccce6"/><path d="M0 72 C18 63 40 63 58 70 C74 78 90 76 100 70 L100 100 L0 100 Z" fill="#f5d48a"/><path d="M15 72 C31 55 69 54 88 72 C73 82 31 83 15 72 Z" fill="#f7dd99"/><path d="M24 70 C39 56 66 57 81 70 C65 77 39 78 24 70 Z" fill="#7ed36f"/><path d="M73 68 C74 58 76 48 80 39 C82 49 83 58 81 69 Z" fill="#8b5a2b" stroke="#6f421d" stroke-width="1.2"/><path d="M69 69 C73 66 80 66 85 70 C81 72 73 72 69 69 Z" fill="#6f9d45"/><path d="M80 41 C68 37 63 29 79 31 C84 20 94 25 88 37 C100 36 100 48 88 45 C91 56 78 56 80 41 Z" fill="#2f9f54"/></svg>';
+        if (id === "world_castle") return '<svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="#dff3ff"/><path d="M0 58 H100 V100 H0 Z" fill="#91d887"/><path d="M11 33 H25 V57 H11 Z M75 33 H89 V57 H75 Z M24 40 H76 V61 H24 Z" fill="#f8f5ff" stroke="#9f94c7" stroke-width="1.1"/><path d="M9 33 L18 18 L27 33 Z M73 33 L82 18 L91 33 Z" fill="#d8ccff" stroke="#9f94c7" stroke-width="1.1"/><path d="M31 31 H69 V43 H31 Z" fill="#fff" stroke="#9f94c7" stroke-width="1.1"/><path d="M49 61 C49 50 62 50 62 61 V73 H49 Z" fill="#a78bfa" stroke="#7c6bb8" stroke-width="1.1"/><path d="M33 68 C43 62 57 62 67 68 L58 100 H42 Z" fill="#d8d1c4"/><circle cx="33" cy="76" r="5" fill="#7bcfe4" stroke="#58aabd" stroke-width="1"/></svg>';
+        if (id === "world_sky_island") return '<svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="#bdeeff"/><path d="M12 25 C18 16 32 18 35 27 C45 25 52 32 47 39 H10 C4 35 6 27 12 25 Z M10 78 C17 70 31 72 34 80 C42 79 47 85 42 91 H9 C3 88 4 80 10 78 Z" fill="#fff" opacity=".86"/><path d="M54 14 C70 17 82 29 88 45" fill="none" stroke="#f472b6" stroke-width="2.7"/><path d="M19 62 C35 45 68 45 86 62 C75 72 32 72 19 62 Z" fill="#7ed36f" stroke="#579c49" stroke-width="1"/><path d="M25 65 C38 78 65 78 80 65 C73 86 34 87 25 65 Z" fill="#8b6f47"/><path d="M36 69 C44 84 55 91 62 69 C55 100 43 100 36 69 Z" fill="#6f5638"/><path d="M60 62 C63 74 58 82 54 91" fill="none" stroke="#7bcfe4" stroke-width="3.5" opacity=".85" stroke-linecap="round"/></svg>';
+        if (id === "world_secret_base") return '<svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="#ffe8bd"/><path d="M0 0 H100 V63 H0 Z" fill="#f7d59b"/><path d="M0 63 H100 V100 H0 Z" fill="#d59b5b"/><g stroke="#c4894e" stroke-width=".45" opacity=".55"><path d="M0 10 H100 M0 22 H100 M0 34 H100 M0 46 H100 M0 58 H100"/><path d="M10 0 V63 M23 0 V63 M37 0 V63 M51 0 V63 M65 0 V63 M79 0 V63 M93 0 V63"/></g><path d="M68 11 C76 5 90 9 91 20 C94 24 92 32 86 34 H67 C60 31 61 19 68 11 Z" fill="#9be7ff" stroke="#a66d38" stroke-width="1.2"/><path d="M78 9 V34 M62 22 H92" stroke="#fff7dd" stroke-width=".9"/><path d="M8 28 H35 V35 H8 Z" fill="#b77943" stroke="#7a4a26" stroke-width=".9"/><path d="M9 35 H37 V65 H9 Z" fill="#f0c07a" stroke="#7a4a26" stroke-width=".9"/><path d="M14 30 H22 C22 33 20 35 18 35 C16 35 14 33 14 30 Z" fill="#d9f6ff" stroke="#7097a1" stroke-width=".65"/><path d="M18 30 C18 27 22 27 22 30" fill="none" stroke="#5b7d86" stroke-width=".7"/><path d="M24 30 H34 V34 H24 Z" fill="#2f2f34" opacity=".75"/><circle cx="27" cy="32" r="1.2" fill="#f59e0b"/><circle cx="31" cy="32" r="1.2" fill="#f59e0b"/><path d="M10 20 H34 V27 H10 Z" fill="#a76836" stroke="#73451f" stroke-width=".8"/><path d="M57 67 C64 59 82 59 90 67 L86 73 H61 Z" fill="#b87943" stroke="#70421f" stroke-width="1"/><path d="M60 73 H87 V78 H60 Z" fill="#8b5a2b"/><path d="M64 78 V92 M83 78 V92" stroke="#70421f" stroke-width="2.2" stroke-linecap="round"/><path d="M55 76 C51 80 51 89 57 91 C60 86 60 80 57 76 Z" fill="#c79255" stroke="#70421f" stroke-width=".8"/><path d="M88 77 C94 80 94 89 88 92 C85 87 85 80 88 77 Z" fill="#c79255" stroke="#70421f" stroke-width=".8"/><path d="M37 74 C45 69 58 69 67 75 C64 87 43 89 35 79 Z" fill="#f5b3a5" opacity=".78" stroke="#bd7b65" stroke-width=".8"/></svg>';
+        return '<svg class="bg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="#BDEEFF"/><circle cx="85" cy="12" r="6" fill="#FACC15"/><path d="M0 54 C18 45 32 58 48 50 C66 40 82 48 100 38 L100 100 L0 100 Z" fill="#9BE18D"/><path d="M8 64 C17 44 20 30 26 18 C34 32 39 48 45 66 Z" fill="#4F9F54"/><path d="M2 84 C12 78 24 78 36 84 C26 90 12 90 2 84 Z" fill="#7BCFE4"/></svg>';
+      }
+      function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+      function round(value) { return Math.round(value * 10) / 10; }
+      function effects(item) {
+        if (!item.effect) return "";
+        return '<span class="artwork-effects"><span class="dust dust-1"></span><span class="dust dust-2"></span><span class="dust dust-3"></span><span class="dust dust-4"></span></span>';
+      }
+      function renderTabs() {
+        tabs.innerHTML = worlds.map(function (world) {
+          return '<button class="' + (world.id === selected ? "is-active" : "") + '" data-world="' + world.id + '">' + world.icon + ' ' + world.name + '</button>';
+        }).join("");
+        Array.prototype.forEach.call(tabs.querySelectorAll("[data-world]"), function (button) {
+          button.addEventListener("click", function () { selected = button.getAttribute("data-world"); render(); });
+        });
+      }
+      function render() {
+        renderTabs();
+        var world = worlds.filter(function (item) { return item.id === selected; })[0];
+        meta.innerHTML = '<div class="panel"><strong>世界ID</strong><br>' + world.id + '</div><div class="panel"><strong>designVersion</strong><br>' + world.designVersion + '</div><div class="panel"><strong>390px相当表示</strong><br>左の枠で確認</div><div class="panel"><strong>重点</strong><br>島の木、城、空島、蝶の鱗粉</div>';
+        stage.innerHTML = bg(selected) + placements[selected].map(function (item) {
+          return '<button class="object" data-object="' + item.id + '" style="left:' + item.xPercent + '%; top:' + item.yPercent + '%; z-index:' + item.zIndex + '"><span class="artwork-wrapper"><span>' + item.icon + '</span>' + effects(item) + '</span></button>';
+        }).join("");
+        output.textContent = JSON.stringify({ selectedWorldId: selected, placements: placements }, null, 2);
+        bindObjects();
+      }
+      function bindObjects() {
+        Array.prototype.forEach.call(stage.querySelectorAll("[data-object]"), function (el) {
+          el.addEventListener("pointerdown", function (event) {
+            var item = placements[selected].filter(function (row) { return row.id === el.getAttribute("data-object"); })[0];
+            activeObjectId = item.id;
+            drag = { id: item.id, startX: event.clientX, startY: event.clientY, startXP: item.xPercent, startYP: item.yPercent, moved: false };
+            el.setPointerCapture(event.pointerId);
+            event.preventDefault();
+          });
+          el.addEventListener("pointermove", function (event) {
+            if (!drag || drag.id !== el.getAttribute("data-object")) return;
+            var dx = event.clientX - drag.startX;
+            var dy = event.clientY - drag.startY;
+            if (!drag.moved && Math.sqrt(dx * dx + dy * dy) < 6) return;
+            drag.moved = true;
+            el.classList.add("is-dragging");
+            var rect = stage.getBoundingClientRect();
+            var item = placements[selected].filter(function (row) { return row.id === drag.id; })[0];
+            item.xPercent = round(clamp(drag.startXP + dx / rect.width * 100, 6, 94));
+            item.yPercent = round(clamp(drag.startYP + dy / rect.height * 100, 12, 90));
+            item.isManual = true;
+            item.zIndex = 9;
+            el.style.left = item.xPercent + "%";
+            el.style.top = item.yPercent + "%";
+            output.textContent = JSON.stringify({ selectedWorldId: selected, placements: placements }, null, 2);
+            event.preventDefault();
+          });
+          function end(event) { if (drag) { el.classList.remove("is-dragging"); drag = null; event.preventDefault(); } }
+          el.addEventListener("pointerup", end);
+          el.addEventListener("pointercancel", end);
+        });
+      }
+      document.getElementById("save").addEventListener("click", function () {
+        placements[selected].sort(function (a, b) { return a.zIndex - b.zIndex; }).forEach(function (item, index) { item.zIndex = index + 1; });
+        render();
+      });
+      document.getElementById("reset").addEventListener("click", function () {
+        placements[selected].forEach(function (item, index) { item.xPercent = 30 + index * 16; item.yPercent = 60 + index * 6; item.zIndex = index + 1; item.isManual = false; });
+        render();
+      });
+      document.getElementById("move").addEventListener("click", function () {
+        var currentList = placements[selected];
+        var item = currentList.filter(function (row) { return row.id === activeObjectId; })[0] || currentList[0];
+        if (!item) return;
+        placements[selected] = currentList.filter(function (row) { return row.id !== item.id; });
+        var nextWorld = worlds[(worlds.findIndex(function (world) { return world.id === selected; }) + 1) % worlds.length].id;
+        item.xPercent = 50;
+        item.yPercent = 64;
+        item.zIndex = placements[nextWorld].length + 1;
+        item.isManual = false;
+        placements[nextWorld].push(item);
+        selected = nextWorld;
+        render();
+      });
+      document.getElementById("wide").addEventListener("click", function () {
+        frame.style.width = frame.style.width ? "" : "min(100%, 760px)";
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -424,26 +424,164 @@
     ].join("");
   }
 
+  function getHomeAdventureSnapshot(data) {
+    var today = KA.date.localDateKey();
+    var outing = KA.outings && KA.outings.ensureOuting ? KA.outings.ensureOuting(data) : { activeTrip: null, history: [] };
+    if (KA.outings && KA.outings.syncTripStatus) {
+      var synced = KA.outings.syncTripStatus(data, today);
+      if (synced.changed) KA.state.saveAppData();
+      outing = KA.outings.ensureOuting(data);
+    }
+    var prep = KA.outings && KA.outings.preparationStatus
+      ? KA.outings.preparationStatus(data)
+      : { job: false, care: false, food: false, count: 0, complete: false };
+    var history = Array.isArray(outing.history) ? outing.history : [];
+    var departedToday = history.some(function (item) {
+      return item && item.departedDateKey === today;
+    });
+    var claimedToday = history.some(function (item) {
+      if (!item || !item.claimedAt) return false;
+      var claimedDate = new Date(item.claimedAt);
+      return !isNaN(claimedDate.getTime()) && KA.date.localDateKey(claimedDate) === today;
+    });
+    return {
+      today: today,
+      prep: prep,
+      trip: outing.activeTrip,
+      outingDone: Boolean(outing.activeTrip) || departedToday,
+      giftReady: Boolean(outing.activeTrip && outing.activeTrip.status === "returned"),
+      giftReceived: claimedToday
+    };
+  }
+
+  function renderHomeHero(data, snapshot) {
+    var owned = KA.companions && KA.companions.ensureCompanions ? KA.companions.ensureCompanions(data).filter(function (companion) {
+      return companion && KA.companions.isValidSpeciesId(companion.speciesId) && Number(companion.hatchCount || 0) > 0;
+    }) : [];
+    var companion = KA.companions && KA.companions.favoriteCompanion ? KA.companions.favoriteCompanion(data) : null;
+    companion = companion || owned[0] || null;
+    var tripSpecies = snapshot.trip && KA.companions ? KA.companions.getSpecies(snapshot.trip.speciesId) : null;
+    var species = tripSpecies || (companion && KA.companions.getSpecies(companion.speciesId));
+    var egg = KA.eggs && KA.eggs.activeEgg ? KA.eggs.activeEgg(data) : null;
+    var art = species && KA.companions
+      ? KA.companions.renderCompanion(species.id)
+      : (egg && KA.eggs.renderEggSvg ? KA.eggs.renderEggSvg(egg) : '<span class="home-hero-placeholder" aria-hidden="true">★</span>');
+    var artLabel = species ? species.name : (egg ? "たまご" : "これからの なかま");
+    var message;
+    var actionLabel;
+    var actionRoute;
+    var actionClass = "btn-primary";
+
+    if (snapshot.giftReady) {
+      message = "おみやげが あるよ！";
+      actionLabel = "おみやげを うけとる";
+      actionRoute = "outing";
+    } else if (snapshot.trip && snapshot.trip.status === "traveling") {
+      message = escapeHtml(species ? species.name : "なかま") + "が おでかけを たのしんでいるよ";
+      actionLabel = "ようすを みる";
+      actionRoute = "outing";
+      actionClass = "btn-soft";
+    } else if (egg) {
+      var target = KA.eggs.targetForEgg ? KA.eggs.targetForEgg(egg) : Number(egg.targetGrowthPoints || 6);
+      var growth = Math.max(0, Math.min(target, Number(egg.growthPoints || 0)));
+      var remaining = Math.max(0, target - growth);
+      if (remaining === 0 || egg.state === "ready") {
+        message = "たまごが うまれる じゅんびを しているよ！";
+        actionLabel = "たまごを みる";
+        actionRoute = "eggs";
+      }
+    }
+
+    if (!message && !owned.length) {
+      message = "たまごから どんな なかまが うまれるかな？";
+      actionLabel = "たまごを おせわする";
+      actionRoute = "eggs";
+    } else if (!message && !snapshot.prep.job) {
+      message = "まずは おしごとを ひとつ やってみよう";
+      actionLabel = "おしごとへ";
+      actionRoute = "tasks";
+    } else if (!message && !snapshot.prep.care) {
+      message = "きょうは おせわが まだだよ";
+      actionLabel = "おせわする";
+      actionRoute = "eggs";
+    } else if (!message && !snapshot.prep.food) {
+      message = "きょうは ごはんが まだだよ";
+      actionLabel = "ごはんを つくる";
+      actionRoute = "kitchen";
+    } else if (!message && snapshot.prep.complete) {
+      message = snapshot.outingDone ? "きょうも たくさん ぼうけんしたね！" : "おでかけの じゅんびが できたよ！";
+      actionLabel = snapshot.outingDone ? "なかまに あいにいく" : "おでかけする";
+      actionRoute = snapshot.outingDone ? "bird-house" : "outing";
+    }
+
+    if (!message) {
+      message = "きょうも いっしょに あそぼう";
+      actionLabel = "なかまに あいにいく";
+      actionRoute = "bird-house";
+    }
+
+    return [
+      '<section class="home-hero" aria-labelledby="home-hero-title">',
+      '<div class="home-hero-art" role="img" aria-label="' + escapeHtml(artLabel) + '">' + art + '</div>',
+      '<div class="home-hero-copy">',
+      '<p class="eyebrow">きょうの おすすめ</p>',
+      '<h2 id="home-hero-title">きょうも いっしょに あそぼう</h2>',
+      '<p class="home-hero-message">' + message + '</p>',
+      button(actionLabel, actionClass + " home-hero-action", 'data-route="' + actionRoute + '"'),
+      '</div>',
+      '</section>'
+    ].join("");
+  }
+
+  function renderHomeAdventure(snapshot) {
+    var items = [
+      { label: "おしごと", done: snapshot.prep.job, detail: snapshot.prep.job ? "できた！" : "まだだよ" },
+      { label: "おせわ", done: snapshot.prep.care, detail: snapshot.prep.care ? "できた！" : "まだだよ" },
+      { label: "ごはん", done: snapshot.prep.food, detail: snapshot.prep.food ? "できた！" : "まだだよ" },
+      { label: "おでかけ", done: snapshot.outingDone, detail: snapshot.outingDone ? "しゅっぱつ済み" : "これから" },
+      { label: "おみやげ", done: snapshot.giftReady || snapshot.giftReceived, detail: snapshot.giftReady ? "うけとれるよ" : (snapshot.giftReceived ? "うけとったよ" : "まだだよ"), alert: snapshot.giftReady }
+    ];
+    return [
+      '<section class="panel panel-pad home-adventure-card" aria-labelledby="home-adventure-title">',
+      '<div class="section-heading"><div><p class="eyebrow">ひとめで わかるよ</p><h2 id="home-adventure-title">きょうの ぼうけん</h2></div>',
+      '<span class="badge">' + snapshot.prep.count + '/3 じゅんび</span></div>',
+      '<div class="home-adventure-grid">',
+      items.map(function (item) {
+        return [
+          '<div class="home-adventure-item ' + (item.done ? "is-done" : "") + (item.alert ? " is-alert" : "") + '">',
+          '<span class="home-adventure-mark" aria-hidden="true">' + (item.done ? "✓" : "□") + '</span>',
+          '<span><strong>' + item.label + '</strong><small>' + item.detail + '</small></span>',
+          '</div>'
+        ].join("");
+      }).join(""),
+      '</div>',
+      '</section>'
+    ].join("");
+  }
+
   function renderHome() {
     var data = KA.state.getAppData();
     var record = KA.state.getDailyRecord();
     var tasks = KA.tasks.activeTasks();
     var completed = KA.tasks.completedDailyTasks();
+    var snapshot = getHomeAdventureSnapshot(data);
     var body = [
       '<section class="home-flow">',
+      renderHomeHero(data, snapshot),
       '<div class="home-star-strip" role="group" aria-label="スターの数">',
       '<div class="home-star-mini" aria-label="つかえるほし ' + Number(data.profile.starTotals.spendableStars || 0) + 'こ"><span>つかえるほし</span><strong>⭐' + Number(data.profile.starTotals.spendableStars || 0) + '</strong></div>',
       '<div class="home-star-mini" aria-label="あつめたほし ' + Number(data.profile.starTotals.lifetimeStars || 0) + 'こ"><span>あつめたほし</span><strong>⭐' + Number(data.profile.starTotals.lifetimeStars || 0) + '</strong></div>',
       '</div>',
+      renderHomeAdventure(snapshot),
       renderCompanionStatus(data),
       renderOutingHomeCard(data),
-      '<div class="panel panel-pad">',
-      '<p><span class="badge">おしごと ' + completed.length + ' / ' + tasks.length + '</span> <span class="badge">さくひん ' + record.artworkIds.length + '</span></p>',
+      '<section class="home-support-stack" aria-label="そのほかの ぼうけん">',
+      '<div class="home-quick-summary"><span class="badge">おしごと ' + completed.length + ' / ' + tasks.length + '</span><span class="badge">さくひん ' + record.artworkIds.length + '</span></div>',
       button("🥚 ふしぎなたまご " + KA.eggs.eggCount() + "こ", "btn-soft egg-button", 'data-route="eggs"'),
-      forestMiniPreview(),
       favoriteCompanionCard(),
+      '<div class="home-world-peek">' + forestMiniPreview() + '</div>',
       dataIssueMessage(),
-      '</div>',
+      '</section>',
       '</section>'
     ].join("");
     layout(KA.constants.APP_DISPLAY_NAME, body, { subtitle: KA.constants.VERSION_LABEL });
@@ -1906,7 +2044,7 @@
     var visibleCount = KA.birdHouse.companionLayout(data, focusId).length;
     var missingMessage = owned.length > 0 && owned.length < KA.companions.allSpecies().length ? '<p class="bird-house-maybe">まだ だれかが くるかも？</p>' : '';
     return [
-      '<section class="bird-house-room panel">',
+      '<section class="bird-house-room panel' + (opts.decorate ? ' is-decorating' : '') + '">',
       '<div class="bird-house-bg"><div class="bird-house-window"></div><div class="bird-house-light"></div></div>',
       '<div class="bird-house-wall-layer">' + renderBirdHouseFurnitureLayer(placements, "wall", "wall") + '</div>',
       '<div class="bird-house-back-floor-layer">' + renderBirdHouseFurnitureLayer(placements, "perch", "back") + renderBirdHouseFurnitureLayer(placements, "table", "back") + renderBirdHouseFurnitureLayer(placements, "nest", "back") + '</div>',

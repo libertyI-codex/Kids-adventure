@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>たまごシステムプレビュー - こどもの冒険</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #27332f;
+      --muted: #697670;
+      --line: #dbe6dd;
+      --panel: #fffdf7;
+      --accent: #f4b73f;
+      --green: #5fae78;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #eaf8ff, #fff9df 42%, #eff8ee);
+    }
+    main {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0 44px;
+    }
+    h1 { margin: 0 0 6px; font-size: clamp(1.5rem, 3vw, 2.15rem); }
+    h2 { margin: 0 0 10px; font-size: 1.2rem; }
+    p { line-height: 1.65; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 8px 20px rgba(82, 96, 88, 0.12);
+    }
+    .egg-stage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .stage {
+      display: grid;
+      place-items: center;
+      min-height: 190px;
+      border: 1px solid #eadfbd;
+      border-radius: 14px;
+      background: #fffaf0;
+      padding: 8px;
+      text-align: center;
+    }
+    .stage svg { width: 120px; }
+    .stage span { color: var(--muted); font-weight: 800; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    button {
+      min-height: 44px;
+      border: 1px solid #c9d9cf;
+      background: #fff;
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 9px 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    button.primary {
+      background: #fff0bd;
+      border-color: #e4ba48;
+    }
+    button.danger {
+      background: #fff1f1;
+      border-color: #efb5b5;
+    }
+    .status {
+      min-height: 1.7em;
+      color: #7c4a03;
+      font-weight: 800;
+    }
+    .data-box {
+      overflow: auto;
+      max-height: 300px;
+      white-space: pre;
+      padding: 10px;
+      border-radius: 12px;
+      background: #18231f;
+      color: #d9ffe7;
+      font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    .today-list {
+      display: grid;
+      gap: 6px;
+      padding: 0;
+      margin: 10px 0;
+      list-style: none;
+    }
+    .today-list li {
+      padding: 7px 9px;
+      border: 1px solid #e4ece6;
+      border-radius: 10px;
+      background: #fff;
+      font-weight: 800;
+    }
+    .today-list li.done {
+      background: #eef8ea;
+      border-color: #9bcf90;
+      color: #23623b;
+    }
+    .dex {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .dex-card {
+      border: 1px solid #e4ece6;
+      border-radius: 14px;
+      background: #fff;
+      padding: 10px;
+      text-align: center;
+    }
+    .dex-card svg { width: 96px; height: auto; }
+    .locked svg path,
+    .locked svg circle,
+    .locked svg ellipse,
+    .locked svg polygon {
+      fill: #111827 !important;
+      stroke: none !important;
+    }
+    .badge {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: #edf7ef;
+      color: #23623b;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+    .preview-390 {
+      width: min(390px, 100%);
+      margin: 12px auto 0;
+      border: 1px dashed #9db4a7;
+      border-radius: 16px;
+      padding: 10px;
+      background: #ffffffa8;
+      overflow-x: hidden;
+    }
+    @media (max-width: 520px) {
+      .controls button { flex: 1 1 100%; }
+      .dex { grid-template-columns: 1fr 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>たまごシステムプレビュー</h1>
+    <p>本番localStorageを使わず、メモリ上のテストデータだけで、お世話5種類、初回4ポイント、通常6ポイント、孵化、なかまずかんを確認します。</p>
+
+    <section class="panel">
+      <h2>成長段階</h2>
+      <div id="stage-root" class="egg-stage-grid"></div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>操作テスト</h2>
+        <div class="controls">
+          <button class="primary" data-action="pet">なでる</button>
+          <button class="primary" data-action="warm">あたためる</button>
+          <button class="primary" data-action="sing">うたう</button>
+          <button data-action="job">おしごと達成</button>
+          <button data-action="coloring">ぬりえ完成</button>
+          <button data-action="next-day">1日進める</button>
+          <button data-action="ready">readyへ進める</button>
+          <button class="primary" data-action="hatch">孵化する</button>
+          <button data-action="duplicate">同じ鳥を再孵化</button>
+          <button data-action="favorite">お気に入り変更</button>
+          <button class="danger" data-action="reset">データリセット</button>
+        </div>
+        <p id="status" class="status"></p>
+        <div id="active-root"></div>
+      </div>
+      <div class="panel">
+        <h2>メモリデータ</h2>
+        <pre id="data-root" class="data-box"></pre>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>なかまずかん</h2>
+      <div id="dex-root" class="dex"></div>
+      <div class="preview-390">
+        <strong>390px相当表示 / 横スクロールなし</strong>
+        <div id="narrow-root" class="dex"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/date-utils.js"></script>
+  <script src="../js/companions.js"></script>
+  <script src="../js/eggs.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var KA = window.KodomoAdventure;
+      var dateIndex = 0;
+      var currentDate = "2026-07-15";
+      var data;
+      var statusEl = document.getElementById("status");
+      var stageRoot = document.getElementById("stage-root");
+      var activeRoot = document.getElementById("active-root");
+      var dexRoot = document.getElementById("dex-root");
+      var narrowRoot = document.getElementById("narrow-root");
+      var dataRoot = document.getElementById("data-root");
+
+      KA.state = {
+        getAppData: function () { return data; },
+        saveAppData: function () {}
+      };
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function createData() {
+        return {
+          profile: { starTotals: { lifetimeStars: 20, spendableStars: 20 } },
+          eggInventory: [
+            { id: "egg_demo_10", createdAt: "2026-07-10T09:00:00+09:00", earnedByStars: 10, state: "new" },
+            { id: "egg_demo_20", createdAt: "2026-07-12T09:00:00+09:00", earnedByStars: 20, state: "new" }
+          ],
+          eggSystem: { activeEggId: null, dailyActivity: {} },
+          companions: []
+        };
+      }
+
+      function setStatus(message) {
+        statusEl.textContent = message;
+      }
+
+      function pad2(value) {
+        var text = String(value);
+        return text.length >= 2 ? text : "0" + text;
+      }
+
+      function renderStages() {
+        var stages = [
+          { points: 0, target: 4, state: "active", label: "初回 0 / 4" },
+          { points: 1, target: 4, state: "warm", label: "初回 1 / 4" },
+          { points: 3, target: 4, state: "cracked", label: "初回 3 / 4" },
+          { points: 4, target: 4, state: "ready", label: "初回 4 / 4 ready" },
+          { points: 3, target: 6, state: "glowing", label: "通常 3 / 6" },
+          { points: 5, target: 6, state: "cracked", label: "通常 5 / 6" },
+          { points: 6, target: 6, state: "ready", label: "通常 6 / 6 ready" },
+          { points: 6, target: 6, state: "hatched", label: "hatched" }
+        ];
+        stageRoot.innerHTML = stages.map(function (stage) {
+          return '<div class="stage">' + KA.eggs.renderEggSvg({ state: stage.state, growthPoints: stage.points, targetGrowthPoints: stage.target }) + '<span>' + escapeHtml(stage.label) + '</span></div>';
+        }).join("");
+      }
+
+      function renderDex(target) {
+        var ownedBySpecies = {};
+        KA.companions.ensureCompanions(data).forEach(function (companion) {
+          ownedBySpecies[companion.speciesId] = companion;
+        });
+        target.innerHTML = KA.companions.allSpecies().map(function (species) {
+          var owned = ownedBySpecies[species.id];
+          return [
+            '<article class="dex-card ' + (owned ? "" : "locked") + '">',
+            KA.companions.renderCompanion(species.id, { silhouette: !owned }),
+            '<h3>' + escapeHtml(species.name) + '</h3>',
+            owned ? '<p><span class="badge">なかよし ' + Number(owned.bondLevel || 1) + '</span></p><p>' + Number(owned.hatchCount || 1) + '回</p>' : '<p>まだ あっていないよ</p>',
+            owned && owned.isFavorite ? '<p class="badge">お気に入り</p>' : '',
+            '</article>'
+          ].join("");
+        }).join("");
+      }
+
+      function todayActivity() {
+        return KA.eggs.todayActivity(data, currentDate);
+      }
+
+      function renderTodayList(activity) {
+        var items = [
+          ["petted", "たまごを なでた"],
+          ["warmed", "たまごを あたためた"],
+          ["sang", "うたを うたった"],
+          ["jobBonus", "おしごとを がんばった"],
+          ["coloringBonus", "ぬりえを かんせいした"]
+        ];
+        return '<ul class="today-list">' + items.map(function (item) {
+          var done = activity[item[0]] === true;
+          return '<li class="' + (done ? "done" : "") + '">' + (done ? "✓ " : "・") + item[1] + '</li>';
+        }).join("") + '</ul>';
+      }
+
+      function render() {
+        KA.eggs.syncEggInventory(data);
+        KA.companions.ensureCompanions(data);
+        var egg = KA.eggs.activeEgg(data);
+        var activity = todayActivity();
+        var target = egg ? KA.eggs.targetForEgg(egg) : 6;
+        activeRoot.innerHTML = egg ? [
+          '<div class="stage">',
+          KA.eggs.renderEggSvg(egg),
+          '<span>' + escapeHtml(KA.eggs.statusLabel(egg.state)) + ' / ' + Number(egg.growthPoints || 0) + ' / ' + target + '</span>',
+          egg.isFirstHatchEgg ? '<span class="badge">初回たまご: 4ポイント</span>' : '<span class="badge">通常たまご: 6ポイント</span>',
+          renderTodayList(activity),
+          '</div>'
+        ].join("") : '<p>activeたまごはありません。</p>';
+        renderDex(dexRoot);
+        renderDex(narrowRoot);
+        dataRoot.textContent = JSON.stringify({
+          today: currentDate,
+          eggInventory: data.eggInventory,
+          eggSystem: data.eggSystem,
+          companions: data.companions
+        }, null, 2);
+      }
+
+      function grow(key) {
+        var labels = {
+          petted: "なでる",
+          warmed: "あたためる",
+          sang: "うたう",
+          jobBonus: "おしごと",
+          coloringBonus: "ぬりえ"
+        };
+        var result = KA.eggs.addGrowth(key, labels[key], data, { dateKey: currentDate, skipSave: true });
+        setStatus(result.ok ? labels[key] + "で +1 しました。" : "今日はもう使ったか、育てるたまごがありません。");
+        render();
+      }
+
+      function hatch() {
+        var egg = KA.eggs.activeEgg(data);
+        var result = KA.eggs.hatchReadyEgg(egg && egg.id);
+        setStatus(result.ok ? result.species.name + "が生まれました。次のたまごは同日の行動を再利用できません。" : "まだ孵化できません。");
+        render();
+      }
+
+      document.addEventListener("click", function (event) {
+        var action = event.target.getAttribute("data-action");
+        if (!action) return;
+        if (action === "pet") grow("petted");
+        if (action === "warm") grow("warmed");
+        if (action === "sing") grow("sang");
+        if (action === "job") grow("jobBonus");
+        if (action === "coloring") grow("coloringBonus");
+        if (action === "next-day") {
+          dateIndex += 1;
+          currentDate = "2026-07-" + pad2(15 + dateIndex);
+          setStatus("日付を " + currentDate + " にしました。");
+          render();
+        }
+        if (action === "ready") {
+          var egg = KA.eggs.activeEgg(data);
+          if (egg) {
+            var target = KA.eggs.targetForEgg(egg);
+            egg.growthPoints = target;
+            egg.state = "ready";
+            egg.readyAt = KA.date.localIsoString();
+            egg.plannedSpeciesId = KA.companions.pickSpeciesForEgg(egg, data);
+          }
+          setStatus("ready状態にしました。自動孵化はしません。");
+          render();
+        }
+        if (action === "hatch") hatch();
+        if (action === "duplicate") {
+          var first = data.companions[0] && data.companions[0].speciesId || "companion_chick";
+          data.eggInventory.push({ id: "egg_repeat_" + Date.now(), createdAt: KA.date.localIsoString(), earnedByStars: 999, state: "ready", growthPoints: 6, targetGrowthPoints: 6, isFirstHatchEgg: false, plannedSpeciesId: first });
+          data.eggSystem.activeEggId = data.eggInventory[data.eggInventory.length - 1].id;
+          hatch();
+        }
+        if (action === "favorite") {
+          var companion = data.companions[0];
+          if (companion) {
+            data.companions.forEach(function (item) { item.isFavorite = false; });
+            companion.isFavorite = !companion.isFavorite;
+          }
+          setStatus("お気に入りを切り替えました。");
+          render();
+        }
+        if (action === "reset") {
+          data = createData();
+          dateIndex = 0;
+          currentDate = "2026-07-15";
+          setStatus("リセットしました。");
+          render();
+        }
+      });
+
+      data = createData();
+      renderStages();
+      render();
+    })();
+  </script>
+</body>
+</html>

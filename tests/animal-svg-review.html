@@ -1,0 +1,1545 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>こどもの冒険 原画レビュー 試作9候補</title>
+  <style>
+    :root {
+      --ink: #1f2933;
+      --muted: #65737a;
+      --line: #d7e3dd;
+      --soft-line: #e8f0ec;
+      --bg: #f5faf7;
+      --panel: #ffffff;
+      --accent: #2f7d5f;
+      --accent-soft: #e4f4ed;
+      --warn: #8a5b14;
+      --warn-soft: #fff3cf;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: rgba(245, 250, 247, 0.94);
+      backdrop-filter: blur(10px);
+      padding: 16px clamp(14px, 4vw, 28px);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.35rem, 5vw, 2rem);
+      letter-spacing: 0;
+    }
+    h2, h3 { letter-spacing: 0; }
+    p { margin: 0; }
+    button {
+      min-height: 44px;
+      border: 1px solid #b9d8ca;
+      border-radius: 12px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 800;
+      padding: 10px 14px;
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    button[aria-pressed="true"] {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+    main {
+      padding: 18px clamp(12px, 4vw, 28px) 36px;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .note {
+      color: var(--muted);
+      max-width: 980px;
+      margin-bottom: 12px;
+    }
+    .warning {
+      display: inline-block;
+      margin-top: 10px;
+      border: 1px solid #ecd58f;
+      border-radius: 12px;
+      background: var(--warn-soft);
+      color: var(--warn);
+      padding: 8px 10px;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+    .animal-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: 0 12px 30px rgba(40, 75, 62, 0.08);
+      overflow: hidden;
+    }
+    .animal-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      padding: 14px;
+      border-bottom: 1px solid var(--soft-line);
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
+    }
+    .animal-head h2 {
+      margin: 0 0 6px;
+      font-size: 1.24rem;
+    }
+    body.names-hidden .animal-name {
+      display: none;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .badge {
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #226449;
+      padding: 4px 8px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .badge.neutral {
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .judgement {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: 0.86rem;
+      font-weight: 900;
+    }
+    .judgement.pass {
+      background: #e3f7ed;
+      color: #176c47;
+    }
+    .judgement.partial {
+      background: #fff3cf;
+      color: #8a5b14;
+    }
+    .judgement.remake {
+      background: #fee2e2;
+      color: #9f1239;
+    }
+    .body {
+      padding: 14px;
+    }
+    .states {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .preview {
+      border: 1px solid var(--soft-line);
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 10px;
+      min-width: 0;
+    }
+    .preview h3 {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+    .preview svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      background: #ffffff;
+    }
+    .preview.small svg {
+      width: 120px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    .comparison {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .comparison .preview svg {
+      max-height: 170px;
+    }
+    .variant-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+      gap: 14px;
+    }
+    .variant-card {
+      border: 1px solid var(--soft-line);
+      border-radius: 14px;
+      background: #fbfefd;
+      padding: 12px;
+      min-width: 0;
+    }
+    .variant-card h3 {
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+    }
+    .variant-card > p {
+      min-height: 3.1em;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    .variant-card.is-picked {
+      border-color: #49a879;
+      box-shadow: 0 0 0 3px rgba(73, 168, 121, 0.16);
+    }
+    .variant-card.needs-work {
+      border-color: #e5b84b;
+      box-shadow: 0 0 0 3px rgba(229, 184, 75, 0.16);
+    }
+    .variant-card.rejected {
+      opacity: 0.72;
+      border-color: #f0a6a6;
+    }
+    .variant-states {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .review-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .review-actions button {
+      min-height: 40px;
+      border-radius: 10px;
+      padding: 8px 6px;
+      font-size: 0.82rem;
+    }
+    .review-actions button[data-choice="pick"] {
+      border-color: #86c9a8;
+      background: #edf9f2;
+    }
+    .review-actions button[data-choice="work"] {
+      border-color: #e5c260;
+      background: #fff7d6;
+    }
+    .review-actions button[data-choice="reject"] {
+      border-color: #f1b2b2;
+      background: #fff1f1;
+    }
+    .review-result {
+      min-height: 1.6em;
+      margin-top: 8px;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 0.86rem;
+    }
+    .history {
+      margin-top: 14px;
+      border: 1px dashed #cbd8d1;
+      border-radius: 12px;
+      background: #f8fbf9;
+      padding: 10px;
+    }
+    .history summary {
+      cursor: pointer;
+      font-weight: 900;
+      color: #41524a;
+    }
+    .history .variant-grid {
+      margin-top: 10px;
+    }
+    .details {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      border-top: 1px solid var(--soft-line);
+      padding-top: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .details code {
+      display: block;
+      overflow-wrap: anywhere;
+      color: #334155;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .candidate-svg .color-regions path,
+    .candidate-svg .color-regions polygon {
+      cursor: pointer;
+      outline: none;
+    }
+    .candidate-svg .color-regions path:focus,
+    .candidate-svg .color-regions polygon:focus {
+      filter: drop-shadow(0 0 4px rgba(47, 125, 95, 0.6));
+    }
+    .candidate-svg .outer-outline path {
+      fill: none;
+      stroke: #1f2933;
+      stroke-width: 2.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+      pointer-events: none;
+    }
+    .candidate-svg .inner-lines path,
+    .candidate-svg .inner-lines line {
+      fill: none;
+      stroke: #2f3a42;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+      pointer-events: none;
+    }
+    .candidate-svg .face-details path,
+    .candidate-svg .face-details circle,
+    .candidate-svg .face-details ellipse {
+      pointer-events: none;
+    }
+    .candidate-svg.silhouette path,
+    .candidate-svg.silhouette polygon {
+      fill: #111827;
+      stroke: none;
+    }
+    @media (max-width: 520px) {
+      .states,
+      .comparison,
+      .variant-states,
+      .review-actions {
+        grid-template-columns: 1fr;
+      }
+      .animal-head {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script src="../js/constants.js?v=10p9"></script>
+  <script src="../js/coloring.js?v=10p9"></script>
+</head>
+<body>
+  <header>
+    <h1>こどもの冒険 原画レビュー 試作9候補</h1>
+    <p class="note">本番のぬりえ定義は変更せず、このページ内の候補SVGだけを表示します。各候補は塗り領域と線画を分離した4層構造です。</p>
+    <div class="toolbar">
+      <button id="toggle-names" type="button" aria-pressed="false">動物名を隠す</button>
+      <span class="warning">名前を隠して、黒一色のシルエットと120px表示で判別できるか確認してください。</span>
+    </div>
+  </header>
+  <main>
+    <div id="review-root" class="grid"></div>
+  </main>
+  <script>
+    (function () {
+      "use strict";
+
+      var KA = window.KodomoAdventure || {};
+      var root = document.getElementById("review-root");
+      var toggle = document.getElementById("toggle-names");
+      var swatches = ["#EF4444", "#F472B6", "#F59E0B", "#FACC15", "#A3E635", "#22C55E", "#38BDF8", "#3B82F6", "#8B5CF6", "#92400E", "#111827", "#FFFFFF"];
+
+      function path(id, d, fallback) {
+        return { id: id, d: d, fallback: fallback || "#FFFFFF" };
+      }
+
+      function line(d) {
+        return { d: d };
+      }
+
+      function colorMap(animal) {
+        var colors = {};
+        animal.regions.forEach(function (region, index) {
+          colors[region.id] = swatches[(index + animal.colorOffset) % swatches.length];
+        });
+        return colors;
+      }
+
+      var animals = [
+        {
+          name: "うさぎ",
+          templateId: "coloring_rabbit_001",
+          candidateVersion: 9,
+          colorOffset: 1,
+          intent: "横向きで地面に座る姿。小さめの頭、長い耳、大きく折りたたんだ後脚で判別させる。",
+          regions: [
+            path("tail", "M48 121 C34 120 29 108 36 98 C45 86 64 88 69 103 C73 117 61 126 48 121 Z"),
+            path("body", "M61 119 C63 92 91 72 126 75 C154 77 177 96 181 122 C185 148 159 164 118 161 C84 159 58 142 61 119 Z"),
+            path("back_leg", "M84 124 C66 132 58 150 74 160 C94 173 127 160 139 140 C125 130 103 127 84 124 Z"),
+            path("belly", "M109 114 C128 130 156 130 174 118 C173 139 148 151 120 146 C105 143 101 127 109 114 Z"),
+            path("front_leg", "M149 120 C159 131 161 147 153 157 C145 158 139 155 135 151 C143 141 141 130 133 123 Z"),
+            path("head", "M153 85 C158 68 174 58 193 62 C210 66 221 78 218 92 C214 106 195 113 176 106 C160 101 149 94 153 85 Z"),
+            path("nose", "M212 84 C222 84 229 90 225 96 C219 101 210 97 207 90 C208 87 210 85 212 84 Z"),
+            path("ear_left_outer", "M162 70 C150 39 152 12 168 7 C179 27 181 54 171 76 Z"),
+            path("ear_left_inner", "M165 63 C158 39 160 22 168 16 C174 32 176 52 169 67 Z", "#F8D7E8"),
+            path("ear_right_outer", "M181 68 C180 34 194 9 207 14 C209 43 201 66 187 77 Z"),
+            path("ear_right_inner", "M187 62 C187 37 196 22 204 19 C204 41 199 58 189 67 Z", "#F8D7E8"),
+            path("cheek", "M185 87 C195 83 204 88 205 98 C196 104 186 99 185 87 Z", "#FDE2E2")
+          ],
+          silhouette: [
+            "M38 98 C47 86 64 88 70 102 C85 80 109 73 136 77 C143 70 150 67 157 66 C148 38 153 12 168 7 C178 25 181 50 174 69 C176 68 178 68 181 68 C180 34 194 9 207 14 C209 43 201 66 188 77 C208 73 224 84 218 99 C213 113 193 118 176 109 C181 119 184 131 181 142 C175 161 150 165 118 161 C88 160 67 148 61 130 C54 127 46 126 38 122 C28 116 29 105 38 98 Z"
+          ],
+          outer: [
+            "M38 98 C47 86 64 88 70 102 C78 84 103 73 132 76 C144 77 157 82 168 91 C174 95 179 105 181 121 C185 148 159 164 118 161 C87 159 63 144 61 122 C56 125 48 125 40 121 C29 115 29 105 38 98 Z",
+            "M153 85 C158 68 174 58 193 62 C210 66 221 78 218 92 C214 106 195 113 176 106 C160 101 149 94 153 85 Z",
+            "M162 70 C150 39 152 12 168 7 C179 27 181 54 171 76 Z M181 68 C180 34 194 9 207 14 C209 43 201 66 187 77 Z"
+          ],
+          inner: [
+            line("M165 63 C158 39 160 22 168 16"),
+            line("M187 62 C187 37 196 22 204 19"),
+            line("M151 91 C144 93 137 93 130 91"),
+            line("M109 114 C128 130 156 130 174 118"),
+            line("M84 124 C104 127 125 130 139 140"),
+            line("M149 120 C143 141 145 151 153 157"),
+            line("M207 90 C213 95 220 97 225 96")
+          ],
+          face: '<circle cx="194" cy="73" r="2.7" fill="#111827"/><path d="M212 93 C207 96 201 95 197 91 M204 88 L194 86 M204 96 L195 99" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+        },
+        {
+          name: "イルカ",
+          templateId: "coloring_dolphin_001",
+          candidateVersion: 9,
+          colorOffset: 6,
+          intent: "少し上向きに泳ぐ横向き。主胴体を一続きの流線形にし、細い尾の付け根と水平な尾びれを強調する。",
+          regions: [
+            path("tail_fluke_top", "M51 79 C30 66 24 49 43 52 C56 55 62 66 56 79 Z"),
+            path("tail_fluke_bottom", "M51 91 C28 103 29 121 49 119 C60 113 63 101 56 91 Z"),
+            path("tail_stem", "M54 80 C77 78 95 82 110 90 C96 98 77 100 54 93 C60 89 60 84 54 80 Z"),
+            path("body_top", "M101 88 C124 61 165 50 196 60 C212 65 222 73 236 76 C222 87 203 91 185 86 C167 102 139 116 106 112 C84 110 75 101 101 88 Z"),
+            path("belly", "M102 96 C126 110 157 106 185 86 C171 111 138 124 107 112 C95 107 93 100 102 96 Z"),
+            path("snout", "M196 63 C215 58 232 64 236 76 C221 82 207 80 194 72 C193 68 194 65 196 63 Z"),
+            path("dorsal_fin", "M143 62 C151 40 170 38 174 67 C163 68 152 66 143 62 Z"),
+            path("pectoral_fin", "M146 102 C154 126 174 127 178 101 C166 96 155 98 146 102 Z"),
+            path("cheek", "M187 74 C196 72 204 77 204 86 C196 91 188 86 187 74 Z", "#DFF7FF")
+          ],
+          silhouette: [
+            "M43 52 C56 55 62 66 56 79 C74 78 93 82 110 90 C134 62 169 51 196 60 C214 66 224 73 236 76 C221 88 203 91 185 86 C171 105 142 120 107 112 C91 107 78 101 56 93 C61 106 57 116 49 119 C29 121 28 103 51 91 C30 66 24 49 43 52 Z M143 62 C151 40 170 38 174 67 C163 68 152 66 143 62 Z M146 102 C154 126 174 127 178 101 C166 96 155 98 146 102 Z"
+          ],
+          outer: [
+            "M43 52 C56 55 62 66 56 79 C74 78 93 82 110 90 C134 62 169 51 196 60 C214 66 224 73 236 76 C221 88 203 91 185 86 C171 105 142 120 107 112 C91 107 78 101 56 93 C61 106 57 116 49 119 C29 121 28 103 51 91 C30 66 24 49 43 52 Z",
+            "M143 62 C151 40 170 38 174 67",
+            "M146 102 C154 126 174 127 178 101"
+          ],
+          inner: [
+            line("M102 96 C126 110 157 106 185 86"),
+            line("M196 63 C215 58 232 64 236 76"),
+            line("M54 80 C77 78 95 82 110 90"),
+            line("M54 93 C77 100 96 98 110 90"),
+            line("M202 78 C211 82 222 81 230 76")
+          ],
+          face: '<circle cx="195" cy="67" r="2.5" fill="#111827"/>'
+        },
+        {
+          name: "きょうりゅう",
+          templateId: "coloring_dinosaur_001",
+          candidateVersion: 9,
+          colorOffset: 4,
+          intent: "横向きに歩くティラノサウルス。長いしっぽ、水平に近い背中、大きな頭、曲がった後脚で判別させる。",
+          regions: [
+            path("tail", "M70 108 C42 123 18 119 5 103 C31 91 55 94 83 101 C83 109 77 113 70 108 Z"),
+            path("body", "M73 94 C91 73 122 64 151 70 C176 75 190 94 187 119 C184 146 155 159 116 153 C86 149 65 129 73 94 Z"),
+            path("belly", "M92 113 C115 130 151 131 179 111 C179 135 154 151 123 148 C101 146 88 129 92 113 Z"),
+            path("neck", "M148 73 C158 57 179 50 195 55 C190 74 176 89 158 96 C151 91 146 82 148 73 Z"),
+            path("head", "M190 50 C210 38 232 47 237 64 C229 79 205 82 183 75 C176 67 179 57 190 50 Z"),
+            path("jaw", "M190 72 C205 77 224 74 236 64 C237 80 219 91 198 87 C188 84 184 77 190 72 Z"),
+            path("arm", "M163 98 C174 100 182 106 185 114 C178 119 166 117 158 111 C158 105 160 101 163 98 Z"),
+            path("back_leg", "M107 129 C98 141 94 155 99 169 L84 169 C77 151 82 132 96 119 C103 119 108 123 107 129 Z M150 124 C165 136 168 153 160 169 L143 169 C149 151 145 138 135 128 Z"),
+            path("foot", "M80 166 C92 164 101 164 111 169 L105 176 L78 176 Z M140 166 C154 164 165 165 174 171 L166 177 L138 177 Z", "#FFFFFF"),
+            path("back_spines", "M94 73 C101 64 108 67 110 76 C116 66 125 67 128 78 C116 75 104 74 94 73 Z", "#DDF7D4"),
+            path("cheek", "M206 65 C214 63 222 67 224 74 C216 79 207 75 206 65 Z", "#FDE2E2"),
+            path("body_mark", "M115 87 C123 84 132 86 139 92 C132 96 122 96 115 87 Z", "#DDF7D4")
+          ],
+          silhouette: [
+            "M5 103 C31 91 55 94 83 101 C98 75 125 65 151 70 C158 57 179 50 195 55 C210 38 232 47 237 64 C237 80 219 91 198 87 C193 104 189 119 184 133 C175 154 149 160 116 153 C104 163 112 174 99 176 L78 176 C75 154 80 135 96 119 C86 117 77 113 70 108 C42 123 18 119 5 103 Z"
+          ],
+          outer: [
+            "M5 103 C31 91 55 94 83 101 C98 75 125 65 151 70 C158 57 179 50 195 55 C210 38 232 47 237 64 C229 79 205 82 183 75 C188 88 191 105 187 119 C184 146 155 159 116 153 C103 151 91 146 82 138 C75 130 70 118 70 108 C42 123 18 119 5 103 Z",
+            "M96 119 C82 132 77 151 84 169 L99 169 C94 155 98 141 107 129",
+            "M135 128 C145 138 149 151 143 169 L160 169 C168 153 165 136 150 124"
+          ],
+          inner: [
+            line("M92 113 C115 130 151 131 179 111"),
+            line("M148 73 C158 83 164 90 158 96"),
+            line("M190 72 C205 77 224 74 236 64"),
+            line("M163 98 C174 100 182 106 185 114"),
+            line("M100 139 C108 147 109 158 99 169"),
+            line("M151 139 C157 149 157 160 150 169"),
+            line("M94 73 C108 69 119 70 128 78")
+          ],
+          face: '<circle cx="209" cy="59" r="2.6" fill="#111827"/><path d="M205 78 C214 82 225 78 232 70" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+        },
+        {
+          name: "うま",
+          templateId: "coloring_horse_001",
+          candidateVersion: 9,
+          colorOffset: 9,
+          intent: "横向きで自然に立つ姿。細長い顔、長い首、斜めの肩、4本の細い脚を分離して見せる。",
+          regions: [
+            path("tail", "M54 83 C31 88 20 111 26 133 C43 121 56 105 62 87 Z"),
+            path("body", "M58 85 C78 68 119 63 154 72 C179 78 190 96 183 115 C174 140 130 146 89 135 C64 128 47 104 58 85 Z"),
+            path("neck", "M148 74 C153 51 169 36 187 34 C194 48 184 73 164 89 C156 87 150 82 148 74 Z"),
+            path("head", "M181 31 C198 23 218 32 223 49 C220 66 203 77 185 72 C175 61 174 43 181 31 Z"),
+            path("muzzle", "M203 50 C216 48 225 55 224 64 C216 71 203 69 196 61 C197 56 199 52 203 50 Z"),
+            path("ears", "M183 33 C179 19 187 14 195 28 C193 34 188 36 183 33 Z M199 31 C204 17 214 17 214 33 C209 38 204 36 199 31 Z"),
+            path("mane", "M153 47 C146 63 148 80 158 91 C166 76 171 55 165 39 Z"),
+            path("front_leg_near", "M139 113 C146 128 146 145 140 166 L130 166 C133 146 130 130 122 116 Z"),
+            path("front_leg_far", "M154 114 C162 129 164 145 158 165 L149 165 C151 146 148 130 141 116 Z"),
+            path("back_leg_near", "M82 115 C74 132 69 147 61 166 L51 166 C55 145 62 128 71 112 Z"),
+            path("back_leg_far", "M98 116 C108 130 112 147 105 166 L94 166 C98 148 94 134 85 119 Z"),
+            path("hooves", "M49 164 L64 164 L67 171 L48 171 Z M92 164 L108 164 L111 171 L91 171 Z M128 164 L143 164 L146 171 L126 171 Z M147 163 L161 163 L164 170 L146 170 Z", "#FFFFFF")
+          ],
+          silhouette: [
+            "M26 133 C43 121 56 105 62 87 C79 68 119 63 148 72 C153 51 169 36 183 33 C179 19 187 14 195 28 C201 16 214 17 214 33 C221 38 225 47 224 58 C223 72 205 78 185 72 C176 82 166 89 158 91 C175 96 187 108 183 121 C174 140 130 146 98 137 C108 151 107 160 105 166 L94 166 C98 148 94 134 85 119 C80 134 70 152 64 166 L51 166 C55 145 62 128 71 112 C60 105 54 96 58 85 C39 89 25 108 26 133 Z"
+          ],
+          outer: [
+            "M26 133 C43 121 56 105 62 87 C79 68 119 63 148 72 C153 51 169 36 183 33 C179 19 187 14 195 28 C201 16 214 17 214 33 C221 38 225 47 224 58 C223 72 205 78 185 72 C176 82 166 89 158 91 C175 96 187 108 183 121 C174 140 130 146 98 137 C83 134 69 129 60 119 C50 107 47 95 58 85",
+            "M71 112 C62 128 55 145 51 166 L64 166 C69 147 74 132 82 115",
+            "M85 119 C94 134 98 148 94 166 L105 166 C112 147 108 130 98 116 M122 116 C130 130 133 146 130 166 L140 166 C146 145 146 128 139 113 M141 116 C148 130 151 146 149 165 L158 165 C164 145 162 129 154 114"
+          ],
+          inner: [
+            line("M148 72 C155 78 161 84 158 91"),
+            line("M153 47 C146 63 148 80 158 91"),
+            line("M196 61 C204 68 216 71 224 64"),
+            line("M58 85 C77 95 120 97 158 91"),
+            line("M82 115 C78 125 77 135 82 145"),
+            line("M139 113 C134 128 134 146 140 166"),
+            line("M54 83 C43 95 35 111 30 127")
+          ],
+          face: '<circle cx="202" cy="43" r="2.5" fill="#111827"/><path d="M215 59 C211 61 207 61 203 59" fill="none" stroke="#111827" stroke-width="1.7" stroke-linecap="round"/>'
+        },
+        {
+          name: "ライオン",
+          templateId: "coloring_lion",
+          candidateVersion: 9,
+          colorOffset: 9,
+          intent: "横向きで立つ雄ライオン。花びら状ではない不規則なたてがみ、猫科らしい胸と腰、長いしっぽを強調する。",
+          regions: [
+            path("tail", "M58 89 C36 83 25 62 37 52 C49 55 55 72 65 91 Z"),
+            path("tail_tip", "M32 48 C23 36 31 25 45 29 C56 34 55 49 43 55 C38 55 34 53 32 48 Z"),
+            path("body", "M61 83 C80 66 123 61 156 72 C181 80 190 101 181 122 C170 145 130 150 89 136 C63 128 49 100 61 83 Z"),
+            path("chest", "M146 78 C159 94 159 118 144 133 C132 119 130 95 146 78 Z"),
+            path("back_leg", "M82 117 C76 134 69 149 59 166 L47 166 C56 143 61 125 65 110 Z"),
+            path("front_leg", "M147 112 C156 128 158 146 151 166 L139 166 C143 145 139 130 131 115 Z"),
+            path("paw", "M45 164 L62 164 L66 171 L43 171 Z M136 164 L153 164 L158 171 L134 171 Z"),
+            path("mane", "M150 50 C158 34 176 31 187 42 C199 34 214 43 213 59 C226 69 221 86 207 92 C205 109 184 116 171 106 C154 113 139 101 143 83 C130 72 136 55 150 50 Z"),
+            path("face", "M162 55 C178 45 199 51 205 68 C210 86 198 100 179 100 C160 100 150 86 153 70 C154 64 157 59 162 55 Z"),
+            path("ears", "M157 54 C153 42 163 35 173 46 C172 54 165 57 157 54 Z M190 47 C198 36 210 41 209 55 C201 60 193 56 190 47 Z"),
+            path("nose", "M185 76 C195 75 201 82 197 89 C190 95 181 91 179 83 C180 79 182 77 185 76 Z")
+          ],
+          silhouette: [
+            "M32 48 C23 36 31 25 45 29 C56 34 55 49 43 55 C50 64 57 79 65 91 C80 66 123 61 146 72 C139 60 138 52 150 50 C158 34 176 31 187 42 C199 34 214 43 213 59 C226 69 221 86 207 92 C205 109 184 116 171 106 C181 117 184 130 176 139 C160 153 122 148 89 136 C82 150 73 166 59 171 L43 171 C51 146 59 126 65 110 C54 102 49 92 61 83 C46 81 33 64 32 48 Z"
+          ],
+          outer: [
+            "M32 48 C23 36 31 25 45 29 C56 34 55 49 43 55 C50 64 57 79 65 91 C80 66 123 61 146 72 C139 60 138 52 150 50 C158 34 176 31 187 42 C199 34 214 43 213 59 C226 69 221 86 207 92 C205 109 184 116 171 106 C181 117 184 130 176 139 C160 153 122 148 89 136 C63 128 49 100 61 83",
+            "M65 110 C61 125 56 143 47 166 L59 166 C69 149 76 134 82 117 M131 115 C139 130 143 145 139 166 L151 166 C158 146 156 128 147 112",
+            "M157 54 C153 42 163 35 173 46 M190 47 C198 36 210 41 209 55"
+          ],
+          inner: [
+            line("M146 78 C159 94 159 118 144 133"),
+            line("M162 55 C178 45 199 51 205 68"),
+            line("M150 50 C154 62 153 78 143 83"),
+            line("M171 106 C165 99 162 89 164 79"),
+            line("M58 89 C47 82 38 68 37 52"),
+            line("M82 117 C79 132 72 151 59 166"),
+            line("M147 112 C141 128 143 146 151 166")
+          ],
+          face: '<circle cx="174" cy="68" r="2.5" fill="#111827"/><path d="M185 76 C195 75 201 82 197 89 C190 95 181 91 179 83 Z" fill="#111827"/><path d="M188 91 C183 96 175 96 170 90" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+        },
+        {
+          name: "バッタ",
+          templateId: "coloring_grasshopper",
+          candidateVersion: 9,
+          colorOffset: 4,
+          intent: "横向き。小さな頭、長い触角、細長い腹、背中の羽、非常に大きく折れ曲がった後脚で判別させる。",
+          regions: [
+            path("abdomen", "M48 88 C72 64 112 61 143 78 C137 103 105 118 74 112 C55 108 43 98 48 88 Z"),
+            path("thorax", "M135 78 C150 64 173 67 183 84 C180 103 155 111 138 98 C133 91 132 84 135 78 Z"),
+            path("head", "M178 70 C192 58 214 65 218 83 C217 98 202 107 186 102 C173 97 168 80 178 70 Z"),
+            path("wing", "M71 76 C100 55 134 63 153 85 C123 95 95 92 71 76 Z", "#EAFBE6"),
+            path("back_leg", "M77 105 C66 129 49 150 27 166 L16 154 C38 136 56 112 68 91 C80 93 87 99 77 105 Z M68 91 C91 126 114 148 143 164 L133 176 C103 160 78 135 58 102 Z"),
+            path("middle_leg", "M129 98 C119 117 114 136 113 155 L101 155 C101 133 109 112 122 94 Z"),
+            path("front_leg", "M169 99 C162 117 163 134 171 150 L158 153 C149 135 151 115 160 97 Z"),
+            path("antennae", "M167 54 C185 36 205 27 226 26 L229 31 C207 32 187 43 169 60 Z M169 61 C191 50 214 51 233 60 L230 66 C210 58 190 58 171 67 Z", "#A3E635"),
+            path("body_segments", "M72 86 C83 96 95 103 109 107 L104 112 C90 109 78 101 68 90 Z M100 75 C108 90 122 98 138 100 L134 105 C118 103 104 94 96 78 Z M127 77 C136 89 149 95 163 95 L160 100 C145 100 132 92 123 80 Z", "#BBF7D0"),
+            path("eye", "M197 75 C204 72 211 77 210 84 C204 89 196 85 197 75 Z")
+          ],
+          silhouette: [
+            "M226 26 L229 31 C207 32 187 43 169 60 C191 50 214 51 233 60 L230 66 C210 58 190 58 171 67 C192 58 214 65 218 83 C217 98 202 107 186 102 C174 112 153 111 138 98 C130 108 115 114 98 115 C115 136 131 153 143 164 L133 176 C103 160 78 135 58 102 C45 122 34 144 16 154 L27 166 C49 150 66 129 77 105 C57 107 43 98 48 88 C72 64 112 61 143 78 C150 64 173 67 183 84 C184 78 175 72 169 67 C187 43 207 32 226 26 Z"
+          ],
+          outer: [
+            "M226 26 C207 32 187 43 169 60 M233 60 C210 58 190 58 171 67",
+            "M48 88 C72 64 112 61 143 78 C150 64 173 67 183 84 C184 78 175 72 169 67 C192 58 214 65 218 83 C217 98 202 107 186 102 C174 112 153 111 138 98 C130 108 115 114 98 115 C115 136 131 153 143 164 L133 176 C103 160 78 135 58 102 C45 122 34 144 16 154 L27 166 C49 150 66 129 77 105 C57 107 43 98 48 88 Z",
+            "M71 76 C100 55 134 63 153 85"
+          ],
+          inner: [
+            line("M71 76 C100 55 134 63 153 85"),
+            line("M72 86 C83 96 95 103 109 107"),
+            line("M100 75 C108 90 122 98 138 100"),
+            line("M127 77 C136 89 149 95 163 95"),
+            line("M129 98 C119 117 114 136 113 155"),
+            line("M169 99 C162 117 163 134 171 150"),
+            line("M77 105 C66 129 49 150 27 166"),
+            line("M68 91 C91 126 114 148 143 164")
+          ],
+          face: '<path d="M197 75 C204 72 211 77 210 84 C204 89 196 85 197 75 Z" fill="#ffffff"/><circle cx="203" cy="80" r="2.2" fill="#111827"/>'
+        }
+      ];
+
+      var previousAnimals = animals.map(cloneAnimal);
+
+      applyCandidateRevision("coloring_dinosaur_001", {
+        intent: "横向きに歩くティラノサウルス。前回案の頭と前後バランスを維持し、胴体・首・尾の付け根を細くして俊敏に見せる。",
+        regions: [
+          path("tail", "M70 106 C43 119 18 115 6 102 C32 94 55 96 82 101 C82 108 76 111 70 106 Z"),
+          path("body", "M76 91 C95 75 126 67 153 73 C176 78 188 94 185 115 C181 137 155 149 119 145 C91 142 69 124 76 91 Z"),
+          path("belly", "M95 111 C118 124 151 124 177 108 C175 128 151 141 124 138 C104 136 92 125 95 111 Z"),
+          path("neck", "M149 73 C158 58 178 51 195 55 C190 73 176 87 159 95 C151 90 146 82 149 73 Z"),
+          path("head", "M190 50 C210 38 232 47 237 64 C229 79 205 82 183 75 C176 67 179 57 190 50 Z"),
+          path("jaw", "M190 72 C205 77 224 74 236 64 C237 80 219 91 198 87 C188 84 184 77 190 72 Z"),
+          path("arm", "M162 97 C173 99 181 105 184 113 C177 118 166 116 158 110 C158 104 160 100 162 97 Z"),
+          path("back_leg", "M108 126 C98 139 94 154 99 169 L84 169 C78 151 83 132 97 118 C104 117 110 121 108 126 Z M150 122 C164 135 167 151 159 169 L144 169 C149 151 145 137 135 127 Z"),
+          path("foot", "M80 166 C92 164 101 164 111 169 L105 176 L78 176 Z M140 166 C154 164 165 165 174 171 L166 177 L138 177 Z", "#FFFFFF"),
+          path("back_spines", "M95 73 C102 65 108 68 110 76 C116 68 124 69 127 78 C116 75 105 74 95 73 Z", "#DDF7D4"),
+          path("cheek", "M206 65 C214 63 222 67 224 74 C216 79 207 75 206 65 Z", "#FDE2E2"),
+          path("body_mark", "M116 86 C124 84 132 86 139 91 C132 95 123 95 116 86 Z", "#DDF7D4")
+        ],
+        silhouette: [
+          "M6 102 C32 94 55 96 82 101 C98 76 126 67 153 73 C159 59 178 51 195 55 C210 38 232 47 237 64 C237 80 219 91 198 87 C193 102 188 115 184 128 C176 146 151 151 119 145 C105 154 111 172 99 176 L78 176 C75 154 82 134 97 118 C88 115 78 111 70 106 C43 119 18 115 6 102 Z"
+        ],
+        outer: [
+          "M6 102 C32 94 55 96 82 101 C98 76 126 67 153 73 C159 59 178 51 195 55 C210 38 232 47 237 64 C229 79 205 82 183 75 C188 88 190 103 185 115 C181 137 155 149 119 145 C93 142 74 128 70 106 C43 119 18 115 6 102 Z",
+          "M97 118 C83 132 78 151 84 169 L99 169 C94 154 98 139 108 126",
+          "M135 127 C145 137 149 151 144 169 L159 169 C167 151 164 135 150 122"
+        ],
+        inner: [
+          line("M95 111 C118 124 151 124 177 108"),
+          line("M149 73 C158 82 164 89 159 95"),
+          line("M190 72 C205 77 224 74 236 64"),
+          line("M162 97 C173 99 181 105 184 113"),
+          line("M101 137 C108 146 109 158 99 169"),
+          line("M151 137 C157 148 157 160 150 169"),
+          line("M95 73 C108 70 119 71 127 78")
+        ],
+        face: '<circle cx="209" cy="59" r="2.6" fill="#111827"/><path d="M205 78 C214 82 225 78 232 70" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+      });
+
+      applyCandidateRevision("coloring_horse_001", {
+        intent: "横向きで自然に立つ成馬。長い脚、長い首、細長い顔、胸から腰までの自然な体形で馬らしさを優先する。",
+        regions: [
+          path("tail", "M55 86 C34 88 17 103 13 128 C31 122 50 103 64 88 Z"),
+          path("body", "M56 84 C75 68 118 62 157 70 C181 75 193 88 187 105 C179 128 146 137 101 132 C71 129 47 108 56 84 Z"),
+          path("neck", "M150 72 C157 50 174 35 190 30 C198 40 193 61 174 84 C164 84 156 80 150 72 Z"),
+          path("head", "M185 29 C200 20 220 25 228 39 C227 55 213 68 193 66 C181 57 178 40 185 29 Z"),
+          path("muzzle", "M207 43 C222 42 232 49 231 59 C221 65 210 62 201 55 C202 50 204 46 207 43 Z"),
+          path("ears", "M183 32 C179 18 187 13 195 28 C193 34 188 36 183 32 Z M199 31 C204 16 214 17 214 33 C209 38 204 36 199 31 Z"),
+          path("mane", "M154 42 C146 56 147 74 158 85 C165 69 169 50 164 35 Z"),
+          path("front_leg_near", "M144 104 C153 122 154 143 149 169 L137 169 C139 147 135 127 127 108 Z"),
+          path("front_leg_far", "M161 106 C170 123 173 143 168 168 L157 168 C160 145 156 127 149 109 Z"),
+          path("back_leg_near", "M78 108 C70 124 65 145 56 169 L44 169 C49 143 57 121 68 104 Z"),
+          path("back_leg_far", "M97 112 C111 126 116 145 110 168 L98 168 C101 148 95 132 84 116 Z"),
+          path("hooves", "M42 166 L59 166 L63 172 L41 172 Z M96 166 L112 166 L115 172 L94 172 Z M135 166 L152 166 L155 172 L133 172 Z M155 165 L171 165 L174 171 L153 171 Z", "#FFFFFF")
+        ],
+        silhouette: [
+          "M13 128 C31 122 50 103 64 88 C76 68 118 62 150 72 C157 50 174 35 183 32 C179 18 187 13 195 28 C204 16 214 17 214 33 C224 36 229 46 228 55 C226 67 211 70 193 66 C185 76 176 83 158 85 C178 91 190 100 187 115 C181 134 146 138 101 132 C111 145 116 156 110 172 L94 172 C101 149 95 132 84 116 C78 132 68 151 59 172 L41 172 C47 143 57 121 68 104 C58 99 52 92 56 84 C36 89 18 106 13 128 Z"
+        ],
+        outer: [
+          "M13 128 C31 122 50 103 64 88 C76 68 118 62 150 72 C157 50 174 35 183 32 C179 18 187 13 195 28 C204 16 214 17 214 33 C224 36 229 46 228 55 C226 67 211 70 193 66 C185 76 176 83 158 85 C178 91 190 100 187 115 C181 134 146 138 101 132 C72 129 47 108 56 84",
+          "M68 104 C57 121 49 143 44 169 L56 169 C65 145 70 124 78 108 M84 116 C95 132 101 148 98 168 L110 168 C116 145 111 126 97 112 M127 108 C135 127 139 147 137 169 L149 169 C154 143 153 122 144 104 M149 109 C156 127 160 145 157 168 L168 168 C173 143 170 123 161 106",
+          "M183 32 C179 18 187 13 195 28 M199 31 C204 16 214 17 214 33"
+        ],
+        inner: [
+          line("M150 72 C158 79 163 83 158 85"),
+          line("M154 42 C146 56 147 74 158 85"),
+          line("M201 55 C210 62 221 65 231 59"),
+          line("M56 84 C79 95 122 98 158 85"),
+          line("M78 108 C73 124 75 136 82 146"),
+          line("M144 104 C137 123 138 148 149 169"),
+          line("M55 86 C42 96 32 112 18 125")
+        ],
+        face: '<circle cx="202" cy="43" r="2.5" fill="#111827"/><path d="M215 59 C211 61 207 61 203 59" fill="none" stroke="#111827" stroke-width="1.7" stroke-linecap="round"/>'
+      });
+
+      applyCandidateRevision("coloring_lion", {
+        intent: "横向きで立つ雄ライオン。猫科の長い体、力強い胸、くびれた腹、不規則なたてがみと長いしっぽで判別させる。",
+        regions: [
+          path("tail", "M56 91 C35 85 24 65 34 54 C47 55 55 74 66 93 Z"),
+          path("tail_tip", "M29 50 C21 38 31 27 44 31 C56 37 53 51 41 57 C36 57 32 54 29 50 Z"),
+          path("body", "M58 88 C78 72 116 66 153 73 C178 78 192 94 188 113 C182 139 143 150 99 139 C70 132 49 110 58 88 Z"),
+          path("chest", "M145 78 C158 92 160 116 145 133 C132 119 129 95 145 78 Z"),
+          path("back_leg", "M80 118 C72 135 67 151 58 167 L45 167 C53 145 59 126 64 111 Z"),
+          path("front_leg", "M149 112 C158 128 160 146 153 167 L140 167 C144 145 140 129 132 115 Z"),
+          path("paw", "M43 165 L62 165 L66 172 L42 172 Z M137 165 L155 165 L160 172 L135 172 Z"),
+          path("mane", "M143 58 C149 42 164 35 176 40 C187 31 203 37 207 52 C221 59 222 76 211 86 C211 103 193 115 177 109 C162 118 143 108 144 90 C130 82 130 64 143 58 Z"),
+          path("face", "M160 59 C176 49 197 54 204 70 C209 86 196 100 178 99 C160 98 151 85 154 70 C155 65 157 61 160 59 Z"),
+          path("ears", "M153 58 C150 45 160 39 171 49 C170 57 162 61 153 58 Z M190 50 C198 39 210 44 209 58 C201 62 192 59 190 50 Z"),
+          path("nose", "M184 76 C194 75 200 82 196 89 C189 94 181 91 179 83 C180 80 182 77 184 76 Z")
+        ],
+        silhouette: [
+          "M29 50 C21 38 31 27 44 31 C56 37 53 51 41 57 C48 66 56 80 66 93 C80 72 116 66 144 73 C133 64 132 52 143 58 C149 42 164 35 176 40 C187 31 203 37 207 52 C221 59 222 76 211 86 C211 103 193 115 177 109 C185 119 190 130 184 139 C169 155 128 149 99 139 C91 153 77 167 58 172 L42 172 C51 145 59 126 64 111 C54 105 50 96 58 88 C43 85 32 64 29 50 Z"
+        ],
+        outer: [
+          "M29 50 C21 38 31 27 44 31 C56 37 53 51 41 57 C48 66 56 80 66 93 C80 72 116 66 144 73 C133 64 132 52 143 58 C149 42 164 35 176 40 C187 31 203 37 207 52 C221 59 222 76 211 86 C211 103 193 115 177 109 C185 119 190 130 184 139 C169 155 128 149 99 139 C70 132 49 110 58 88",
+          "M64 111 C59 126 53 145 45 167 L58 167 C67 151 72 135 80 118 M132 115 C140 129 144 145 140 167 L153 167 C160 146 158 128 149 112",
+          "M153 58 C150 45 160 39 171 49 M190 50 C198 39 210 44 209 58"
+        ],
+        inner: [
+          line("M145 78 C158 92 160 116 145 133"),
+          line("M160 59 C176 49 197 54 204 70"),
+          line("M143 58 C151 70 151 83 144 90"),
+          line("M177 109 C169 101 166 90 168 79"),
+          line("M56 91 C45 83 38 67 34 54"),
+          line("M80 118 C77 133 70 152 58 167"),
+          line("M149 112 C143 128 145 147 153 167")
+        ],
+        face: '<circle cx="174" cy="68" r="2.5" fill="#111827"/><path d="M184 76 C194 75 200 82 196 89 C189 94 181 91 179 83 Z" fill="#111827"/><path d="M187 91 C182 96 174 96 169 90" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+      });
+
+      applyCandidateRevision("coloring_grasshopper", {
+        intent: "横向きで止まるバッタ。小さな頭、細長い腹、背に沿う羽、非常に大きく折れ曲がった後脚をシルエットの主役にする。",
+        regions: [
+          path("abdomen", "M53 86 C76 67 112 63 145 78 C139 101 111 116 78 112 C57 108 47 98 53 86 Z"),
+          path("thorax", "M137 77 C151 64 171 66 181 82 C179 99 158 108 140 98 C134 91 133 83 137 77 Z"),
+          path("head", "M176 70 C189 60 209 66 214 82 C213 96 199 105 184 101 C172 97 167 81 176 70 Z"),
+          path("wing", "M76 76 C105 58 136 65 155 84 C128 94 99 92 76 76 Z", "#EAFBE6"),
+          path("back_leg", "M86 101 C72 84 61 63 58 42 C69 36 82 43 88 58 C97 81 101 96 96 108 Z M60 43 C44 70 31 111 20 157 L33 165 C45 129 60 92 82 63 Z M83 107 C102 133 124 151 149 163 L139 176 C111 163 84 139 65 111 Z"),
+          path("middle_leg", "M129 98 C118 116 112 134 111 155 L99 155 C100 132 108 112 121 95 Z"),
+          path("front_leg", "M166 97 C158 114 159 132 168 149 L155 153 C146 135 148 115 158 96 Z"),
+          path("antennae", "M166 54 C184 37 205 28 226 27 L229 32 C207 33 187 44 169 60 Z M168 61 C190 51 211 52 232 61 L229 67 C209 59 189 58 171 67 Z", "#A3E635"),
+          path("body_segments", "M76 87 C87 96 99 103 112 107 L107 112 C92 109 80 101 72 90 Z M103 76 C111 90 124 98 139 100 L135 105 C119 103 106 94 99 79 Z M129 78 C137 88 149 95 162 96 L158 101 C144 100 132 93 125 81 Z", "#BBF7D0"),
+          path("eye", "M195 75 C201 73 207 77 207 83 C201 88 194 85 195 75 Z")
+        ],
+        silhouette: [
+          "M226 27 L229 32 C207 33 187 44 169 60 C190 51 211 52 232 61 L229 67 C209 59 189 58 171 67 C189 60 209 66 214 82 C213 96 199 105 184 101 C174 110 154 110 140 98 C130 110 113 116 94 115 C112 137 130 154 149 163 L139 176 C111 163 84 139 65 111 C52 130 42 150 33 165 L20 157 C31 111 44 70 60 43 C58 38 65 35 72 38 C81 43 87 55 88 58 C98 83 102 97 96 108 C78 113 59 107 53 86 C76 67 112 63 145 78 C151 64 171 66 181 82 C180 76 173 70 169 67 C187 44 207 33 226 27 Z"
+        ],
+        outer: [
+          "M226 27 C207 33 187 44 169 60 M232 61 C209 59 189 58 171 67",
+          "M53 86 C76 67 112 63 145 78 C151 64 171 66 181 82 C180 76 173 70 169 67 C189 60 209 66 214 82 C213 96 199 105 184 101 C174 110 154 110 140 98 C130 110 113 116 94 115 C112 137 130 154 149 163 L139 176 C111 163 84 139 65 111 C52 130 42 150 33 165 L20 157 C31 111 44 70 60 43 C58 38 65 35 72 38 C81 43 87 55 88 58 C98 83 102 97 96 108 C78 113 59 107 53 86 Z",
+          "M76 76 C105 58 136 65 155 84"
+        ],
+        inner: [
+          line("M76 76 C105 58 136 65 155 84"),
+          line("M76 87 C87 96 99 103 112 107"),
+          line("M103 76 C111 90 124 98 139 100"),
+          line("M129 78 C137 88 149 95 162 96"),
+          line("M129 98 C118 116 112 134 111 155"),
+          line("M166 97 C158 114 159 132 168 149"),
+          line("M60 43 C44 70 31 111 20 157"),
+          line("M86 101 C72 84 61 63 58 42"),
+          line("M83 107 C102 133 124 151 149 163")
+        ],
+        face: '<path d="M195 75 C201 73 207 77 207 83 C201 88 194 85 195 75 Z" fill="#ffffff"/><circle cx="201" cy="80" r="2.1" fill="#111827"/>'
+      });
+
+      var previousById = previousAnimals.reduce(function (map, animal) {
+        map[animal.templateId] = animal;
+        return map;
+      }, {});
+      var judgementById = {
+        coloring_rabbit_001: { label: "正式採用", className: "pass" },
+        coloring_dolphin_001: { label: "正式採用", className: "pass" },
+        coloring_horse_001: { label: "正式採用", className: "pass" },
+        coloring_dinosaur_001: { label: "正式採用", className: "pass" },
+        coloring_lion: { label: "正式採用", className: "pass" },
+        coloring_grasshopper: { label: "正式採用", className: "pass" }
+      };
+
+      var variantById = {
+        coloring_dinosaur_001: [
+          makeVariant("coloring_dinosaur_001", "A案", "走るT-Rex", "前傾姿勢で走る案。尾を水平に伸ばし、片脚を前、片脚を後ろへずらして動きを出す。", {
+            regions: [
+              path("tail", "M91 99 C61 90 31 90 7 101 C35 112 62 111 92 104 Z"),
+              path("body", "M83 88 C106 70 143 69 166 83 C183 94 187 111 174 126 C154 143 119 139 91 119 C78 108 75 97 83 88 Z"),
+              path("belly", "M96 109 C119 122 148 122 169 108 C165 126 144 136 117 132 C101 130 92 120 96 109 Z"),
+              path("neck", "M159 82 C169 66 190 58 207 63 C202 79 187 91 169 97 C162 93 157 88 159 82 Z"),
+              path("head", "M199 57 C216 47 235 54 240 68 C232 80 211 82 193 75 C187 67 191 61 199 57 Z"),
+              path("jaw", "M193 73 C207 79 226 77 239 68 C238 82 219 91 198 86 C190 83 187 77 193 73 Z"),
+              path("arm", "M165 98 C174 99 181 104 183 111 C176 116 166 114 159 109 C159 104 161 100 165 98 Z"),
+              path("back_leg", "M110 121 C98 133 89 148 83 168 L67 168 C76 145 85 128 99 116 Z M147 119 C160 133 174 145 190 155 L181 169 C160 159 143 143 133 126 Z"),
+              path("foot", "M65 165 C79 163 89 165 96 171 L88 177 L62 176 Z M178 153 C191 154 199 159 205 166 L196 172 L178 166 Z", "#FFFFFF"),
+              path("back_spines", "M102 75 C111 69 119 71 123 80 C112 77 105 76 102 75 Z", "#DDF7D4"),
+              path("cheek", "M208 66 C216 64 223 68 224 74 C216 78 208 75 208 66 Z", "#FDE2E2"),
+              path("body_mark", "M118 86 C127 84 136 87 142 92 C133 96 124 95 118 86 Z", "#DDF7D4")
+            ],
+            silhouette: [
+              "M7 101 C35 112 62 111 92 104 C106 72 144 69 166 83 C171 68 190 58 207 63 C216 47 235 54 240 68 C238 82 219 91 198 86 C191 103 184 119 174 126 C155 143 122 139 99 120 C87 132 78 151 67 168 L62 176 L88 177 C94 154 99 137 110 121 C123 128 130 130 133 126 C143 143 160 159 181 169 L196 172 L205 166 C184 149 165 132 147 119 C129 118 109 112 91 99 C61 90 31 90 7 101 Z"
+            ],
+            outer: [
+              "M7 101 C35 112 62 111 92 104 C106 72 144 69 166 83 C171 68 190 58 207 63 C216 47 235 54 240 68 C232 80 211 82 193 75 C187 92 184 113 174 126 C154 143 119 139 91 119 C78 108 75 97 83 88",
+              "M99 116 C85 128 76 145 67 168 M110 121 C98 133 89 148 83 168 M133 126 C143 143 160 159 181 169 M147 119 C160 133 174 145 190 155",
+              "M102 75 C112 72 119 74 123 80"
+            ],
+            inner: [
+              line("M96 109 C119 122 148 122 169 108"),
+              line("M159 82 C166 90 170 94 169 97"),
+              line("M193 73 C207 79 226 77 239 68"),
+              line("M165 98 C174 99 181 104 183 111"),
+              line("M104 136 C95 146 89 158 83 168"),
+              line("M151 133 C164 146 177 157 190 155")
+            ],
+            face: '<circle cx="211" cy="61" r="2.5" fill="#111827"/><path d="M207 78 C216 82 228 78 235 71" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+          }),
+          makeVariant("coloring_dinosaur_001", "B案", "立ち止まったT-Rex", "後脚2本でしっかり立つ標準案。胸を少し起こし、長い尾で前後バランスを取る。", {
+            regions: [
+              path("tail", "M79 112 C49 124 22 119 6 104 C35 94 61 98 91 106 C90 114 85 117 79 112 Z"),
+              path("body", "M78 89 C99 72 131 67 158 78 C179 86 188 105 181 126 C171 148 141 155 110 146 C85 139 68 116 78 89 Z"),
+              path("belly", "M94 112 C117 127 149 127 174 111 C172 132 149 145 121 141 C103 139 91 126 94 112 Z"),
+              path("neck", "M153 78 C163 62 182 54 199 58 C196 75 181 91 163 100 C155 95 150 86 153 78 Z"),
+              path("head", "M192 54 C211 43 234 50 240 66 C232 81 208 84 187 77 C181 68 184 59 192 54 Z"),
+              path("jaw", "M190 74 C205 80 226 77 239 67 C239 83 221 94 199 89 C189 86 184 79 190 74 Z"),
+              path("arm", "M163 100 C173 102 181 108 183 116 C176 121 165 118 158 112 C158 106 160 102 163 100 Z"),
+              path("back_leg", "M104 126 C94 140 91 155 97 170 L81 170 C75 151 80 132 94 117 Z M145 126 C158 138 160 154 151 170 L135 170 C143 151 138 138 128 130 Z"),
+              path("foot", "M78 167 C91 165 101 166 110 171 L103 177 L76 177 Z M132 167 C146 165 156 166 165 172 L157 178 L130 178 Z", "#FFFFFF"),
+              path("back_spines", "M99 76 C108 69 116 72 119 81 C110 78 103 77 99 76 Z", "#DDF7D4"),
+              path("cheek", "M208 66 C216 64 223 68 225 75 C217 80 208 76 208 66 Z", "#FDE2E2"),
+              path("body_mark", "M116 88 C125 85 134 87 141 93 C133 97 123 96 116 88 Z", "#DDF7D4")
+            ],
+            silhouette: [
+              "M6 104 C35 94 61 98 91 106 C101 74 132 68 158 78 C164 63 182 54 199 58 C211 43 234 50 240 66 C239 83 221 94 199 89 C194 106 187 124 181 126 C171 148 141 155 110 146 C100 157 109 174 97 177 L76 177 C73 154 80 134 94 117 C88 116 83 114 79 112 C49 124 22 119 6 104 Z"
+            ],
+            outer: [
+              "M6 104 C35 94 61 98 91 106 C101 74 132 68 158 78 C164 63 182 54 199 58 C211 43 234 50 240 66 C232 81 208 84 187 77 C192 94 188 116 181 126 C171 148 141 155 110 146 C88 140 70 120 78 89",
+              "M94 117 C80 132 75 151 81 170 M104 126 C94 140 91 155 97 170 M128 130 C138 138 143 151 135 170 M145 126 C158 138 160 154 151 170",
+              "M99 76 C108 72 115 74 119 81"
+            ],
+            inner: [
+              line("M94 112 C117 127 149 127 174 111"),
+              line("M153 78 C161 89 164 96 163 100"),
+              line("M190 74 C205 80 226 77 239 67"),
+              line("M163 100 C173 102 181 108 183 116"),
+              line("M101 140 C105 150 104 160 97 170"),
+              line("M145 140 C149 150 147 160 142 170")
+            ],
+            face: '<circle cx="211" cy="60" r="2.5" fill="#111827"/><path d="M206 79 C216 84 228 80 235 72" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+          }),
+          makeVariant("coloring_dinosaur_001", "C案", "振り向くT-Rex", "体は横向き、頭だけ少しこちらを向く案。小さな前脚と長い尾は維持する。", {
+            regions: [
+              path("tail", "M76 109 C46 119 19 113 7 98 C35 91 61 94 90 102 C88 110 82 113 76 109 Z"),
+              path("body", "M77 90 C99 73 134 69 161 80 C180 88 189 107 181 126 C170 148 136 154 106 145 C82 138 68 114 77 90 Z"),
+              path("belly", "M94 111 C117 126 149 126 175 110 C173 131 149 143 119 140 C102 138 91 126 94 111 Z"),
+              path("neck", "M154 78 C163 62 181 55 196 60 C193 77 178 91 162 98 C155 93 151 85 154 78 Z"),
+              path("head", "M188 53 C205 42 228 47 237 62 C235 80 216 90 195 86 C180 80 177 62 188 53 Z"),
+              path("jaw", "M188 75 C202 83 221 82 235 73 C232 88 213 96 196 91 C188 88 184 80 188 75 Z"),
+              path("arm", "M158 99 C168 102 175 109 176 117 C168 121 158 117 153 110 C153 104 155 101 158 99 Z"),
+              path("back_leg", "M103 126 C94 140 90 155 96 170 L80 170 C75 151 80 132 94 118 Z M145 124 C160 136 164 152 156 170 L140 170 C146 151 141 137 130 129 Z"),
+              path("foot", "M77 167 C90 165 101 166 110 171 L102 177 L75 177 Z M137 167 C151 165 163 166 172 172 L163 178 L136 178 Z", "#FFFFFF"),
+              path("back_spines", "M99 76 C108 70 116 73 119 81 C110 78 103 77 99 76 Z", "#DDF7D4"),
+              path("cheek", "M205 68 C214 65 223 69 225 77 C216 82 207 78 205 68 Z", "#FDE2E2"),
+              path("body_mark", "M116 88 C125 85 134 87 141 93 C133 97 123 96 116 88 Z", "#DDF7D4")
+            ],
+            silhouette: [
+              "M7 98 C35 91 61 94 90 102 C100 74 135 70 161 80 C164 64 181 55 196 60 C205 42 228 47 237 62 C235 80 216 90 195 86 C190 104 187 119 181 126 C170 148 136 154 106 145 C96 157 108 174 96 177 L75 177 C72 154 80 134 94 118 C88 116 82 113 76 109 C46 119 19 113 7 98 Z"
+            ],
+            outer: [
+              "M7 98 C35 91 61 94 90 102 C100 74 135 70 161 80 C164 64 181 55 196 60 C205 42 228 47 237 62 C235 80 216 90 195 86 C190 104 187 119 181 126 C170 148 136 154 106 145 C84 138 69 116 77 90",
+              "M94 118 C80 132 75 151 80 170 M103 126 C94 140 90 155 96 170 M130 129 C141 137 146 151 140 170 M145 124 C160 136 164 152 156 170",
+              "M99 76 C108 72 116 74 119 81"
+            ],
+            inner: [
+              line("M94 111 C117 126 149 126 175 110"),
+              line("M154 78 C161 90 164 96 162 98"),
+              line("M188 75 C202 83 221 82 235 73"),
+              line("M158 99 C168 102 175 109 176 117"),
+              line("M101 140 C105 150 103 161 96 170"),
+              line("M148 137 C154 149 153 160 147 170")
+            ],
+            face: '<circle cx="207" cy="62" r="2.5" fill="#111827"/><path d="M199 81 C209 87 224 82 231 75" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+          })
+        ],
+        coloring_lion: [
+          makeVariant("coloring_lion", "A案", "横向きに立つライオン", "自然な横向き。首と胸を包む不規則なたてがみ、厚い胸、細い腹、後方へ伸びる尾を重視する。", {
+            regions: [
+              path("tail", "M55 91 C35 84 25 64 36 53 C49 56 55 75 66 94 Z"),
+              path("tail_tip", "M31 50 C22 39 31 27 45 31 C56 36 54 51 42 57 C37 57 33 54 31 50 Z"),
+              path("body", "M59 88 C80 71 120 66 156 74 C180 79 192 95 187 114 C180 139 143 149 100 138 C70 131 50 110 59 88 Z"),
+              path("chest", "M145 78 C160 94 161 118 145 134 C132 119 130 95 145 78 Z"),
+              path("back_leg", "M81 117 C73 135 68 151 59 167 L45 167 C53 144 59 126 65 111 Z"),
+              path("front_leg", "M149 112 C158 128 160 146 153 167 L140 167 C144 145 140 129 132 115 Z"),
+              path("paw", "M43 165 L63 165 L67 172 L42 172 Z M137 165 L156 165 L160 172 L135 172 Z"),
+              path("mane", "M143 58 C149 42 164 35 176 40 C188 31 204 37 208 53 C222 61 222 78 211 87 C211 104 193 116 177 110 C161 119 142 108 144 90 C130 82 130 64 143 58 Z"),
+              path("face", "M160 59 C176 49 197 54 204 70 C209 86 196 100 178 99 C160 98 151 85 154 70 C155 65 157 61 160 59 Z"),
+              path("ears", "M153 58 C150 45 160 39 171 49 C170 57 162 61 153 58 Z M190 50 C198 39 210 44 209 58 C201 62 192 59 190 50 Z"),
+              path("nose", "M184 76 C194 75 200 82 196 89 C189 94 181 91 179 83 C180 80 182 77 184 76 Z")
+            ],
+            silhouette: [
+              "M31 50 C22 39 31 27 45 31 C56 36 54 51 42 57 C49 67 56 80 66 94 C80 71 120 66 145 74 C133 64 132 52 143 58 C149 42 164 35 176 40 C188 31 204 37 208 53 C222 61 222 78 211 87 C211 104 193 116 177 110 C185 120 190 131 184 140 C169 155 129 149 100 138 C91 153 78 167 59 172 L42 172 C51 145 59 126 65 111 C54 105 50 96 59 88 C44 84 34 65 31 50 Z"
+            ],
+            outer: [
+              "M31 50 C22 39 31 27 45 31 C56 36 54 51 42 57 C49 67 56 80 66 94 C80 71 120 66 145 74 C133 64 132 52 143 58 C149 42 164 35 176 40 C188 31 204 37 208 53 C222 61 222 78 211 87 C211 104 193 116 177 110 C185 120 190 131 184 140 C169 155 129 149 100 138 C70 131 50 110 59 88",
+              "M65 111 C59 126 53 144 45 167 L59 167 C68 151 73 135 81 117 M132 115 C140 129 144 145 140 167 L153 167 C160 146 158 128 149 112",
+              "M153 58 C150 45 160 39 171 49 M190 50 C198 39 210 44 209 58"
+            ],
+            inner: [
+              line("M145 78 C160 94 161 118 145 134"),
+              line("M160 59 C176 49 197 54 204 70"),
+              line("M143 58 C151 70 151 83 144 90"),
+              line("M177 110 C169 102 166 90 168 79"),
+              line("M55 91 C45 84 39 67 36 53"),
+              line("M81 117 C77 133 70 152 59 167"),
+              line("M149 112 C143 128 145 147 153 167")
+            ],
+            face: '<circle cx="174" cy="68" r="2.5" fill="#111827"/><path d="M184 76 C194 75 200 82 196 89 C189 94 181 91 179 83 Z" fill="#111827"/><path d="M187 91 C182 96 174 96 169 90" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+          }),
+          makeVariant("coloring_lion", "B案", "座っているライオン", "胸を張って座る案。前脚をまっすぐ下ろし、後脚を折りたたんで、たてがみの外形を自然に見せる。", {
+            regions: [
+              path("tail", "M64 133 C42 144 33 164 48 174 C60 167 70 153 73 136 Z"),
+              path("tail_tip", "M42 170 C31 166 31 153 43 149 C55 151 58 164 49 172 C47 173 44 173 42 170 Z"),
+              path("body", "M80 91 C101 72 142 73 164 96 C183 118 175 153 147 165 C112 177 74 157 70 124 C68 109 72 99 80 91 Z"),
+              path("chest", "M130 83 C151 99 154 136 132 158 C112 136 111 101 130 83 Z"),
+              path("back_leg", "M82 134 C66 143 63 164 82 174 L121 174 C122 151 105 134 82 134 Z"),
+              path("front_leg", "M132 118 C141 133 143 151 137 174 L123 174 C126 151 123 134 115 120 Z"),
+              path("paw", "M80 171 L122 171 L127 178 L78 178 Z M121 171 L140 171 L144 178 L119 178 Z"),
+              path("mane", "M105 48 C116 31 137 30 149 43 C165 37 180 51 178 69 C190 83 180 102 162 104 C151 119 127 119 115 104 C95 101 86 78 98 65 C97 58 99 52 105 48 Z"),
+              path("face", "M119 55 C135 45 158 51 166 69 C172 88 158 102 138 102 C117 102 106 88 110 70 C111 63 114 58 119 55 Z"),
+              path("ears", "M113 55 C108 42 119 36 130 48 C129 57 121 60 113 55 Z M151 48 C159 37 171 43 170 57 C162 62 153 57 151 48 Z"),
+              path("nose", "M139 77 C149 76 155 83 151 90 C144 95 135 91 134 83 C135 80 137 78 139 77 Z")
+            ],
+            silhouette: [
+              "M42 170 C31 166 31 153 43 149 C51 147 57 151 60 157 C64 149 68 141 73 136 C66 121 70 102 80 91 C93 78 109 73 125 75 C89 100 86 78 98 65 C97 58 99 52 105 48 C116 31 137 30 149 43 C165 37 180 51 178 69 C190 83 180 102 162 104 C176 119 181 143 164 160 C144 180 101 180 82 174 C63 164 66 143 82 134 C69 141 59 162 49 172 C47 173 44 173 42 170 Z"
+            ],
+            outer: [
+              "M42 170 C31 166 31 153 43 149 C55 151 58 164 49 172 C60 167 70 153 73 136 C66 121 70 102 80 91 C93 78 109 73 125 75 C96 100 86 78 98 65 C97 58 99 52 105 48 C116 31 137 30 149 43 C165 37 180 51 178 69 C190 83 180 102 162 104 C176 119 181 143 164 160 C144 180 101 180 82 174 C63 164 66 143 82 134",
+              "M115 120 C123 134 126 151 123 174 M132 118 C141 133 143 151 137 174",
+              "M113 55 C108 42 119 36 130 48 M151 48 C159 37 171 43 170 57"
+            ],
+            inner: [
+              line("M130 83 C151 99 154 136 132 158"),
+              line("M119 55 C135 45 158 51 166 69"),
+              line("M82 134 C105 134 122 151 121 174"),
+              line("M60 157 C64 149 68 141 73 136"),
+              line("M115 104 C126 113 148 113 162 104"),
+              line("M132 118 C126 139 128 158 137 174")
+            ],
+            face: '<circle cx="130" cy="68" r="2.5" fill="#111827"/><path d="M139 77 C149 76 155 83 151 90 C144 95 135 91 134 83 Z" fill="#111827"/><path d="M142 92 C137 97 129 96 124 90" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+          }),
+          makeVariant("coloring_lion", "C案", "歩くライオン", "歩く姿勢の案。頭を少し低くし、前脚と後脚を前後にずらし、しっぽを緩く上へ曲げる。", {
+            regions: [
+              path("tail", "M58 84 C38 76 34 54 49 47 C59 55 62 72 66 90 Z"),
+              path("tail_tip", "M44 44 C38 32 48 23 60 30 C68 39 61 51 50 52 C47 50 45 48 44 44 Z"),
+              path("body", "M61 91 C84 72 127 68 162 80 C186 89 194 106 184 123 C169 146 129 148 91 135 C65 126 49 107 61 91 Z"),
+              path("chest", "M145 82 C160 96 162 118 149 132 C135 120 130 99 145 82 Z"),
+              path("back_leg", "M82 119 C76 137 70 151 58 165 L45 163 C56 144 63 128 67 111 Z"),
+              path("front_leg", "M151 112 C164 126 172 143 180 161 L167 168 C157 148 148 132 134 119 Z"),
+              path("paw", "M43 161 L60 163 L63 171 L40 169 Z M166 164 L184 158 L190 164 L168 172 Z"),
+              path("mane", "M143 62 C149 46 164 38 177 43 C188 35 204 41 207 56 C219 66 217 84 204 91 C201 107 181 116 168 107 C152 114 135 103 139 86 C128 78 130 66 143 62 Z"),
+              path("face", "M159 61 C174 52 196 57 203 72 C207 88 194 101 177 100 C158 99 149 86 153 72 C154 67 156 64 159 61 Z"),
+              path("ears", "M153 60 C149 47 160 41 170 51 C169 59 161 63 153 60 Z M189 52 C197 41 209 46 207 59 C200 64 191 60 189 52 Z"),
+              path("nose", "M183 78 C193 77 199 84 195 91 C188 96 180 92 178 84 C179 81 181 79 183 78 Z")
+            ],
+            silhouette: [
+              "M44 44 C38 32 48 23 60 30 C68 39 61 51 50 52 C57 61 62 75 66 90 C84 72 127 68 143 80 C131 72 130 66 143 62 C149 46 164 38 177 43 C188 35 204 41 207 56 C219 66 217 84 204 91 C201 107 181 116 168 107 C181 118 190 131 184 141 C169 151 124 147 91 135 C78 149 70 163 58 171 L40 169 C51 146 61 128 67 111 C56 104 53 96 61 91 C47 84 39 61 49 47 Z"
+            ],
+            outer: [
+              "M44 44 C38 32 48 23 60 30 C68 39 61 51 50 52 C57 61 62 75 66 90 C84 72 127 68 143 80 C131 72 130 66 143 62 C149 46 164 38 177 43 C188 35 204 41 207 56 C219 66 217 84 204 91 C201 107 181 116 168 107 C181 118 190 131 184 141 C169 151 124 147 91 135 C65 126 49 107 61 91",
+              "M67 111 C63 128 56 144 45 163 M82 119 C76 137 70 151 58 165 M134 119 C148 132 157 148 167 168 M151 112 C164 126 172 143 180 161",
+              "M153 60 C149 47 160 41 170 51 M189 52 C197 41 209 46 207 59"
+            ],
+            inner: [
+              line("M145 82 C160 96 162 118 149 132"),
+              line("M159 61 C174 52 196 57 203 72"),
+              line("M143 62 C151 75 149 86 139 86"),
+              line("M168 107 C162 99 160 89 162 79"),
+              line("M58 84 C49 75 45 60 49 47"),
+              line("M151 112 C157 132 168 149 180 161")
+            ],
+            face: '<circle cx="173" cy="70" r="2.5" fill="#111827"/><path d="M183 78 C193 77 199 84 195 91 C188 96 180 92 178 84 Z" fill="#111827"/><path d="M186 93 C181 98 173 97 168 91" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+          })
+        ],
+        coloring_grasshopper: [
+          makeVariant("coloring_grasshopper", "A案", "地面に止まるバッタ", "水平に近い体。後脚を上後方へ大きく折り、脛を前下方へ伸ばす。", {
+            regions: [
+              path("abdomen", "M53 88 C76 68 113 65 146 78 C140 101 112 116 78 112 C58 108 47 99 53 88 Z"),
+              path("thorax", "M138 78 C152 65 172 67 182 83 C180 100 158 108 140 98 C134 91 134 84 138 78 Z"),
+              path("head", "M177 71 C190 61 209 67 214 82 C213 96 199 105 185 101 C173 97 168 82 177 71 Z"),
+              path("wing", "M76 77 C106 59 137 66 156 84 C129 94 100 93 76 77 Z", "#EAFBE6"),
+              path("back_leg", "M86 101 C72 84 61 63 58 42 C69 36 82 43 88 58 C97 81 101 96 96 108 Z M60 43 C44 70 31 111 20 157 L33 165 C45 129 60 92 82 63 Z M83 107 C102 133 124 151 149 163 L139 176 C111 163 84 139 65 111 Z"),
+              path("middle_leg", "M129 98 C118 116 112 134 111 155 L99 155 C100 132 108 112 121 95 Z"),
+              path("front_leg", "M166 98 C158 115 159 132 168 149 L155 153 C146 135 148 115 158 96 Z"),
+              path("antennae", "M166 54 C184 37 205 28 226 27 L229 32 C207 33 187 44 169 60 Z M168 61 C190 51 211 52 232 61 L229 67 C209 59 189 58 171 67 Z", "#A3E635"),
+              path("body_segments", "M76 88 C87 97 99 103 112 107 L107 112 C92 109 80 101 72 90 Z M103 77 C111 91 124 98 139 100 L135 105 C119 103 106 94 99 79 Z M129 78 C137 88 149 95 162 96 L158 101 C144 100 132 93 125 81 Z", "#BBF7D0"),
+              path("eye", "M195 76 C201 73 207 77 207 83 C201 88 194 85 195 76 Z")
+            ],
+            silhouette: [
+              "M226 27 L229 32 C207 33 187 44 169 60 C190 51 211 52 232 61 L229 67 C209 59 189 58 171 67 C190 61 209 67 214 82 C213 96 199 105 185 101 C175 110 155 110 140 98 C130 110 113 116 94 115 C112 137 130 154 149 163 L139 176 C111 163 84 139 65 111 C52 130 42 150 33 165 L20 157 C31 111 44 70 60 43 C58 38 65 35 72 38 C81 43 87 55 88 58 C98 83 102 97 96 108 C78 113 59 108 53 88 C76 68 113 65 146 78 C152 65 172 67 182 83 C181 77 174 71 171 67 C187 44 207 33 226 27 Z"
+            ],
+            outer: [
+              "M226 27 C207 33 187 44 169 60 M232 61 C209 59 189 58 171 67",
+              "M53 88 C76 68 113 65 146 78 C152 65 172 67 182 83 C181 77 174 71 171 67 C190 61 209 67 214 82 C213 96 199 105 185 101 C175 110 155 110 140 98 C130 110 113 116 94 115 C112 137 130 154 149 163 L139 176 C111 163 84 139 65 111 C52 130 42 150 33 165 L20 157 C31 111 44 70 60 43 C58 38 65 35 72 38 C81 43 87 55 88 58 C98 83 102 97 96 108 C78 113 59 108 53 88 Z",
+              "M76 77 C106 59 137 66 156 84"
+            ],
+            inner: [
+              line("M76 77 C106 59 137 66 156 84"),
+              line("M76 88 C87 97 99 103 112 107"),
+              line("M103 77 C111 91 124 98 139 100"),
+              line("M129 78 C137 88 149 95 162 96"),
+              line("M129 98 C118 116 112 134 111 155"),
+              line("M166 98 C158 115 159 132 168 149"),
+              line("M60 43 C44 70 31 111 20 157"),
+              line("M86 101 C72 84 61 63 58 42"),
+              line("M83 107 C102 133 124 151 149 163")
+            ],
+            face: '<path d="M195 76 C201 73 207 77 207 83 C201 88 194 85 195 76 Z" fill="#ffffff"/><circle cx="201" cy="80" r="2.1" fill="#111827"/>'
+          }),
+          makeVariant("coloring_grasshopper", "B案", "葉の上に止まるバッタ", "体を少し斜め上向きにした案。後脚を高く持ち上げ、羽を腹に沿わせる。", {
+            regions: [
+              path("abdomen", "M52 96 C72 72 108 62 144 72 C142 96 116 115 82 116 C60 115 48 107 52 96 Z"),
+              path("thorax", "M137 72 C150 58 171 60 183 75 C183 93 163 104 144 96 C137 89 134 80 137 72 Z"),
+              path("head", "M176 62 C188 51 209 56 215 72 C216 87 203 98 188 96 C175 94 168 75 176 62 Z"),
+              path("wing", "M75 83 C102 60 135 59 157 77 C132 91 102 96 75 83 Z", "#EAFBE6"),
+              path("back_leg", "M88 96 C76 75 69 51 75 31 C88 28 99 40 100 57 C101 81 99 94 94 108 Z M76 32 C57 55 40 92 27 140 L39 151 C55 111 73 75 96 55 Z M84 108 C106 130 131 145 160 154 L153 169 C121 158 92 137 68 113 Z"),
+              path("middle_leg", "M130 95 C122 114 119 133 121 154 L109 155 C105 132 111 111 123 93 Z"),
+              path("front_leg", "M167 91 C162 110 166 127 177 142 L166 148 C153 132 152 111 158 92 Z"),
+              path("antennae", "M166 45 C186 29 208 22 229 23 L231 29 C209 29 188 38 169 52 Z M169 54 C191 44 214 45 234 55 L231 61 C210 52 190 51 171 60 Z", "#A3E635"),
+              path("body_segments", "M76 94 C88 102 101 107 115 109 L111 114 C96 113 83 105 72 98 Z M102 79 C112 92 126 98 141 98 L138 104 C122 104 108 95 99 83 Z M128 73 C139 84 152 89 165 88 L162 94 C148 94 135 87 125 77 Z", "#BBF7D0"),
+              path("eye", "M194 66 C200 63 207 67 207 73 C202 79 195 76 194 66 Z")
+            ],
+            silhouette: [
+              "M229 23 L231 29 C209 29 188 38 169 52 C191 44 214 45 234 55 L231 61 C210 52 190 51 171 60 C188 51 209 56 215 72 C216 87 203 98 188 96 C177 106 161 106 144 96 C133 109 113 116 93 116 C114 135 136 148 160 154 L153 169 C121 158 92 137 68 113 C56 126 48 140 39 151 L27 140 C40 92 57 55 76 32 C75 28 83 26 91 30 C99 35 100 49 100 57 C101 81 99 94 94 108 C76 119 55 114 52 96 C72 72 108 62 144 72 C150 58 171 60 183 75 C181 69 175 63 171 60 C188 38 209 29 229 23 Z"
+            ],
+            outer: [
+              "M229 23 C209 29 188 38 169 52 M234 55 C210 52 190 51 171 60",
+              "M52 96 C72 72 108 62 144 72 C150 58 171 60 183 75 C181 69 175 63 171 60 C188 51 209 56 215 72 C216 87 203 98 188 96 C177 106 161 106 144 96 C133 109 113 116 93 116 C114 135 136 148 160 154 L153 169 C121 158 92 137 68 113 C56 126 48 140 39 151 L27 140 C40 92 57 55 76 32 C75 28 83 26 91 30 C99 35 100 49 100 57 C101 81 99 94 94 108 C76 119 55 114 52 96 Z",
+              "M75 83 C102 60 135 59 157 77"
+            ],
+            inner: [
+              line("M75 83 C102 60 135 59 157 77"),
+              line("M76 94 C88 102 101 107 115 109"),
+              line("M102 79 C112 92 126 98 141 98"),
+              line("M128 73 C139 84 152 89 165 88"),
+              line("M130 95 C122 114 119 133 121 154"),
+              line("M167 91 C162 110 166 127 177 142"),
+              line("M76 32 C57 55 40 92 27 140"),
+              line("M88 96 C76 75 69 51 75 31"),
+              line("M84 108 C106 130 131 145 160 154")
+            ],
+            face: '<path d="M194 66 C200 63 207 67 207 73 C202 79 195 76 194 66 Z" fill="#ffffff"/><circle cx="200" cy="70" r="2.1" fill="#111827"/>'
+          }),
+          makeVariant("coloring_grasshopper", "C案", "跳ぶ直前のバッタ", "前傾して跳ぶ直前の案。後脚を深く折りたたみ、前脚を少し浮かせる。", {
+            regions: [
+              path("abdomen", "M54 91 C80 71 118 70 148 86 C139 107 108 119 77 112 C58 108 48 100 54 91 Z"),
+              path("thorax", "M141 84 C156 72 176 76 184 93 C179 109 157 114 141 101 C136 94 136 88 141 84 Z"),
+              path("head", "M180 75 C194 66 211 75 214 90 C211 104 196 111 183 105 C171 99 170 84 180 75 Z"),
+              path("wing", "M78 84 C109 70 139 75 157 94 C129 101 101 97 78 84 Z", "#EAFBE6"),
+              path("back_leg", "M88 101 C76 84 70 65 76 49 C88 47 99 58 99 75 C98 88 96 99 92 109 Z M76 50 C58 73 49 99 45 128 L58 136 C65 108 78 82 96 65 Z M83 108 C103 129 127 143 155 151 L148 166 C117 157 89 135 67 112 Z"),
+              path("middle_leg", "M130 101 C119 118 115 136 117 154 L105 155 C103 132 111 113 123 98 Z"),
+              path("front_leg", "M169 103 C163 118 167 132 180 142 L170 150 C154 139 151 119 160 101 Z"),
+              path("antennae", "M170 59 C191 44 212 38 232 41 L233 47 C213 44 192 51 172 65 Z M171 66 C193 60 214 64 232 76 L228 82 C210 72 191 68 173 72 Z", "#A3E635"),
+              path("body_segments", "M78 92 C89 101 101 106 115 109 L110 114 C95 111 83 104 73 96 Z M105 83 C113 96 127 103 142 104 L138 109 C122 108 108 99 101 87 Z M130 84 C139 96 151 102 164 103 L160 108 C146 108 134 100 126 88 Z", "#BBF7D0"),
+              path("eye", "M196 82 C202 79 208 84 207 90 C201 94 195 90 196 82 Z")
+            ],
+            silhouette: [
+              "M232 41 L233 47 C213 44 192 51 172 65 C193 60 214 64 232 76 L228 82 C210 72 191 68 173 72 C194 66 211 75 214 90 C211 104 196 111 183 105 C172 114 156 114 141 101 C130 113 109 119 91 116 C112 135 134 146 155 151 L148 166 C117 157 89 135 67 112 C64 122 61 130 58 136 L45 128 C49 99 58 73 76 50 C76 45 85 44 93 50 C101 58 100 70 99 75 C98 88 96 99 92 109 C74 114 56 108 54 91 C80 71 118 70 148 86 C156 72 176 76 184 93 C183 85 177 77 173 72 C192 51 213 44 232 41 Z"
+            ],
+            outer: [
+              "M232 41 C213 44 192 51 172 65 M232 76 C210 72 191 68 173 72",
+              "M54 91 C80 71 118 70 148 86 C156 72 176 76 184 93 C183 85 177 77 173 72 C194 66 211 75 214 90 C211 104 196 111 183 105 C172 114 156 114 141 101 C130 113 109 119 91 116 C112 135 134 146 155 151 L148 166 C117 157 89 135 67 112 C64 122 61 130 58 136 L45 128 C49 99 58 73 76 50 C76 45 85 44 93 50 C101 58 100 70 99 75 C98 88 96 99 92 109 C74 114 56 108 54 91 Z",
+              "M78 84 C109 70 139 75 157 94"
+            ],
+            inner: [
+              line("M78 84 C109 70 139 75 157 94"),
+              line("M78 92 C89 101 101 106 115 109"),
+              line("M105 83 C113 96 127 103 142 104"),
+              line("M130 84 C139 96 151 102 164 103"),
+              line("M130 101 C119 118 115 136 117 154"),
+              line("M169 103 C163 118 167 132 180 142"),
+              line("M76 50 C58 73 49 99 45 128"),
+              line("M88 101 C76 84 70 65 76 49"),
+              line("M83 108 C103 129 127 143 155 151")
+            ],
+            face: '<path d="M196 82 C202 79 208 84 207 90 C201 94 195 90 196 82 Z" fill="#ffffff"/><circle cx="201" cy="86" r="2.1" fill="#111827"/>'
+          })
+        ]
+      };
+
+      var rejectedHistoryById = {
+        coloring_dinosaur_001: [
+          historyVariant(variantById.coloring_dinosaur_001[0], "前回A案", "不採用: 走るT-Rex"),
+          historyVariant(variantById.coloring_dinosaur_001[1], "前回B案", "不採用: 立ち止まったT-Rex"),
+          historyVariant(variantById.coloring_dinosaur_001[2], "前回C案", "不採用: 振り向くT-Rex")
+        ],
+        coloring_lion: [
+          historyVariant(variantById.coloring_lion[1], "前回B案", "不採用: 座っているライオン"),
+          historyVariant(variantById.coloring_lion[2], "前回C案", "不採用: 歩くライオン")
+        ],
+        coloring_grasshopper: [
+          historyVariant(variantById.coloring_grasshopper[0], "前回A案", "不採用: 地面に止まるバッタ"),
+          historyVariant(variantById.coloring_grasshopper[1], "前回B案", "不採用: 葉の上に止まるバッタ")
+        ]
+      };
+
+      var activeVariantById = {
+        coloring_dinosaur_001: [
+          makeVariant("coloring_dinosaur_001", "D案", "標準的な側面T-Rex", "完全な横向き。背中を水平に近づけ、頭と長い尾で重心を取る標準姿勢。", {
+            regions: [
+              path("tail", "M82 94 C55 84 25 86 4 99 C30 108 58 108 87 101 C88 98 86 96 82 94 Z"),
+              path("body", "M84 82 C108 69 145 70 169 82 C188 92 191 111 178 126 C158 144 122 141 94 122 C80 112 74 93 84 82 Z"),
+              path("belly", "M98 106 C121 119 151 119 174 105 C170 123 148 134 120 130 C104 128 96 118 98 106 Z"),
+              path("neck", "M163 80 C172 67 190 62 206 67 C201 81 185 92 169 96 C164 92 161 86 163 80 Z"),
+              path("head", "M200 60 C217 52 234 57 239 70 C231 82 210 83 194 76 C190 70 193 64 200 60 Z"),
+              path("jaw", "M193 74 C207 80 226 78 238 70 C237 83 219 91 199 86 C191 83 187 78 193 74 Z"),
+              path("arm", "M164 98 C173 100 179 105 180 112 C173 116 164 114 158 109 C158 104 160 100 164 98 Z"),
+              path("back_leg", "M108 119 C98 132 94 149 101 168 L86 168 C79 148 84 130 96 116 Z M146 118 C158 130 161 148 153 168 L137 168 C145 149 139 134 130 124 Z"),
+              path("foot", "M83 165 C96 163 107 165 115 171 L106 177 L80 177 Z M134 165 C148 163 160 165 169 171 L160 177 L132 177 Z", "#FFFFFF"),
+              path("back_spines", "M104 74 C112 69 119 71 122 79 C113 77 108 76 104 74 Z", "#DDF7D4"),
+              path("cheek", "M208 67 C216 65 223 69 224 75 C216 79 208 76 208 67 Z", "#FDE2E2"),
+              path("body_mark", "M119 85 C128 83 136 86 142 91 C134 95 125 94 119 85 Z", "#DDF7D4")
+            ],
+            silhouette: [
+              "M4 99 C30 108 58 108 87 101 C104 70 145 70 169 82 C174 68 190 62 206 67 C217 52 234 57 239 70 C237 83 219 91 199 86 C192 103 186 119 178 126 C158 144 122 141 96 123 C86 134 78 154 86 168 L80 177 L106 177 C104 154 100 134 108 119 C116 124 124 126 130 124 C139 134 145 149 137 168 L132 177 L160 177 C166 151 160 131 146 118 C124 116 104 107 82 94 C55 84 25 86 4 99 Z"
+            ],
+            outer: [
+              "M4 99 C30 108 58 108 87 101 C104 70 145 70 169 82 C174 68 190 62 206 67 C217 52 234 57 239 70 C231 82 210 83 194 76 C190 94 187 116 178 126 C158 144 122 141 94 122 C80 112 74 93 84 82",
+              "M96 116 C84 130 79 148 86 168 M108 119 C98 132 94 149 101 168 M130 124 C139 134 145 149 137 168 M146 118 C158 130 161 148 153 168",
+              "M104 74 C112 71 118 72 122 79"
+            ],
+            inner: [
+              line("M98 106 C121 119 151 119 174 105"),
+              line("M163 80 C168 89 171 94 169 96"),
+              line("M193 74 C207 80 226 78 238 70"),
+              line("M164 98 C173 100 179 105 180 112"),
+              line("M104 135 C110 148 109 160 101 168"),
+              line("M148 132 C154 145 154 157 147 168")
+            ],
+            face: '<circle cx="211" cy="64" r="2.5" fill="#111827"/><path d="M206 79 C216 83 228 79 235 72" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+          }),
+          makeVariant("coloring_dinosaur_001", "E案", "ゆっくり歩くT-Rex", "片脚を前、片脚を後ろへずらした歩行姿勢。頭を前へ出し、尾で重心を取る。", {
+            regions: [
+              path("tail", "M78 102 C50 95 24 101 6 116 C35 121 62 116 90 106 C88 102 84 101 78 102 Z"),
+              path("body", "M85 86 C111 72 150 76 172 91 C189 102 188 120 171 132 C149 147 113 139 90 116 C79 105 76 92 85 86 Z"),
+              path("belly", "M97 109 C119 125 150 127 173 114 C168 131 144 140 118 134 C103 131 96 121 97 109 Z"),
+              path("neck", "M164 87 C175 74 193 70 209 77 C203 91 185 100 169 101 C163 96 161 91 164 87 Z"),
+              path("head", "M204 70 C221 63 237 71 239 84 C229 94 209 93 195 84 C192 78 196 73 204 70 Z"),
+              path("jaw", "M194 83 C207 90 226 90 239 84 C236 96 218 102 199 95 C191 91 187 86 194 83 Z"),
+              path("arm", "M162 103 C171 105 177 111 178 118 C171 121 162 118 156 113 C157 108 159 105 162 103 Z"),
+              path("back_leg", "M109 123 C96 132 84 144 72 160 L58 153 C72 135 86 122 101 115 Z M144 124 C158 141 171 152 188 160 L179 174 C158 164 139 146 130 128 Z"),
+              path("foot", "M56 150 C69 153 79 158 86 166 L76 171 L53 159 Z M176 158 C189 158 199 164 205 171 L195 177 L176 171 Z", "#FFFFFF"),
+              path("back_spines", "M106 78 C115 73 121 76 123 84 C114 81 109 80 106 78 Z", "#DDF7D4"),
+              path("cheek", "M211 78 C218 76 225 81 225 87 C216 90 210 86 211 78 Z", "#FDE2E2"),
+              path("body_mark", "M122 90 C131 88 139 92 145 97 C136 100 128 98 122 90 Z", "#DDF7D4")
+            ],
+            silhouette: [
+              "M6 116 C35 121 62 116 90 106 C111 72 150 76 172 91 C178 76 193 70 209 77 C221 63 237 71 239 84 C236 96 218 102 199 95 C191 112 181 126 171 132 C149 147 113 139 101 115 C86 122 72 135 58 153 L53 159 L76 171 C88 150 99 134 109 123 C119 128 125 130 130 128 C139 146 158 164 179 174 L195 177 L205 171 C185 153 165 138 144 124 C120 122 99 113 78 102 C50 95 24 101 6 116 Z"
+            ],
+            outer: [
+              "M6 116 C35 121 62 116 90 106 C111 72 150 76 172 91 C178 76 193 70 209 77 C221 63 237 71 239 84 C229 94 209 93 195 84 C190 105 181 126 171 132 C149 147 113 139 90 116 C79 105 76 92 85 86",
+              "M101 115 C86 122 72 135 58 153 M109 123 C96 132 84 144 72 160 M130 128 C139 146 158 164 179 174 M144 124 C158 141 171 152 188 160",
+              "M106 78 C115 75 121 77 123 84"
+            ],
+            inner: [
+              line("M97 109 C119 125 150 127 173 114"),
+              line("M164 87 C169 96 171 101 169 101"),
+              line("M194 83 C207 90 226 90 239 84"),
+              line("M162 103 C171 105 177 111 178 118"),
+              line("M92 133 C82 142 74 151 72 160"),
+              line("M151 139 C163 151 176 159 188 160")
+            ],
+            face: '<circle cx="214" cy="75" r="2.5" fill="#111827"/><path d="M208 91 C218 96 230 92 236 86" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+          }),
+          makeVariant("coloring_dinosaur_001", "F案", "細身で俊敏なT-Rex", "少し前傾した細身案。胸と腹を絞り、太ももの力強さと大きな頭は残す。", {
+            regions: [
+              path("tail", "M84 92 C55 80 27 81 4 94 C31 105 60 107 89 100 C90 96 88 94 84 92 Z"),
+              path("body", "M87 80 C112 67 150 69 171 82 C186 91 189 106 176 119 C156 136 122 134 94 116 C81 108 78 88 87 80 Z"),
+              path("belly", "M99 101 C122 113 151 113 173 101 C169 116 148 126 121 123 C106 122 98 112 99 101 Z"),
+              path("neck", "M165 80 C176 67 193 64 208 70 C203 83 185 92 169 94 C164 90 162 84 165 80 Z"),
+              path("head", "M201 63 C219 55 236 62 239 75 C230 86 209 86 193 79 C190 72 194 66 201 63 Z"),
+              path("jaw", "M193 77 C207 83 226 82 238 75 C236 88 218 96 198 90 C190 86 187 81 193 77 Z"),
+              path("arm", "M163 95 C171 96 177 101 178 108 C171 112 162 110 157 105 C157 100 159 97 163 95 Z"),
+              path("back_leg", "M111 116 C100 130 95 149 101 169 L86 169 C79 148 85 128 98 112 Z M147 114 C160 128 165 147 158 169 L142 169 C148 149 143 132 132 121 Z"),
+              path("foot", "M84 166 C97 164 108 166 116 172 L107 178 L81 177 Z M139 166 C153 164 165 166 174 172 L165 178 L137 178 Z", "#FFFFFF"),
+              path("back_spines", "M107 72 C114 68 120 71 122 78 C114 76 110 75 107 72 Z", "#DDF7D4"),
+              path("cheek", "M209 70 C217 68 224 72 224 78 C216 82 209 78 209 70 Z", "#FDE2E2"),
+              path("body_mark", "M121 83 C129 81 137 84 143 89 C135 92 127 91 121 83 Z", "#DDF7D4")
+            ],
+            silhouette: [
+              "M4 94 C31 105 60 107 89 100 C111 68 150 69 171 82 C177 68 193 64 208 70 C219 55 236 62 239 75 C236 88 218 96 198 90 C192 105 185 116 176 119 C156 136 122 134 98 112 C87 128 79 148 86 169 L81 177 L107 178 C105 153 101 132 111 116 C119 121 126 123 132 121 C143 132 148 149 142 169 L137 178 L165 178 C169 150 163 128 147 114 C124 112 103 103 84 92 C55 80 27 81 4 94 Z"
+            ],
+            outer: [
+              "M4 94 C31 105 60 107 89 100 C111 68 150 69 171 82 C177 68 193 64 208 70 C219 55 236 62 239 75 C230 86 209 86 193 79 C189 96 185 111 176 119 C156 136 122 134 94 116 C81 108 78 88 87 80",
+              "M98 112 C85 128 79 148 86 169 M111 116 C100 130 95 149 101 169 M132 121 C143 132 148 149 142 169 M147 114 C160 128 165 147 158 169",
+              "M107 72 C115 70 120 72 122 78"
+            ],
+            inner: [
+              line("M99 101 C122 113 151 113 173 101"),
+              line("M165 80 C169 89 171 93 169 94"),
+              line("M193 77 C207 83 226 82 238 75"),
+              line("M163 95 C171 96 177 101 178 108"),
+              line("M105 133 C110 146 109 160 101 169"),
+              line("M150 130 C156 144 156 158 149 169")
+            ],
+            face: '<circle cx="212" cy="67" r="2.5" fill="#111827"/><path d="M207 82 C216 87 228 83 235 77" fill="none" stroke="#111827" stroke-width="1.8" stroke-linecap="round"/>'
+          })
+        ],
+        coloring_lion: [
+          historyVariant(variantById.coloring_lion[0], "前回A案", "比較用: 胸の張り出しが残るA案"),
+          revisedVariant(variantById.coloring_lion[0], "A改", "胸を引いた横向きライオン", "前回A案をベースに、胸の最前部を後ろへ引き、首から前脚への接続を緩やかにした案。", {
+            regions: [
+              path("tail", "M55 91 C35 84 25 64 36 53 C49 56 55 75 66 94 Z"),
+              path("tail_tip", "M31 50 C22 39 31 27 45 31 C56 36 54 51 42 57 C37 57 33 54 31 50 Z"),
+              path("body", "M59 88 C80 71 120 66 154 74 C176 80 188 96 184 114 C177 138 142 149 100 138 C70 131 50 110 59 88 Z"),
+              path("chest", "M143 80 C153 96 154 118 143 133 C131 120 130 98 143 80 Z"),
+              path("back_leg", "M81 117 C73 135 68 151 59 167 L45 167 C53 144 59 126 65 111 Z"),
+              path("front_leg", "M149 112 C158 128 160 146 153 167 L140 167 C144 145 140 129 132 115 Z"),
+              path("paw", "M43 165 L63 165 L67 172 L42 172 Z M137 165 L156 165 L160 172 L135 172 Z"),
+              path("mane", "M143 58 C149 42 164 35 176 40 C188 31 204 37 208 53 C222 61 222 78 211 87 C211 104 193 116 177 110 C161 119 142 108 144 90 C130 82 130 64 143 58 Z"),
+              path("face", "M160 59 C176 49 197 54 204 70 C209 86 196 100 178 99 C160 98 151 85 154 70 C155 65 157 61 160 59 Z"),
+              path("ears", "M153 58 C150 45 160 39 171 49 C170 57 162 61 153 58 Z M190 50 C198 39 210 44 209 58 C201 62 192 59 190 50 Z"),
+              path("nose", "M184 76 C194 75 200 82 196 89 C189 94 181 91 179 83 C180 80 182 77 184 76 Z")
+            ],
+            silhouette: [
+              "M31 50 C22 39 31 27 45 31 C56 36 54 51 42 57 C49 67 56 80 66 94 C80 71 120 66 143 74 C133 64 132 52 143 58 C149 42 164 35 176 40 C188 31 204 37 208 53 C222 61 222 78 211 87 C211 104 193 116 177 110 C185 120 190 131 184 140 C169 155 129 149 100 138 C91 153 78 167 59 172 L42 172 C51 145 59 126 65 111 C54 105 50 96 59 88 C44 84 34 65 31 50 Z"
+            ],
+            outer: [
+              "M31 50 C22 39 31 27 45 31 C56 36 54 51 42 57 C49 67 56 80 66 94 C80 71 120 66 143 74 C133 64 132 52 143 58 C149 42 164 35 176 40 C188 31 204 37 208 53 C222 61 222 78 211 87 C211 104 193 116 177 110 C185 120 190 131 184 140 C169 155 129 149 100 138 C70 131 50 110 59 88",
+              "M65 111 C59 126 53 144 45 167 L59 167 C68 151 73 135 81 117 M132 115 C140 129 144 145 140 167 L153 167 C160 146 158 128 149 112",
+              "M153 58 C150 45 160 39 171 49 M190 50 C198 39 210 44 209 58"
+            ],
+            inner: [
+              line("M143 80 C153 96 154 118 143 133"),
+              line("M160 59 C176 49 197 54 204 70"),
+              line("M143 58 C151 70 151 83 144 90"),
+              line("M177 110 C169 102 166 90 168 79"),
+              line("M55 91 C45 84 39 67 36 53"),
+              line("M81 117 C77 133 70 152 59 167"),
+              line("M149 112 C143 128 145 147 153 167")
+            ]
+          })
+        ],
+        coloring_grasshopper: [
+          historyVariant(variantById.coloring_grasshopper[2], "前回C案", "比較用: 跳ぶ直前のバッタ"),
+          revisedVariant(variantById.coloring_grasshopper[2], "C改", "脚を細くした跳ぶ直前のバッタ", "前回C案をベースに、姿勢と後脚の角度を保ちながら前脚・中脚・後脚を細くした案。", {
+            regions: [
+              path("abdomen", "M54 91 C80 71 118 70 148 86 C139 107 108 119 77 112 C58 108 48 100 54 91 Z"),
+              path("thorax", "M141 84 C156 72 176 76 184 93 C179 109 157 114 141 101 C136 94 136 88 141 84 Z"),
+              path("head", "M180 75 C194 66 211 75 214 90 C211 104 196 111 183 105 C171 99 170 84 180 75 Z"),
+              path("wing", "M78 84 C109 70 139 75 157 94 C129 101 101 97 78 84 Z", "#EAFBE6"),
+              path("back_leg", "M86 100 C77 84 72 65 78 51 C88 50 95 60 95 75 C94 88 93 99 90 108 Z M78 52 C61 75 53 101 50 126 L59 131 C66 105 80 80 95 65 Z M84 108 C104 130 127 143 154 151 L149 162 C120 154 91 134 70 112 Z"),
+              path("middle_leg", "M130 101 C121 118 118 136 120 154 L111 154 C108 132 114 113 124 98 Z"),
+              path("front_leg", "M169 103 C164 117 168 130 179 140 L171 146 C157 137 154 119 162 101 Z"),
+              path("antennae", "M170 59 C191 44 212 38 232 41 L233 47 C213 44 192 51 172 65 Z M171 66 C193 60 214 64 232 76 L228 82 C210 72 191 68 173 72 Z", "#A3E635"),
+              path("body_segments", "M78 92 C89 101 101 106 115 109 L110 114 C95 111 83 104 73 96 Z M105 83 C113 96 127 103 142 104 L138 109 C122 108 108 99 101 87 Z M130 84 C139 96 151 102 164 103 L160 108 C146 108 134 100 126 88 Z", "#BBF7D0"),
+              path("eye", "M196 82 C202 79 208 84 207 90 C201 94 195 90 196 82 Z")
+            ],
+            silhouette: [
+              "M232 41 L233 47 C213 44 192 51 172 65 C193 60 214 64 232 76 L228 82 C210 72 191 68 173 72 C194 66 211 75 214 90 C211 104 196 111 183 105 C172 114 156 114 141 101 C130 113 109 119 91 116 C111 134 134 145 154 151 L149 162 C120 154 91 134 70 112 C65 120 62 127 59 131 L50 126 C53 101 61 75 78 52 C78 48 86 47 92 52 C97 59 96 70 95 75 C94 88 93 99 90 108 C73 113 56 108 54 91 C80 71 118 70 148 86 C156 72 176 76 184 93 C183 85 177 77 173 72 C192 51 213 44 232 41 Z"
+            ],
+            outer: [
+              "M232 41 C213 44 192 51 172 65 M232 76 C210 72 191 68 173 72",
+              "M54 91 C80 71 118 70 148 86 C156 72 176 76 184 93 C183 85 177 77 173 72 C194 66 211 75 214 90 C211 104 196 111 183 105 C172 114 156 114 141 101 C130 113 109 119 91 116 C111 134 134 145 154 151 L149 162 C120 154 91 134 70 112 C65 120 62 127 59 131 L50 126 C53 101 61 75 78 52 C78 48 86 47 92 52 C97 59 96 70 95 75 C94 88 93 99 90 108 C73 113 56 108 54 91 Z",
+              "M78 84 C109 70 139 75 157 94"
+            ],
+            inner: [
+              line("M78 84 C109 70 139 75 157 94"),
+              line("M78 92 C89 101 101 106 115 109"),
+              line("M105 83 C113 96 127 103 142 104"),
+              line("M130 84 C139 96 151 102 164 103"),
+              line("M130 101 C121 118 118 136 120 154"),
+              line("M169 103 C164 117 168 130 179 140"),
+              line("M78 52 C61 75 53 101 50 126"),
+              line("M86 100 C77 84 72 65 78 51"),
+              line("M84 108 C104 130 127 143 154 151")
+            ]
+          })
+        ]
+      };
+      function markFormalAdopted(source, label, title) {
+        var variant = cloneAnimal(source);
+        variant.variantLabel = label;
+        variant.variantTitle = title || source.variantTitle || source.name;
+        variant.variantDescription = "正式採用した候補です。本番SVGとの形状一致を下の比較欄で確認します。";
+        variant.reviewable = false;
+        variant.formalAdopted = true;
+        return variant;
+      }
+
+      rejectedHistoryById.coloring_dinosaur_001 = rejectedHistoryById.coloring_dinosaur_001.concat([
+        historyVariant(activeVariantById.coloring_dinosaur_001[1], "E案", "不採用: ゆっくり歩くT-Rex"),
+        historyVariant(activeVariantById.coloring_dinosaur_001[2], "F案", "不採用: 細身で俊敏なT-Rex")
+      ]);
+      rejectedHistoryById.coloring_lion = [historyVariant(activeVariantById.coloring_lion[0], "前回A案", "不採用: 胸の張り出しが残るA案")].concat(rejectedHistoryById.coloring_lion);
+      rejectedHistoryById.coloring_grasshopper = [historyVariant(activeVariantById.coloring_grasshopper[0], "前回C案", "不採用: 脚が太いC案")].concat(rejectedHistoryById.coloring_grasshopper);
+      activeVariantById.coloring_dinosaur_001 = [markFormalAdopted(activeVariantById.coloring_dinosaur_001[0], "D案 正式採用", "標準的な側面T-Rex")];
+      activeVariantById.coloring_lion = [markFormalAdopted(activeVariantById.coloring_lion[1], "A改 正式採用", "胸を引いた横向きライオン")];
+      activeVariantById.coloring_grasshopper = [markFormalAdopted(activeVariantById.coloring_grasshopper[1], "C改 正式採用", "脚を細くした跳ぶ直前のバッタ")];
+
+      function cloneAnimal(animal) {
+        return JSON.parse(JSON.stringify(animal));
+      }
+
+      function makeVariant(templateId, variantLabel, variantTitle, description, next) {
+        var base = animals.filter(function (animal) {
+          return animal.templateId === templateId;
+        })[0];
+        var variant = cloneAnimal(base);
+        variant.variantLabel = variantLabel;
+        variant.variantTitle = variantTitle;
+        variant.variantDescription = description;
+        Object.keys(next).forEach(function (key) {
+          variant[key] = next[key];
+        });
+        return variant;
+      }
+
+      function historyVariant(source, label, title) {
+        var variant = cloneAnimal(source);
+        variant.variantLabel = label;
+        variant.variantTitle = title;
+        variant.variantDescription = "折りたたみ履歴として残す不採用案です。";
+        variant.reviewable = false;
+        return variant;
+      }
+
+      function revisedVariant(source, label, title, description, next) {
+        var variant = cloneAnimal(source);
+        variant.variantLabel = label;
+        variant.variantTitle = title;
+        variant.variantDescription = description;
+        variant.reviewable = true;
+        Object.keys(next).forEach(function (key) {
+          variant[key] = next[key];
+        });
+        return variant;
+      }
+
+      function applyCandidateRevision(templateId, next) {
+        var target = animals.filter(function (animal) {
+          return animal.templateId === templateId;
+        })[0];
+        if (!target) return;
+        Object.keys(next).forEach(function (key) {
+          target[key] = next[key];
+        });
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function (char) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[char];
+        });
+      }
+
+      function renderRegion(region, fill) {
+        return '<path class="color-region" data-region-id="' + escapeHtml(region.id) + '" tabindex="0" d="' + region.d + '" fill="' + fill + '"/>';
+      }
+
+      function renderCandidate(animal, mode) {
+        var colors = mode === "sample" ? colorMap(animal) : {};
+        var title = mode === "silhouette" ? animal.name + " silhouette" : animal.name + " candidate";
+        if (mode === "silhouette") {
+          return [
+            '<svg class="candidate-svg silhouette" viewBox="0 0 240 180" role="img" aria-label="' + escapeHtml(title) + '">',
+            animal.silhouette.map(function (d) { return '<path d="' + d + '"/>'; }).join(""),
+            '</svg>'
+          ].join("");
+        }
+        return [
+          '<svg class="candidate-svg" viewBox="0 0 240 180" role="img" aria-label="' + escapeHtml(title) + '">',
+          '<g class="color-regions">',
+          animal.regions.map(function (region) {
+            return renderRegion(region, colors[region.id] || region.fallback || "#FFFFFF");
+          }).join(""),
+          '</g>',
+          '<g class="outer-outline">',
+          animal.outer.map(function (d) { return '<path d="' + d + '"/>'; }).join(""),
+          '</g>',
+          '<g class="inner-lines">',
+          animal.inner.map(function (item) { return '<path d="' + item.d + '"/>'; }).join(""),
+          '</g>',
+          '<g class="face-details">',
+          animal.face,
+          '</g>',
+          '</svg>'
+        ].join("");
+      }
+
+      function renderOldSvg(animal) {
+        if (!KA.coloring || !KA.coloring.renderTemplate) {
+          return '<p>旧SVGを読み込めませんでした。</p>';
+        }
+        return KA.coloring.renderTemplate(animal.templateId, {}, "old-svg");
+      }
+
+      function oldTemplate(animal) {
+        if (!KA.constants || !KA.constants.COLORING_TEMPLATES) return null;
+        return KA.constants.COLORING_TEMPLATES.filter(function (template) {
+          return template.templateId === animal.templateId;
+        })[0] || null;
+      }
+
+      function normalizePath(value) {
+        return String(value || "").replace(/\s+/g, " ").trim();
+      }
+
+      function candidatePaths(variant) {
+        return variant.regions.map(function (region) { return normalizePath(region.d); })
+          .concat(variant.outer.map(normalizePath))
+          .concat(variant.inner.map(function (item) { return normalizePath(item.d || item); }))
+          .concat([String(variant.face || "").replace(/\s+/g, " ").trim()]);
+      }
+
+      function productionCompareBlock(variant) {
+        if (!KA.coloring || !KA.coloring.getLayeredDefinition) {
+          return '<div><strong>本番比較:</strong> <span class="badge neutral">未対応</span></div>';
+        }
+        var definition = KA.coloring.getLayeredDefinition(variant.templateId);
+        if (!definition) return '<div><strong>本番比較:</strong> <span class="badge neutral">定義なし</span></div>';
+        var candidateRegionIds = variant.regions.map(function (region) { return region.id; }).join(",");
+        var productionRegionIds = definition.regions.map(function (region) { return region.id; }).join(",");
+        var productionPaths = definition.regions.map(function (region) { return normalizePath(region.d); })
+          .concat(definition.outer.map(normalizePath))
+          .concat(definition.inner.map(function (item) { return normalizePath(item.d || item); }))
+          .concat([String(definition.face || "").replace(/\s+/g, " ").trim()]);
+        var sameViewBox = definition.viewBox === "0 0 240 180";
+        var sameRegions = candidateRegionIds === productionRegionIds;
+        var samePaths = candidatePaths(variant).join("|") === productionPaths.join("|");
+        return [
+          '<div><strong>本番比較:</strong> ',
+          '<span class="badge ' + (sameViewBox ? '' : 'neutral') + '">viewBox ' + (sameViewBox ? '一致' : '不一致') + '</span> ',
+          '<span class="badge ' + (sameRegions ? '' : 'neutral') + '">領域ID ' + (sameRegions ? '一致' : '不一致') + '</span> ',
+          '<span class="badge ' + (samePaths ? '' : 'neutral') + '">path ' + (samePaths ? '一致' : '不一致') + '</span> ',
+          '<span class="badge neutral">designVersion ' + (definition.designVersion || '-') + '</span></div>',
+          '<code>候補path: ' + escapeHtml(candidatePaths(variant).join(' | ').slice(0, 900)) + '</code>'
+        ].join("");
+      }
+
+      function variantCard(animal, variant, index, isMulti) {
+        var label = variant.variantLabel || (isMulti ? "候補" : "合格候補");
+        var title = variant.variantTitle || (isMulti ? "レビュー候補" : "現在の合格候補");
+        var description = variant.variantDescription || (isMulti ? "レビュー対象の候補です。" : "合格済みのため、第2回候補をそのまま保持しています。");
+        var canReview = isMulti && variant.reviewable !== false;
+        return [
+          '<article class="variant-card" data-template-id="' + escapeHtml(animal.templateId) + '" data-variant-index="' + index + '">',
+          '<h3>' + escapeHtml(label + " / " + title) + '</h3>',
+          '<p>' + escapeHtml(description) + '</p>',
+          '<div class="variant-states">',
+          '<div class="preview"><h3>黒一色</h3>' + renderCandidate(variant, "silhouette") + '</div>',
+          '<div class="preview"><h3>未着色</h3>' + renderCandidate(variant, "line") + '</div>',
+          '<div class="preview"><h3>サンプル着色</h3>' + renderCandidate(variant, "sample") + '</div>',
+          '<div class="preview small"><h3>120px</h3>' + renderCandidate(variant, "line") + '</div>',
+          '</div>',
+          '<div class="details">',
+          '<div><strong>領域数:</strong> ' + variant.regions.length + '</div>',
+          '<div><strong>outer-outline path数:</strong> ' + variant.outer.length + '</div>',
+          '<div><strong>inner-lines数:</strong> ' + variant.inner.length + '</div>',
+          '<div><strong>領域ID:</strong><code>' + variant.regions.map(function (region) { return region.id; }).join(", ") + '</code></div>',
+          '</div>',
+          canReview ? [
+            '<div class="review-actions" aria-label="レビュー選択">',
+            '<button type="button" data-choice="pick">この案がよい</button>',
+            '<button type="button" data-choice="work">一部修正</button>',
+            '<button type="button" data-choice="reject">不採用</button>',
+            '</div>',
+            '<div class="review-result" aria-live="polite"></div>'
+          ].join("") : '',
+          '</article>'
+        ].join("");
+      }
+
+      function card(animal) {
+        var old = oldTemplate(animal);
+        var oldVersion = old ? old.designVersion : "-";
+        var judgement = judgementById[animal.templateId] || { label: "確認中", className: "neutral" };
+        var variants = activeVariantById[animal.templateId] || [animal];
+        var history = rejectedHistoryById[animal.templateId] || [];
+        var isMulti = variants.length > 1;
+        return [
+          '<section class="animal-card">',
+          '<div class="animal-head">',
+          '<div>',
+          '<h2><span class="animal-name">' + escapeHtml(animal.name) + '</span><span class="hidden-label" aria-hidden="true"></span></h2>',
+          '<p>' + escapeHtml(isMulti ? "未合格のため、姿勢とシルエットが異なる3案を比較します。" : animal.intent) + '</p>',
+          '</div>',
+          '<div class="meta">',
+          '<span class="judgement ' + judgement.className + '">判定: ' + judgement.label + '</span>',
+          '<span class="badge">' + escapeHtml(animal.templateId) + '</span>',
+          '<span class="badge">designVersion候補 ' + animal.candidateVersion + '</span>',
+          '<span class="badge neutral">本番現行 ' + oldVersion + '</span>',
+          '</div>',
+          '</div>',
+          '<div class="body">',
+          '<div class="variant-grid">',
+          variants.map(function (variant, index) {
+            return variantCard(animal, variant, index, isMulti);
+          }).join(""),
+          '</div>',
+          history.length ? [
+            '<details class="history">',
+            '<summary>不採用履歴を見る</summary>',
+            '<div class="variant-grid">',
+            history.map(function (variant, index) {
+              return variantCard(animal, variant, index, true);
+            }).join(""),
+            '</div>',
+            '</details>'
+          ].join("") : '',
+          '</div>',
+          '</section>'
+        ].join("");
+      }
+
+      root.innerHTML = animals.map(card).join("");
+
+      root.addEventListener("click", function (event) {
+        var button = event.target.closest ? event.target.closest("button[data-choice]") : null;
+        if (!button) return;
+        var cardEl = button.closest(".variant-card");
+        if (!cardEl) return;
+        cardEl.classList.remove("is-picked", "needs-work", "rejected");
+        var labels = {
+          pick: "この案がよい",
+          work: "一部修正",
+          reject: "不採用"
+        };
+        var classes = {
+          pick: "is-picked",
+          work: "needs-work",
+          reject: "rejected"
+        };
+        var choice = button.getAttribute("data-choice");
+        cardEl.classList.add(classes[choice]);
+        var result = cardEl.querySelector(".review-result");
+        if (result) result.textContent = "選択: " + labels[choice];
+      });
+
+      toggle.addEventListener("click", function () {
+        var pressed = toggle.getAttribute("aria-pressed") === "true";
+        toggle.setAttribute("aria-pressed", pressed ? "false" : "true");
+        toggle.textContent = pressed ? "動物名を隠す" : "動物名を表示する";
+        document.body.classList.toggle("names-hidden", !pressed);
+      });
+    })();
+  </script>
+</body>
+</html>

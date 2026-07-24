@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>試作20 ホーム・おしごと確認</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#eef7f2;color:#24352b;font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic",sans-serif;overflow-x:hidden}button,input{font:inherit}button{min-height:48px;border:1px solid #b7c9bb;border-radius:8px;background:#fff;padding:8px 12px;font-weight:800}button:disabled{opacity:.45}.page{width:min(100%,980px);margin:auto;padding:16px max(12px,env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}.toolbar,.actions,.nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.panel{margin:12px 0;padding:14px;border:1px solid #c9ddcd;border-radius:8px;background:#fff}.stars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.star{min-width:0;padding:9px;border:1px solid #ead271;border-radius:8px;background:#fffbe8}.star span{display:block;color:#667568;font-size:.82rem}.star strong{font-size:1.1rem;overflow-wrap:anywhere}.status{background:#f7fff4}.status ul{list-style:none;padding:0;margin:8px 0}.status li{display:grid;grid-template-columns:62px minmax(0,1fr);gap:8px;padding:7px;background:#fff;margin-top:6px;border-radius:8px}.duplicate-check{padding:10px;border:1px dashed #9bb4a0;border-radius:8px}.nav{grid-template-columns:repeat(4,minmax(0,1fr));position:sticky;bottom:0;padding:8px;background:#fff}.nav button{padding:6px 3px;min-width:0;font-size:.83rem}.job-list{display:grid;gap:8px}.job{display:grid;grid-template-columns:52px minmax(0,1fr);gap:9px;padding:10px;border:1px solid #d2ddd4;border-radius:8px}.job-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:8px;background:#eef8ff;font-size:1.7rem}.job-icon svg{width:100%;height:100%}.job-main h3,.job-main p{margin:0 0 5px}.job-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;grid-column:1/-1}.job-controls button{min-width:0;padding:6px;font-size:.86rem}.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#edf2ed;font-size:.78rem}.selected{border-color:#62a66c;background:#f0faef}.form-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.form-row input{min-width:0;min-height:48px;border:1px solid #b7c9bb;border-radius:8px;padding:8px}.message{min-height:24px;color:#386e3d;font-weight:800}.scenario{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}@media(min-width:720px){.preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.toolbar,.scenario{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:390px){.page{padding-left:10px;padding-right:10px}.job-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  </style>
+  <script src="../js/constants.js?v=10p20"></script>
+</head>
+<body>
+  <main class="page">
+    <h1>試作20 ホーム・おしごと確認</h1>
+    <p>このページはメモリ内データだけを使い、本番localStorageへ保存しません。</p>
+    <section class="panel">
+      <h2>確認状態</h2>
+      <div class="scenario">
+        <button data-scenario="empty">鳥なし・たまごなし</button>
+        <button data-scenario="egg">鳥なし・たまごあり</button>
+        <button data-scenario="bird">鳥あり・食事前</button>
+        <button data-scenario="fed">鳥あり・食事後</button>
+        <button data-stars="small">星1桁</button>
+        <button data-stars="large">星5桁</button>
+        <button data-count="1">1日1件</button>
+        <button data-count="10">1日10件</button>
+      </div>
+    </section>
+    <div class="preview-grid">
+      <section>
+        <h2>ホーム 390px相当</h2>
+        <div class="panel" id="home-preview"></div>
+      </section>
+      <section>
+        <h2>きょうのおしごと</h2>
+        <div class="panel">
+          <p id="selection-label"></p>
+          <div class="job-list" id="daily-jobs"></div>
+          <div class="actions" style="margin-top:8px"><button id="reload-day">同日再読み込み</button><button id="next-day">1日進める</button></div>
+        </div>
+      </section>
+    </div>
+    <section class="panel">
+      <h2>親モード おしごと設定</h2>
+      <p>有効は最低1件。標準項目は削除できません。</p>
+      <div class="form-row"><input id="custom-name" maxlength="20" placeholder="オリジナルのおしごと名"><button id="add-custom">追加</button></div>
+      <div class="job-list" id="settings-jobs" style="margin-top:10px"></div>
+      <div class="actions" style="margin-top:10px"><button id="reset-standard">標準設定へ戻す</button><button id="normalize-invalid">不正データ補正</button></div>
+      <p class="message" id="message" aria-live="polite"></p>
+    </section>
+  </main>
+  <script>
+    (function(){
+      "use strict";
+      var official=(window.KodomoAdventure.constants.DEFAULT_TASKS||[]).map(function(job){return {id:job.taskId,name:job.title,description:job.description||"",icon:job.icon||"",iconKey:job.iconKey||null,custom:false};});
+      var state={spendable:7,lifetime:9,scenario:"empty",date:"2026-07-18",count:official.length,order:official.map(function(j){return j.id;}),enabled:official.map(function(j){return j.id;}),custom:[],selections:{}};
+      function hash(value){var h=2166136261,i;for(i=0;i<value.length;i+=1){h^=value.charCodeAt(i);h+=(h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24);}return h>>>0;}
+      function jobs(){var map={};official.concat(state.custom).forEach(function(j){map[j.id]=j;});return state.order.map(function(id){return map[id];}).filter(Boolean);}
+      function selected(){var enabled=jobs().filter(function(j){return state.enabled.indexOf(j.id)>=0;});var limit=Math.min(Math.max(1,Math.min(10,state.count)),enabled.length);var list=(state.selections[state.date]||[]).filter(function(id){return state.enabled.indexOf(id)>=0&&jobs().some(function(j){return j.id===id;});}).slice(0,limit);enabled.slice().sort(function(a,b){return hash(state.date+a.id)-hash(state.date+b.id);}).forEach(function(j){if(list.length<limit&&list.indexOf(j.id)<0)list.push(j.id);});state.selections[state.date]=list;return enabled.filter(function(j){return list.indexOf(j.id)>=0;});}
+      function cleanupSvg(){return '<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 25h44v27H10z" fill="#E8A35D"/><path d="M7 20h50v9H7z" fill="#F5C36B"/><path d="M17 17l8-9 7 12" fill="#66B8DB"/><circle cx="41" cy="14" r="8" fill="#F27676"/></svg>';}
+      function icon(job){return job.iconKey==="toybox"?cleanupSvg():(job.icon||"★");}
+      function esc(value){return String(value||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+      function renderHome(){var status=state.scenario==="empty"?'<li><strong>たまご</strong><span>たまごから どんな なかまが<br>うまれるかな？</span></li>':state.scenario==="egg"?'<li><strong>たまご</strong><span>あと2ポイントで うまれそう！</span></li><li><strong>おせわ</strong><span>きょうの おせわは 3/5ポイント</span></li>':'<li><strong>なかま</strong><span>ひよこと なかよしレベル3</span></li><li><strong>ごはん</strong><span>'+(state.scenario==="fed"?'きょうは ごはんを たべたよ':'きょうは まだ ごはんを あげていないよ')+'</span></li>';
+        document.getElementById("home-preview").innerHTML='<div class="stars"><div class="star"><span>つかえるほし</span><strong>⭐'+state.spendable+'</strong></div><div class="star"><span>あつめたほし</span><strong>⭐'+state.lifetime+'</strong></div></div><section class="panel status"><h2>なかまのようす</h2><ul>'+status+'</ul></section><div class="duplicate-check"><strong>上部の重複メニューなし</strong><p>たまご・お気に入り・おうち・キッチンの入口は維持</p></div><nav class="nav" aria-label="維持する下部ナビ"><button>おしごと</button><button>ぬりえ</button><button>せかい</button><button>さくひん</button></nav>';
+      }
+      function jobCard(job,index,settings){var enabled=state.enabled.indexOf(job.id)>=0;return '<article class="job '+(enabled?'selected':'')+'"><div class="job-icon">'+icon(job)+'</div><div class="job-main"><h3>'+esc(job.name)+'</h3><p>'+esc(job.description)+'</p><span class="badge">'+(job.custom?'オリジナル':'標準')+'</span> <span class="badge">'+(enabled?'有効':'お休み中')+'</span></div>'+(settings?'<div class="job-controls"><button data-toggle="'+job.id+'">'+(enabled?'お休みにする':'有効にする')+'</button><button data-up="'+job.id+'" '+(index===0?'disabled':'')+'>上へ</button><button data-down="'+job.id+'" '+(index===jobs().length-1?'disabled':'')+'>下へ</button>'+(job.custom?'<button data-edit="'+job.id+'">編集</button><button data-delete="'+job.id+'">削除</button>':'<button disabled>標準は削除不可</button>')+'</div>':'')+'</article>';}
+      function render(){renderHome();var daily=selected();document.getElementById("selection-label").textContent=state.date+" / 表示 "+daily.length+"件（設定 "+state.count+"件）";document.getElementById("daily-jobs").innerHTML=daily.map(function(j,i){return jobCard(j,i,false);}).join("");document.getElementById("settings-jobs").innerHTML=jobs().map(function(j,i){return jobCard(j,i,true);}).join("");bindRows();}
+      function message(text){document.getElementById("message").textContent=text;}
+      function bindRows(){Array.prototype.forEach.call(document.querySelectorAll("[data-toggle]"),function(el){el.onclick=function(){var id=el.getAttribute("data-toggle"),on=state.enabled.indexOf(id)>=0;if(on&&state.enabled.length===1){message("おしごとは 1ついじょう えらんでください");return;}state.enabled=on?state.enabled.filter(function(x){return x!==id;}):state.enabled.concat(id);render();};});Array.prototype.forEach.call(document.querySelectorAll("[data-up],[data-down]"),function(el){el.onclick=function(){var id=el.getAttribute("data-up")||el.getAttribute("data-down"),from=state.order.indexOf(id),to=el.hasAttribute("data-up")?from-1:from+1;if(to<0||to>=state.order.length)return;var swap=state.order[to];state.order[to]=id;state.order[from]=swap;render();};});Array.prototype.forEach.call(document.querySelectorAll("[data-edit]"),function(el){el.onclick=function(){var id=el.getAttribute("data-edit"),job=state.custom.filter(function(j){return j.id===id;})[0];job.name=(job.name+" 変更").slice(0,20);render();message("IDを変えずに編集しました");};});Array.prototype.forEach.call(document.querySelectorAll("[data-delete]"),function(el){el.onclick=function(){var id=el.getAttribute("data-delete");state.custom=state.custom.filter(function(j){return j.id!==id;});state.order=state.order.filter(function(x){return x!==id;});state.enabled=state.enabled.filter(function(x){return x!==id;});if(!state.enabled.length)state.enabled=[official[0].id];render();message("履歴を想定して表示だけから削除しました");};});}
+      Array.prototype.forEach.call(document.querySelectorAll("[data-scenario]"),function(el){el.onclick=function(){state.scenario=el.getAttribute("data-scenario");render();};});Array.prototype.forEach.call(document.querySelectorAll("[data-stars]"),function(el){el.onclick=function(){if(el.getAttribute("data-stars")==="large"){state.spendable=12345;state.lifetime=98765;}else{state.spendable=3;state.lifetime=8;}render();};});Array.prototype.forEach.call(document.querySelectorAll("[data-count]"),function(el){el.onclick=function(){state.count=Number(el.getAttribute("data-count"));render();};});
+      document.getElementById("reload-day").onclick=function(){var before=JSON.stringify(selected().map(function(j){return j.id;}));render();message("同日選択を維持: "+before);};document.getElementById("next-day").onclick=function(){var day=Number(state.date.slice(-2))+1;state.date="2026-07-"+(day<10?"0":"")+day;render();message("日付を進めました");};document.getElementById("add-custom").onclick=function(){var input=document.getElementById("custom-name"),name=input.value.replace(/^\s+|\s+$/g,"").slice(0,20);if(!name){message("名前を入力してください");return;}if(state.custom.length>=20){message("20件までです");return;}var id="custom_job_preview_"+(state.custom.length+1);state.custom.push({id:id,name:name,description:"家庭で決めた おしごと",icon:"★",custom:true});state.order.push(id);state.enabled.push(id);input.value="";render();message("オリジナルを追加しました");};document.getElementById("reset-standard").onclick=function(){state.count=official.length;state.enabled=official.map(function(j){return j.id;}).concat(state.custom.map(function(j){return j.id;}));state.order=official.map(function(j){return j.id;}).concat(state.custom.map(function(j){return j.id;}));state.selections={};render();message("標準設定へ戻しました（オリジナルは維持）");};document.getElementById("normalize-invalid").onclick=function(){state.count=10;state.enabled=[official[0].id];state.order=official.map(function(j){return j.id;});state.custom=[];state.selections={};render();message("不正値を安全な範囲へ補正しました");};render();
+    })();
+  </script>
+</body>
+</html>

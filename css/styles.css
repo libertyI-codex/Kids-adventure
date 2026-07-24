@@ -1,24 +1,37 @@
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --bg: #f5fbf2;
-  --panel: #ffffff;
+  --color-bg: #f6fbf5;
+  --color-card: #ffffff;
+  --color-primary: #4f9f54;
+  --color-primary-soft: #eaf7e7;
+  --color-accent: #f7c948;
+  --color-text: #24312b;
+  --color-muted: #657368;
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --shadow-card: 0 8px 22px rgba(40, 70, 45, 0.1);
+  --shadow-soft: 0 4px 12px rgba(40, 70, 45, 0.08);
+  --bg: var(--color-bg);
+  --panel: var(--color-card);
   --panel-strong: #fff7d8;
-  --ink: #24312b;
-  --muted: #657368;
-  --leaf: #4f9f54;
+  --ink: var(--color-text);
+  --muted: var(--color-muted);
+  --leaf: var(--color-primary);
   --leaf-dark: #2f7837;
   --sky: #85c9f7;
   --water: #7bcfe4;
   --flower: #ef6fa6;
-  --sun: #f7c948;
+  --sun: var(--color-accent);
   --danger: #b84b4b;
   --line: #d7e6d5;
-  --shadow: 0 10px 28px rgba(40, 70, 45, 0.14);
+  --shadow: var(--shadow-card);
   --radius: 12px;
-  --radius-panel: 18px;
-  --radius-card: 14px;
-  --radius-button: 12px;
+  --radius-panel: 20px;
+  --radius-card: 16px;
+  --radius-button: 14px;
   --radius-input: 10px;
   --radius-modal: 18px;
   --radius-nav: 12px;
@@ -37,11 +50,12 @@ body {
 
 body {
   background:
-    linear-gradient(180deg, #dff4ff 0%, #f5fbf2 34%, #f8fff4 100%);
+    linear-gradient(180deg, #e8f7ff 0%, var(--color-bg) 30%, #fbfff9 100%);
   color: var(--ink);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
   overflow-x: hidden;
+  scroll-padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 24px);
 }
 
 body.startup-active {
@@ -206,7 +220,7 @@ button {
 
 .app-shell {
   min-height: 100vh;
-  padding: calc(12px + var(--safe-top)) 14px calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  padding: calc(12px + var(--safe-top)) 14px calc(var(--nav-height) + var(--safe-bottom) + 24px);
 }
 
 .screen {
@@ -291,12 +305,12 @@ h3 {
 .panel {
   border: 1px solid var(--line);
   border-radius: var(--radius-panel);
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: var(--shadow);
+  background: var(--color-card);
+  box-shadow: var(--shadow-card);
 }
 
 .panel-pad {
-  padding: 16px;
+  padding: var(--space-md);
 }
 
 .home-stats {
@@ -343,8 +357,8 @@ h3 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 48px;
-  padding: 10px 14px;
+  min-height: 52px;
+  padding: 11px 16px;
   border: 2px solid transparent;
   border-radius: var(--radius-button);
   background: #fff;
@@ -352,16 +366,35 @@ h3 {
   font-weight: 900;
   text-decoration: none;
   cursor: pointer;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease, border-color 0.14s ease;
 }
 
 .btn:disabled {
   cursor: not-allowed;
-  opacity: 0.58;
+  opacity: 0.62;
+  box-shadow: none;
+}
+
+.btn:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.btn:focus-visible,
+.nav-btn:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(47, 120, 55, 0.3);
+  outline-offset: 2px;
 }
 
 .btn-primary {
   background: var(--leaf);
   color: #fff;
+  box-shadow: 0 5px 12px rgba(47, 120, 55, 0.2);
 }
 
 .btn-sun {
@@ -381,8 +414,8 @@ h3 {
 }
 
 .btn-small {
-  min-height: 40px;
-  padding: 8px 10px;
+  min-height: 48px;
+  padding: 9px 11px;
   font-size: 0.92rem;
 }
 
@@ -884,7 +917,7 @@ h3 {
 }
 
 .parent-job-controls .btn-small {
-  min-height: 44px;
+  min-height: 48px;
 }
 
 .job-enabled-control {
@@ -892,7 +925,7 @@ h3 {
   grid-column: 1 / -1;
   gap: 8px;
   align-items: center;
-  min-height: 44px;
+  min-height: 48px;
   padding: 7px 10px;
   border-radius: 8px;
   background: #f5f8f2;
@@ -1056,7 +1089,7 @@ h3 {
 
 .swatch {
   position: relative;
-  min-height: 46px;
+  min-height: 48px;
   overflow: hidden;
   border: 3px solid #fff;
   border-radius: 10px 4px 4px 10px;
@@ -1414,7 +1447,7 @@ h3 {
 .field select,
 .field textarea {
   width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   padding: 9px 10px;
   border: 1px solid #c8d7cb;
   border-radius: var(--radius-input);
@@ -1525,7 +1558,7 @@ h3 {
 }
 
 .compact-field input {
-  min-height: 42px;
+  min-height: 48px;
   text-align: center;
   font-weight: 900;
 }
@@ -1545,8 +1578,8 @@ h3 {
 
 .coloring-order-controls .btn,
 .coloring-star-controls .btn {
-  min-width: 42px;
-  min-height: 42px;
+  min-width: 48px;
+  min-height: 48px;
   white-space: nowrap;
 }
 
@@ -2431,6 +2464,398 @@ h3 {
   75% { transform: translate(calc(-50% - 3px), calc(-50% - 5px)) scale(var(--scale, 1)) rotate(-1deg); }
 }
 
+/* Ver.1.0 prototype 23: shared visual language and home priorities. */
+.section-heading {
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.section-heading h2,
+.screen-header h2 {
+  margin-bottom: 2px;
+  line-height: 1.25;
+}
+
+.task-card,
+.coloring-card,
+.art-card,
+.companion-card,
+.world-card,
+.move-art-card,
+.kitchen-card,
+.ingredient-choice,
+.bird-house-item-choice,
+.bird-house-catalog-card,
+.outing-companion-choice,
+.outing-destination-choice,
+.parent-row {
+  border-radius: var(--radius-card);
+  background: var(--color-card);
+  box-shadow: var(--shadow-soft);
+}
+
+.home-flow {
+  gap: var(--space-md);
+}
+
+.home-hero {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: var(--space-md);
+  align-items: center;
+  min-height: 168px;
+  padding: 18px;
+  border: 1px solid #cfe7c9;
+  border-radius: var(--radius-panel);
+  background: #f0faed;
+  box-shadow: var(--shadow-card);
+}
+
+.home-hero-art {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
+  border: 1px solid #dbeed6;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.home-hero-art .companion-svg,
+.home-hero-art .egg-svg {
+  width: 108px;
+  max-height: 112px;
+  overflow: visible;
+}
+
+.home-hero-placeholder {
+  color: var(--sun);
+  font-size: 3.4rem;
+  line-height: 1;
+}
+
+.home-hero-copy {
+  min-width: 0;
+}
+
+.home-hero-copy h2 {
+  margin-bottom: 6px;
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.home-hero-message {
+  margin-bottom: 12px;
+  color: #36543a;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.home-hero-action {
+  width: 100%;
+}
+
+.home-star-mini {
+  min-height: 58px;
+  border-radius: var(--radius-card);
+  background: #fffbee;
+  box-shadow: var(--shadow-soft);
+}
+
+.home-adventure-card {
+  border-color: #d8e8d5;
+}
+
+.home-adventure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.home-adventure-item {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
+  min-width: 0;
+  min-height: 62px;
+  padding: 9px 10px;
+  border: 1px solid #dce7da;
+  border-radius: 12px;
+  background: #f8faf7;
+}
+
+.home-adventure-item:last-child {
+  grid-column: 1 / -1;
+}
+
+.home-adventure-item.is-done {
+  border-color: #b8d9b2;
+  background: var(--color-primary-soft);
+}
+
+.home-adventure-item.is-alert {
+  border-color: #ead271;
+  background: #fff7d8;
+}
+
+.home-adventure-mark {
+  color: var(--muted);
+  font-size: 1.18rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.home-adventure-item.is-done .home-adventure-mark {
+  color: var(--leaf-dark);
+}
+
+.home-adventure-item strong,
+.home-adventure-item small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.home-adventure-item small {
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.home-support-stack {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.home-quick-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.home-world-peek {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: #fff;
+  box-shadow: var(--shadow-soft);
+}
+
+.home-world-peek .preview-wrap {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.companion-status-card {
+  background: #f8fff6;
+}
+
+.companion-status-list li {
+  min-height: 52px;
+  border: 1px solid #e5eee3;
+  border-radius: 12px;
+}
+
+.companion-art,
+.companion-home-art,
+.outing-companion-choice > span,
+.kitchen-feed-grid .companion-art {
+  border-radius: 50%;
+  background: #f1f9ef;
+}
+
+.companion-art {
+  width: 118px;
+  min-height: 118px;
+  margin: 0 auto;
+}
+
+.companion-home-card {
+  gap: var(--space-md);
+  margin-top: 0;
+}
+
+.companion-home-card .quick-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.companion-home-art {
+  display: grid;
+  place-items: center;
+  width: 108px;
+  height: 108px;
+}
+
+.companion-home-art .companion-svg {
+  width: 98px;
+}
+
+.egg-big {
+  border-radius: var(--radius-card);
+  background: #fffdf5;
+}
+
+.egg-big .egg-svg {
+  max-height: 250px;
+}
+
+.task-card,
+.coloring-card,
+.art-card {
+  padding: var(--space-md);
+}
+
+.task-card.is-done {
+  border-color: #a9d4a0;
+  background: var(--color-primary-soft);
+}
+
+.task-actions .btn,
+.coloring-card .btn,
+.art-card .btn {
+  width: 100%;
+}
+
+.kitchen-card,
+.ingredient-choice {
+  padding: 14px;
+  background: #fff;
+}
+
+.kitchen-card .kitchen-icon,
+.ingredient-choice .ingredient-art {
+  border-radius: 18px;
+  background: #fffaf0;
+}
+
+.kitchen-work-area {
+  border-radius: var(--radius-panel);
+  background: #fffdf5;
+}
+
+.kitchen-complete-panel {
+  border-color: #ead271;
+  background: #fffdf3;
+}
+
+.bird-house-room {
+  border-radius: var(--radius-panel);
+  background: linear-gradient(180deg, #fff9df 0%, #fffef7 52%, #dfbd83 53%, #cfa269 100%);
+  box-shadow: var(--shadow-card);
+}
+
+.bird-house-room.is-decorating {
+  border-color: #e6ad35;
+  box-shadow: 0 0 0 4px rgba(247, 201, 72, 0.18), var(--shadow-card);
+}
+
+.bird-house-room.is-decorating .bird-house-slot-layer {
+  background: rgba(255, 250, 225, 0.12);
+}
+
+.bird-house-bird {
+  min-width: 96px;
+  min-height: 96px;
+}
+
+.bird-house-bird:focus-visible {
+  outline: 3px solid rgba(47, 120, 55, 0.36);
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+.bird-house-new {
+  position: relative;
+  border-color: #ead271;
+  background: #fffbee;
+}
+
+.bird-house-new::before {
+  content: "NEW";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e85d87;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 900;
+  animation: uiNewPulse 1.8s ease-in-out infinite;
+}
+
+.outing-home-card {
+  border-color: #c9e6ef;
+  background: #f4fbfe;
+}
+
+.outing-home-card .quick-actions {
+  grid-template-columns: minmax(180px, 320px);
+}
+
+.outing-prep-mini span,
+.outing-prep-list p,
+.outing-history-list article {
+  border-radius: 12px;
+  background: #fff;
+}
+
+.outing-companion-choice,
+.outing-destination-choice {
+  min-height: 184px;
+  padding: 12px;
+}
+
+.outing-companion-choice.is-selected,
+.outing-destination-choice.is-selected,
+.ingredient-choice.is-selected,
+.bird-house-item-choice.is-selected {
+  border-color: #d99a22;
+  background: #fff8dd;
+  box-shadow: 0 0 0 3px rgba(217, 154, 34, 0.14);
+}
+
+.outing-confirm,
+.outing-active,
+.outing-claim-result {
+  border-color: #c9e6ef;
+  background: #f8fdff;
+}
+
+.empty-world-message,
+.companion-card.is-locked {
+  border-style: dashed;
+  background: #fafbf8;
+  color: var(--muted);
+}
+
+.parent-screen {
+  gap: var(--space-md);
+}
+
+.parent-screen .panel {
+  border-color: #d9e1d8;
+  box-shadow: var(--shadow-soft);
+}
+
+.parent-screen .panel h2,
+.parent-screen .panel h3 {
+  line-height: 1.3;
+}
+
+.parent-row,
+.parent-job-row,
+.parent-coloring-row {
+  background: #fff;
+}
+
+@keyframes uiNewPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
 @media (min-width: 720px) {
   .hero {
     grid-template-columns: 1fr 1fr;
@@ -2459,6 +2884,42 @@ h3 {
   .app-shell {
     padding-right: 10px;
     padding-left: 10px;
+  }
+
+  .home-hero {
+    grid-template-columns: 102px minmax(0, 1fr);
+    gap: 12px;
+    min-height: 154px;
+    padding: 14px;
+  }
+
+  .home-hero-art {
+    width: 102px;
+    height: 102px;
+  }
+
+  .home-hero-art .companion-svg,
+  .home-hero-art .egg-svg {
+    width: 92px;
+    max-height: 96px;
+  }
+
+  .home-hero-copy h2 {
+    font-size: 1.18rem;
+  }
+
+  .home-hero-message {
+    font-size: 0.92rem;
+  }
+
+  .home-adventure-card .section-heading {
+    align-items: flex-start;
+  }
+
+  .companion-home-card {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
   }
 
   .home-stats {

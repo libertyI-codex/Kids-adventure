@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>とりのおうち プレビュー</title>
+  <style>
+    :root { --ink:#263228; --muted:#657064; --line:#cfe5bf; --panel:#fffdf6; --accent:#7acb77; }
+    body { margin:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:#f5f7de; color:var(--ink); }
+    main { width:min(1120px, 100%); margin:0 auto; padding:18px max(12px, env(safe-area-inset-left)) 34px; box-sizing:border-box; }
+    h1, h2, h3 { margin:0 0 8px; }
+    p { margin:6px 0; }
+    button { min-height:48px; border:0; border-radius:8px; padding:10px 12px; font-weight:800; background:var(--accent); color:#123019; cursor:pointer; }
+    button.secondary { background:#fff3bf; }
+    .panel { border:2px solid var(--line); background:var(--panel); border-radius:8px; padding:12px; box-shadow:0 8px 18px rgba(64,80,50,.08); margin:12px 0; }
+    .actions, .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+    .narrow { max-width:390px; margin:0 auto; border-left:1px dashed #cbd5bd; border-right:1px dashed #cbd5bd; }
+    .room { position:relative; min-height:460px; overflow:hidden; border-radius:8px; background:linear-gradient(180deg,#fff7d6 0%,#fffdf4 52%,#d8b579 53%,#c9985b 100%); }
+    .window { position:absolute; top:9%; left:43%; width:14%; aspect-ratio:1; border-radius:999px; border:6px solid #f5d189; background:#bfdbfe; }
+    .furniture, .bird, .slot { position:absolute; transform:translate(-50%,-50%); }
+    .furniture { width:82px; height:82px; pointer-events:none; }
+    .bird { width:96px; height:96px; border:0; padding:0; background:transparent; }
+    .bird svg, .furniture svg { width:100%; height:100%; overflow:visible; }
+    .slot { min-width:76px; border:2px dashed #f59e0b; border-radius:8px; padding:5px; background:rgba(255,247,214,.9); font-size:.75rem; }
+    .card { text-align:center; border:2px solid var(--line); border-radius:8px; padding:10px; background:#fff; }
+    .art { width:86px; height:86px; margin:0 auto 6px; }
+    .art svg { width:100%; height:100%; overflow:visible; }
+    .muted { color:var(--muted); }
+    .badge { display:inline-block; border-radius:999px; padding:4px 8px; background:#eef8e8; font-weight:800; }
+    @media (max-width:420px) { .grid { grid-template-columns:1fr 1fr; } .actions { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>とりのおうち プレビュー</h1>
+    <p class="muted">本番localStorageは使用しません。鳥0/1/3/6、孔雀、家具12種、配置枠8か所、模様替え、家具図鑑を確認します。</p>
+    <section class="panel actions">
+      <button data-state="0">鳥0種類</button>
+      <button data-state="1">鳥1種類</button>
+      <button data-state="3">鳥3種類</button>
+      <button data-state="6">鳥6種類</button>
+      <button data-favorite>お気に入り切替</button>
+      <button data-unlock>家具条件達成</button>
+    </section>
+    <section class="panel narrow">
+      <h2>390px相当</h2>
+      <div id="preview"></div>
+    </section>
+    <section class="panel">
+      <h2>家具12種類 / かぐずかん</h2>
+      <div id="catalog" class="grid"></div>
+    </section>
+  </main>
+  <script src="../js/date-utils.js"></script>
+  <script src="../js/companions.js"></script>
+  <script src="../js/kitchen.js"></script>
+  <script src="../js/bird-house.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var KA = window.KodomoAdventure;
+      var count = 3;
+      var favorite = true;
+      var unlockedBonus = false;
+      var placements = KA.birdHouse.defaultBirdHouse().placements;
+      function esc(value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[ch];
+        });
+      }
+      function data() {
+        var species = KA.companions.allSpecies().slice(0, count);
+        if (count >= 4 && !species.some(function (item) { return item.id === "companion_peacock"; })) {
+          species[species.length - 1] = KA.companions.getSpecies("companion_peacock");
+        }
+        var kitchenStats = unlockedBonus ? {
+          recipe_fruit_salad: { cookCount: 2 },
+          recipe_ramen: { cookCount: 4 },
+          recipe_cake: { cookCount: 4 }
+        } : {};
+        return {
+          companions: species.map(function (item, index) {
+            return {
+              id: item.id,
+              speciesId: item.id,
+              hatchCount: unlockedBonus ? 2 : 1,
+              bondLevel: unlockedBonus && index === 0 ? 5 : 2,
+              isFavorite: favorite && index === 0,
+              mealCount: unlockedBonus ? 5 : index,
+              bondMealProgress: index % 3,
+              lastBondMealDate: null,
+              lastFedAt: index === 0 ? KA.date.localIsoString() : null
+            };
+          }),
+          kitchen: { recipeStats: kitchenStats },
+          artworks: unlockedBonus ? [{ artworkId: "a1" }, { artworkId: "a2" }, { artworkId: "a3" }] : [],
+          birdHouse: {
+            unlockedItemIds: KA.birdHouse.initialItemIds.slice(),
+            unlockedAtByItemId: {},
+            unseenItemIds: unlockedBonus ? ["house_table_wood", "house_bell_toy"] : [],
+            placements: JSON.parse(JSON.stringify(placements)),
+            lastVisitedAt: null,
+            lastInteractedCompanionId: null
+          }
+        };
+      }
+      function renderRoom(appData) {
+        KA.birdHouse.ensureBirdHouse(appData);
+        var house = appData.birdHouse;
+        var birds = KA.birdHouse.companionLayout(appData);
+        return [
+          '<div class="room"><div class="window"></div>',
+          KA.birdHouse.allSlots().map(function (slot) {
+            var itemId = house.placements[slot.id];
+            return itemId ? '<div class="furniture" style="left:' + slot.x + '%;top:' + slot.y + '%">' + KA.birdHouse.renderFurniture(itemId) + '</div>' : '';
+          }).join(""),
+          birds.map(function (entry) {
+            return '<button class="bird" data-bird="' + esc(entry.species.id) + '" style="left:' + entry.x + '%;top:' + entry.y + '%;width:' + Math.round(96 * entry.scale) + 'px;height:' + Math.round(96 * entry.scale) + 'px">' + KA.companions.renderCompanion(entry.species.id) + '</button>';
+          }).join(""),
+          birds.length && birds.length < 6 ? '<p class="badge" style="position:absolute;left:10px;top:10px">まだ だれかが くるかも？</p>' : '',
+          '<div>',
+          KA.birdHouse.allSlots().map(function (slot) {
+            return '<button class="slot" data-slot="' + esc(slot.id) + '" style="left:' + slot.x + '%;top:' + slot.y + '%">' + esc(slot.name) + '</button>';
+          }).join(""),
+          '</div></div>'
+        ].join("");
+      }
+      function render() {
+        var appData = data();
+        KA.birdHouse.ensureBirdHouse(appData);
+        document.getElementById("preview").innerHTML = count ? renderRoom(appData) + '<p class="muted">鳥をタップすると、首かしげ・ジャンプ・羽ばたき・眠る・ハートの反応を想定。</p>' : '<p>たまごから なかまが うまれたら<br>おうちで いっしょに あそべるよ！</p>';
+        document.getElementById("catalog").innerHTML = KA.birdHouse.allItems().map(function (item) {
+          var unlocked = appData.birdHouse.unlockedItemIds.indexOf(item.id) >= 0;
+          var progress = KA.birdHouse.conditionProgress(item, KA.birdHouse.getBirdHouseMetrics(appData));
+          return '<article class="card"><div class="art">' + KA.birdHouse.renderFurniture(item.id, { silhouette: !unlocked }) + '</div><h3>' + esc(item.name) + '</h3><p class="muted">' + esc(item.description) + '</p><p>' + (unlocked ? '<span class="badge">取得済み</span>' : esc(progress.label) + '<br>' + progress.current + '/' + progress.target) + '</p></article>';
+        }).join("");
+        Array.prototype.forEach.call(document.querySelectorAll("[data-slot]"), function (button) {
+          button.addEventListener("click", function () {
+            var slotId = button.getAttribute("data-slot");
+            var candidates = KA.birdHouse.compatibleUnlockedItems(slotId, appData);
+            var item = candidates[0];
+            Object.keys(placements).forEach(function (key) { if (item && placements[key] === item.id) placements[key] = null; });
+            placements[slotId] = item ? item.id : null;
+            render();
+          });
+        });
+        Array.prototype.forEach.call(document.querySelectorAll("[data-bird]"), function (button) {
+          button.addEventListener("click", function () {
+            button.insertAdjacentHTML("beforeend", '<span style="position:absolute;right:0;top:0;color:#f43f5e;font-size:24px">♥</span>');
+          });
+        });
+      }
+      Array.prototype.forEach.call(document.querySelectorAll("[data-state]"), function (button) {
+        button.addEventListener("click", function () { count = Number(button.getAttribute("data-state")); render(); });
+      });
+      document.querySelector("[data-favorite]").addEventListener("click", function () { favorite = !favorite; render(); });
+      document.querySelector("[data-unlock]").addEventListener("click", function () { unlockedBonus = !unlockedBonus; render(); });
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>起動復旧プレビュー - こどもの冒険</title>
+  <style>
+    :root {
+      --ink: #26322e;
+      --muted: #65736d;
+      --line: #dce7df;
+      --panel: #fffdf8;
+      --accent: #4f9f54;
+      --warn: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #e4f6ff, #fff9df 46%, #f0f8ed);
+      overflow-x: hidden;
+    }
+    main {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0 44px;
+    }
+    h1 { margin: 0 0 8px; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+    h2 { margin: 0 0 8px; font-size: 1.1rem; }
+    p { line-height: 1.65; }
+    button {
+      min-height: 44px;
+      border: 1px solid #d2c38b;
+      background: #fff4c6;
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 900;
+      cursor: pointer;
+      word-break: keep-all;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      padding: 14px;
+      box-shadow: 0 8px 20px rgba(67, 84, 76, 0.12);
+    }
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .scenario {
+      position: relative;
+      min-height: 340px;
+      overflow: hidden;
+      border: 1px solid #d5e5da;
+      border-radius: 16px;
+      background: #f8fff8;
+    }
+    .app-body {
+      min-height: 340px;
+      padding: 16px;
+      background: linear-gradient(180deg, #e9f7ff, #fffdf6);
+    }
+    .app-body[hidden],
+    .app-body.is-inert,
+    .app-body.is-pointer-blocked {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .demo-splash {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, #dff4ff, #fff7d8 54%, #f5fbf2);
+      z-index: 2;
+      transition: opacity .32s ease, visibility .32s ease;
+    }
+    .demo-splash.is-hiding {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .demo-icon {
+      width: min(74%, 220px);
+      aspect-ratio: 1;
+      object-fit: contain;
+      display: block;
+    }
+    .recovery-root {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: none;
+      padding: 16px;
+      overflow-y: auto;
+      background: linear-gradient(160deg, #e2f6ff, #fff8dc 58%, #f3fbef);
+      pointer-events: auto;
+    }
+    .recovery-root.is-visible { display: block; }
+    .recovery-panel {
+      width: min(100%, 420px);
+      margin: 8px auto;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .97);
+      box-shadow: 0 10px 24px rgba(67, 84, 76, .15);
+    }
+    .recovery-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .recovery-actions button {
+      width: 100%;
+      min-height: 56px;
+      white-space: normal;
+    }
+    .status {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-top: 8px;
+      white-space: pre-wrap;
+    }
+    .ok { color: #267349; font-weight: 900; }
+    .ng { color: #a14343; font-weight: 900; }
+    .narrow {
+      width: min(390px, 100%);
+      margin: 18px auto 0;
+      border: 1px dashed #9bb4a7;
+      border-radius: 16px;
+      padding: 10px;
+      background: #ffffff9e;
+    }
+    body.preview-locked {
+      overflow: hidden;
+      pointer-events: none;
+    }
+    body.preview-locked .recovery-root,
+    body.preview-locked .recovery-root * {
+      pointer-events: auto;
+    }
+    @media (max-width: 520px) {
+      .actions { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .demo-splash { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>起動復旧プレビュー</h1>
+    <p>boot層の復旧画面、3つのボタン、safeStart、起動ロック解除を確認します。本番localStorageは使わず、ページ内メモリだけで動作します。</p>
+    <div class="grid" id="scenario-root"></div>
+    <section class="narrow">
+      <strong>390px相当</strong>
+      <div class="scenario" id="narrow-demo"></div>
+      <p class="status" id="narrow-status">390pxでボタンが自然に収まるか確認します。</p>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+      var memoryDiagnostics = [];
+      var scenarios = [
+        { id: "normal", title: "通常起動", mode: "ok", code: "" },
+        { id: "inert", title: "app rootがinert", mode: "error", code: "INIT-STATE-001", inert: true },
+        { id: "body-lock", title: "bodyがstartup locked", mode: "error", code: "INIT-UNKNOWN-001", bodyLock: true },
+        { id: "pointer-lock", title: "pointer-events制限あり", mode: "error", code: "INIT-UNKNOWN-001", pointerLock: true },
+        { id: "ka-missing", title: "KA未定義", mode: "error", code: "INIT-UNKNOWN-001" },
+        { id: "state-throw", title: "state.initでthrow", mode: "error", code: "INIT-STATE-001" },
+        { id: "companions-throw", title: "companions初期化でthrow", mode: "error", code: "INIT-COMPANIONS-001" },
+        { id: "eggs-throw", title: "eggs初期化でthrow", mode: "error", code: "INIT-EGGS-001" },
+        { id: "render-throw", title: "first renderでthrow", mode: "error", code: "INIT-RENDER-001" },
+        { id: "rejection", title: "unhandled rejection", mode: "error", code: "INIT-UNKNOWN-001" },
+        { id: "safe", title: "safeStartモード", mode: "safe", code: "" },
+        { id: "double", title: "復旧ボタン連続タップ", mode: "error", code: "INIT-EVENTS-001", doubleTap: true }
+      ];
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function (char) {
+          return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char];
+        });
+      }
+
+      function demoMarkup(id) {
+        return [
+          '<div class="app-body" id="app-' + id + '">',
+          '<div class="card"><h2>ホーム</h2><p>ここがアプリ本体です。</p><button type="button">ためす</button></div>',
+          '</div>',
+          '<div class="demo-splash" id="splash-' + id + '">',
+          '<div><img class="demo-icon" src="../apple-touch-icon.png?v=10p12h2" alt="結羽のぼうけん"><p>じゅんびしているよ</p></div>',
+          '</div>',
+          '<div class="recovery-root" id="recovery-' + id + '"></div>'
+        ].join("");
+      }
+
+      function diagnostic(id, code, message) {
+        var item = {
+          occurredAt: new Date().toISOString(),
+          stage: code || "INIT-UNKNOWN-001",
+          errorCode: code || "INIT-UNKNOWN-001",
+          message: message || "preview error",
+          filename: "startup-recovery-preview.html",
+          lineNumber: 0,
+          stack: "preview stack"
+        };
+        memoryDiagnostics.unshift(item);
+        memoryDiagnostics = memoryDiagnostics.slice(0, 5);
+        return item;
+      }
+
+      function unlock(id) {
+        var app = document.getElementById("app-" + id);
+        document.body.classList.remove("preview-locked");
+        if (!app) return;
+        app.hidden = false;
+        app.removeAttribute("hidden");
+        app.removeAttribute("inert");
+        app.inert = false;
+        app.removeAttribute("aria-hidden");
+        app.classList.remove("is-inert", "is-pointer-blocked");
+      }
+
+      function hideSplash(id) {
+        var splash = document.getElementById("splash-" + id);
+        if (splash) splash.classList.add("is-hiding");
+      }
+
+      function showRecovery(id, info) {
+        unlock(id);
+        hideSplash(id);
+        var root = document.getElementById("recovery-" + id);
+        if (!root) return;
+        root.classList.add("is-visible");
+        root.innerHTML = [
+          '<section class="recovery-panel">',
+          '<h2>うまく よみこめませんでした</h2>',
+          '<p>データは そのままです。<br>あんぜんモードで ひらくこともできます。</p>',
+          '<p>エラー番号：' + escapeHtml(info.errorCode) + '</p>',
+          '<div class="recovery-actions">',
+          '<button type="button" data-action="reload" data-id="' + id + '">もういちど よみこむ</button>',
+          '<button type="button" data-action="safe" data-id="' + id + '">あんぜんに ホームをひらく</button>',
+          '<button type="button" data-action="copy" data-id="' + id + '">しょうさいを コピー</button>',
+          '</div><p class="status" data-copy-status="' + id + '"></p>',
+          '</section>'
+        ].join("");
+      }
+
+      function renderSafe(id) {
+        unlock(id);
+        hideSplash(id);
+        var app = document.getElementById("app-" + id);
+        if (app) {
+          app.innerHTML = '<div class="card"><h2>ホーム</h2><p>あんぜんモードで ひらいています。</p><p>保存データは削除しません。</p><button type="button">通常起動へ戻る</button></div>';
+        }
+      }
+
+      function runScenario(scenario) {
+        var app = document.getElementById("app-" + scenario.id);
+        var status = document.querySelector('[data-status="' + scenario.id + '"]');
+        if (scenario.bodyLock || scenario.pointerLock) document.body.classList.add("preview-locked");
+        if (scenario.inert && app) {
+          app.setAttribute("inert", "");
+          app.inert = true;
+          app.classList.add("is-inert");
+        }
+        if (scenario.pointerLock && app) app.classList.add("is-pointer-blocked");
+        window.setTimeout(function () {
+          if (scenario.mode === "ok") {
+            unlock(scenario.id);
+            hideSplash(scenario.id);
+            status.innerHTML = '<span class="ok">通常起動 OK</span>';
+            return;
+          }
+          if (scenario.mode === "safe") {
+            renderSafe(scenario.id);
+            status.innerHTML = '<span class="ok">safeStart OK</span>';
+            return;
+          }
+          var info = diagnostic(scenario.id, scenario.code, scenario.title);
+          showRecovery(scenario.id, info);
+          status.innerHTML = '<span class="ok">復旧画面 OK</span>';
+          if (scenario.doubleTap) {
+            clickRecovery(scenario.id, "copy");
+            clickRecovery(scenario.id, "copy");
+          }
+        }, 260);
+      }
+
+      function clickRecovery(id, action) {
+        var status = document.querySelector('[data-status="' + id + '"]');
+        if (action === "reload") {
+          status.textContent = "reloadボタン: 実行されました";
+        } else if (action === "safe") {
+          renderSafe(id);
+          status.textContent = "safeStartボタン: 実行されました";
+        } else if (action === "copy") {
+          var target = document.querySelector('[data-copy-status="' + id + '"]');
+          if (target) target.textContent = "コピーしました";
+          status.textContent = "copyボタン: 実行されました";
+        }
+      }
+
+      var root = document.getElementById("scenario-root");
+      root.innerHTML = scenarios.map(function (scenario) {
+        return [
+          '<article class="card">',
+          '<h2>' + escapeHtml(scenario.title) + '</h2>',
+          '<div class="actions">',
+          '<button type="button" data-run="' + escapeHtml(scenario.id) + '">実行</button>',
+          '<button type="button" data-click-all="' + escapeHtml(scenario.id) + '">3ボタン確認</button>',
+          '</div>',
+          '<div class="scenario">' + demoMarkup(scenario.id) + '</div>',
+          '<p class="status" data-status="' + escapeHtml(scenario.id) + '">未実行</p>',
+          '</article>'
+        ].join("");
+      }).join("");
+
+      document.getElementById("narrow-demo").innerHTML = demoMarkup("narrow");
+      showRecovery("narrow", diagnostic("narrow", "INIT-RENDER-001", "390px"));
+
+      document.addEventListener("click", function (event) {
+        var runId = event.target.getAttribute("data-run");
+        var clickAllId = event.target.getAttribute("data-click-all");
+        if (runId) {
+          var scenario = scenarios.filter(function (item) { return item.id === runId; })[0];
+          if (!scenario) return;
+          document.querySelector('[data-status="' + runId + '"]').textContent = "実行中";
+          runScenario(scenario);
+          return;
+        }
+        if (clickAllId) {
+          clickRecovery(clickAllId, "reload");
+          clickRecovery(clickAllId, "safe");
+          clickRecovery(clickAllId, "copy");
+          return;
+        }
+        var action = event.target.getAttribute("data-action");
+        var id = event.target.getAttribute("data-id");
+        if (action && id) clickRecovery(id, action);
+      });
+    })();
+  </script>
+</body>
+</html>

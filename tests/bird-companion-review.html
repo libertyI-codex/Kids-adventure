@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>鳥の仲間レビュー - こどもの冒険</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #25312d;
+      --muted: #65736d;
+      --line: #d9e4dc;
+      --paper: #fffdf6;
+      --panel: #ffffff;
+      --accent: #4f9f72;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #e7f6ff 0%, #fff8df 42%, #f5fbef 100%);
+    }
+    main {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+    h1 { margin: 0 0 6px; font-size: clamp(1.5rem, 3vw, 2.2rem); }
+    p { line-height: 1.7; }
+    button {
+      border: 1px solid #b9d8c2;
+      background: #fff;
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(37, 49, 45, 0.08);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 8px 20px rgba(76, 101, 88, 0.12);
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+    }
+    .hide-names .bird-name { visibility: hidden; }
+    .meta {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 6px 10px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    .meta b { color: var(--ink); }
+    .views {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .view {
+      min-height: 132px;
+      display: grid;
+      place-items: center;
+      padding: 8px;
+      border: 1px solid #e7eee8;
+      border-radius: 14px;
+      background: var(--paper);
+    }
+    .view span {
+      align-self: end;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .view svg { width: min(100%, 150px); height: auto; display: block; }
+    .view-small svg { width: 120px; }
+    .view-tiny svg { width: 80px; }
+    .view-card svg { width: 96px; }
+    .view-home svg { width: 64px; }
+    .view-hatch svg { width: 132px; }
+    .view-colored { background: #dff4ff; }
+    .compare-card {
+      grid-column: 1 / -1;
+      border-color: #b7d7c2;
+      background: #fffefa;
+    }
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .compare-panel {
+      border: 1px solid #dce8df;
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+    }
+    .compare-panel h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+    .view-silhouette svg path,
+    .view-silhouette svg circle,
+    .view-silhouette svg ellipse,
+    .view-silhouette svg polygon {
+      fill: #111827 !important;
+      stroke: none !important;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+    @media (max-width: 520px) {
+      header { display: block; }
+      header button { width: 100%; margin-top: 10px; }
+      .views { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>鳥の仲間レビュー</h1>
+        <p>本番採用SVGから、たまごで生まれる11種類の鳥をシルエット、通常配色、120px、80pxで確認します。ひよこは旧外周ありと試作22を背景別に比較できます。</p>
+      </div>
+      <button id="toggle-names" type="button" aria-pressed="false">名前を隠す</button>
+    </header>
+    <section id="review-root" class="grid" aria-live="polite"></section>
+  </main>
+
+  <script src="../js/date-utils.js"></script>
+  <script src="../js/companions.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var KA = window.KodomoAdventure;
+      var root = document.getElementById("review-root");
+      var toggle = document.getElementById("toggle-names");
+      var PEACOCK_V15 = {
+        id: "companion_peacock_v15",
+        name: "くじゃく 試作15相当",
+        designVersion: 2,
+        viewBox: "0 0 210 170",
+        preferredWorldIds: ["world_castle", "world_sky_island", "world_island"],
+        defaultColors: { body: "#2563EB", neck: "#38BDF8", tail: "#22C55E", eye: "#FACC15" },
+        outer: [
+          "M6 124 C8 48 59 4 105 32 C151 4 202 49 204 124 C165 88 129 90 111 119 C92 90 45 88 6 124 Z",
+          "M96 47 C110 38 126 48 128 64 C130 82 119 96 105 96 C90 96 80 83 83 67 C84 58 88 51 96 47 Z"
+        ],
+        regions: [
+          { id: "tail", d: "M6 124 C8 48 59 4 105 32 C151 4 202 49 204 124 C165 88 129 90 111 119 C92 90 45 88 6 124 Z", fill: "#22C55E" },
+          { id: "body", d: "M86 76 C100 62 124 68 132 88 C143 114 122 135 101 131 C78 127 68 102 78 85 C80 81 83 78 86 76 Z", fill: "#2563EB" },
+          { id: "neck", d: "M96 47 C108 40 122 49 123 64 C124 80 113 92 101 91 C88 90 83 77 87 64 C89 56 92 51 96 47 Z", fill: "#38BDF8" },
+          { id: "crest", d: "M99 45 C94 34 96 28 103 22 M108 45 C111 34 116 29 123 27 M103 45 C103 33 108 27 112 21", fill: "none" },
+          { id: "tail_eyes", d: "M36 92 C43 82 57 83 62 94 C56 104 43 104 36 92 Z M68 49 C76 38 91 40 97 52 C90 63 76 62 68 49 Z M103 34 C112 22 128 25 134 38 C127 50 112 48 103 34 Z M139 50 C148 39 163 41 169 54 C162 66 147 64 139 50 Z M169 93 C177 83 191 84 196 96 C190 106 176 105 169 93 Z", fill: "#FACC15" }
+        ],
+        inner: [
+          "M105 32 C101 58 101 88 111 119",
+          "M56 28 C78 60 92 88 104 116",
+          "M154 30 C132 61 119 89 111 119",
+          "M26 92 C56 96 82 103 104 116",
+          "M184 94 C153 97 130 104 113 116",
+          "M82 88 C95 98 116 100 131 90"
+        ],
+        face: '<circle cx="111" cy="61" r="3.5" fill="#1f2937"/><path d="M121 68 L134 72 L121 77 Z" fill="#FACC15"/>'
+      };
+      var PEACOCK_V16 = JSON.parse(JSON.stringify(PEACOCK_V15));
+      PEACOCK_V16.id = "companion_peacock_v16";
+      PEACOCK_V16.name = "くじゃく 試作16相当";
+      PEACOCK_V16.designVersion = 3;
+      PEACOCK_V16.viewBox = "-105 -100 420 260";
+      PEACOCK_V16.peacockTailTransform = "translate(-105 -100) scale(2)";
+      PEACOCK_V16.peacockBodyTransform = "translate(52.5 45) scale(0.5)";
+      PEACOCK_V16.peacockTailScale = 2;
+      PEACOCK_V16.peacockBodyScale = 0.5;
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function countOutline(species) {
+        return (species.outer || []).length;
+      }
+
+      function countInner(species) {
+        return (species.inner || []).length;
+      }
+
+      function renderLegacyPeacock(species, silhouette) {
+        if (silhouette) {
+          return '<svg class="companion-svg companion-silhouette" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">' + species.outer.map(function (d) {
+            return '<path d="' + d + '" fill="#1f2937"/>';
+          }).join("") + '</svg>';
+        }
+        return [
+          '<svg class="companion-svg companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+          '<g class="body-regions">',
+          species.regions.map(function (region) {
+            if (region.fill === "none") {
+              return '<path d="' + region.d + '" fill="none" stroke="#92400E" stroke-width="4" stroke-linecap="round"/>';
+            }
+            return '<path d="' + region.d + '" fill="' + region.fill + '"/>';
+          }).join(""),
+          '</g>',
+          '<g class="outer-outline" fill="none" stroke="#28312d" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">',
+          species.outer.map(function (d) { return '<path d="' + d + '"/>'; }).join(""),
+          '</g>',
+          '<g class="inner-lines" fill="none" stroke="#5b4631" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">',
+          species.inner.map(function (d) { return '<path d="' + d + '"/>'; }).join(""),
+          '</g>',
+          '<g class="face-details">',
+          species.face,
+          '</g>',
+          '</svg>'
+        ].join("");
+      }
+
+      function renderGroupedPeacock(species, silhouette) {
+        var tailRegions = species.regions.filter(function (region) {
+          return region.id === "tail" || region.id === "tail_eyes";
+        });
+        var bodyRegions = species.regions.filter(function (region) {
+          return region.id !== "tail" && region.id !== "tail_eyes";
+        });
+        var tailInner = species.inner.slice(0, 5);
+        var bodyInner = species.inner.slice(5);
+        if (silhouette) {
+          return [
+            '<svg class="companion-svg companion-silhouette companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+            '<g class="peacock-tail-group" transform="' + species.peacockTailTransform + '"><path d="' + species.outer[0] + '" fill="#1f2937"/></g>',
+            '<g class="peacock-body-group" transform="' + species.peacockBodyTransform + '"><path d="' + species.outer[1] + '" fill="#1f2937"/><path d="' + species.regions[1].d + '" fill="#1f2937"/><path d="' + species.regions[2].d + '" fill="#1f2937"/></g>',
+            '</svg>'
+          ].join("");
+        }
+        return [
+          '<svg class="companion-svg companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+          '<g class="body-regions">',
+          '<g class="peacock-tail-group" transform="' + species.peacockTailTransform + '">' + tailRegions.map(function (region) { return '<path d="' + region.d + '" fill="' + region.fill + '"/>'; }).join("") + '</g>',
+          '<g class="peacock-body-group" transform="' + species.peacockBodyTransform + '">' + bodyRegions.map(function (region) { return region.fill === "none" ? '<path d="' + region.d + '" fill="none" stroke="#92400E" stroke-width="4" stroke-linecap="round"/>' : '<path d="' + region.d + '" fill="' + region.fill + '"/>'; }).join("") + '</g>',
+          '</g>',
+          '<g class="outer-outline" fill="none" stroke="#28312d" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"><g class="peacock-tail-group" transform="' + species.peacockTailTransform + '"><path d="' + species.outer[0] + '"/></g><g class="peacock-body-group" transform="' + species.peacockBodyTransform + '"><path d="' + species.outer[1] + '"/></g></g>',
+          '<g class="inner-lines" fill="none" stroke="#5b4631" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g class="peacock-tail-group" transform="' + species.peacockTailTransform + '">' + tailInner.map(function (d) { return '<path d="' + d + '"/>'; }).join("") + '</g><g class="peacock-body-group" transform="' + species.peacockBodyTransform + '">' + bodyInner.map(function (d) { return '<path d="' + d + '"/>'; }).join("") + '</g></g>',
+          '<g class="face-details peacock-body-group" transform="' + species.peacockBodyTransform + '">' + species.face + '</g>',
+          '</svg>'
+        ].join("");
+      }
+
+      function card(species) {
+        if (species.id === "companion_chick") return chickCompareCard(species);
+        if (species.id === "companion_peacock") return peacockCompareCard(species);
+        return [
+          '<article class="card">',
+          '<h2 class="bird-name">' + escapeHtml(species.name) + '</h2>',
+          '<div class="views">',
+          '<div class="view view-silhouette">' + KA.companions.renderCompanion(species.id, { silhouette: true }) + '<span>黒一色</span></div>',
+          '<div class="view">' + KA.companions.renderCompanion(species.id) + '<span>通常配色</span></div>',
+          '<div class="view view-small">' + KA.companions.renderCompanion(species.id) + '<span>120px</span></div>',
+          '<div class="view view-tiny">' + KA.companions.renderCompanion(species.id) + '<span>80px</span></div>',
+          '</div>',
+          '<div class="meta">',
+          '<b>speciesId</b><code>' + escapeHtml(species.id) + '</code>',
+          '<b>designVersion</b><span>' + Number(species.designVersion || 0) + '</span>',
+          '<b>viewBox</b><code>' + escapeHtml(species.viewBox) + '</code>',
+          '<b>outer-outline</b><span>' + countOutline(species) + ' path</span>',
+          '<b>inner-lines</b><span>' + countInner(species) + '</span>',
+          '<b>preferredWorldIds</b><code>' + escapeHtml(species.preferredWorldIds.join(", ")) + '</code>',
+          '</div>',
+          '</article>'
+        ].join("");
+      }
+
+      function renderLegacyChick(species) {
+        return KA.companions.renderCompanion(species.id).replace(
+          '<g class="outer-outline" fill="none" stroke="none"',
+          '<g class="outer-outline" fill="none" stroke="#28312d"'
+        );
+      }
+
+      function chickCompareCard(species) {
+        var current = KA.companions.renderCompanion(species.id);
+        var legacy = renderLegacyChick(species);
+        return [
+          '<article class="card compare-card">',
+          '<h2 class="bird-name">ひよこ</h2>',
+          '<p>黄色い体、表情、くちばし、足、冠羽、内部線はそのままに、全身を包んでいた黒い外周ストロークだけを無効化しています。</p>',
+          '<div class="compare-grid">',
+          '<div class="compare-panel"><h3>修正前相当</h3><div class="views">',
+          '<div class="view">' + legacy + '<span>白系背景</span></div>',
+          '<div class="view view-colored">' + legacy + '<span>色付き背景</span></div>',
+          '<div class="view view-small">' + legacy + '<span>120px</span></div>',
+          '<div class="view view-tiny">' + legacy + '<span>80px</span></div>',
+          '</div></div>',
+          '<div class="compare-panel"><h3>試作22</h3><div class="views">',
+          '<div class="view">' + current + '<span>白系背景</span></div>',
+          '<div class="view view-colored">' + current + '<span>色付き背景</span></div>',
+          '<div class="view view-small">' + current + '<span>120px</span></div>',
+          '<div class="view view-tiny">' + current + '<span>80px</span></div>',
+          '<div class="view view-silhouette">' + KA.companions.renderCompanion(species.id, { silhouette: true }) + '<span>黒一色</span></div>',
+          '</div></div>',
+          '</div>',
+          '<div class="meta">',
+          '<b>speciesId</b><code>' + escapeHtml(species.id) + '</code>',
+          '<b>designVersion</b><span>' + Number(species.designVersion || 0) + '</span>',
+          '<b>viewBox</b><code>' + escapeHtml(species.viewBox) + '</code>',
+          '<b>外周stroke</b><code>' + escapeHtml(species.outlineStroke) + '</code>',
+          '<b>維持</b><span>表情・体・くちばし・足・冠羽・内部線</span>',
+          '</div>',
+          '</article>'
+        ].join("");
+      }
+
+      function peacockViews(label, species, legacy) {
+        var render = legacy ? function (silhouette) { return renderLegacyPeacock(species, silhouette); } : function (silhouette) {
+          if (species.id === "companion_peacock_v16") return renderGroupedPeacock(species, silhouette);
+          return KA.companions.renderCompanion(species.id, silhouette ? { silhouette: true } : {});
+        };
+        return [
+          '<div class="compare-panel">',
+          '<h3>' + escapeHtml(label) + '</h3>',
+          '<div class="views">',
+          '<div class="view view-silhouette">' + render(true) + '<span>黒一色</span></div>',
+          '<div class="view">' + render(false) + '<span>通常カラー</span></div>',
+          '<div class="view view-small">' + render(false) + '<span>120px</span></div>',
+          '<div class="view view-tiny">' + render(false) + '<span>80px</span></div>',
+          '<div class="view view-card">' + render(false) + '<span>図鑑カード相当</span></div>',
+          '<div class="view view-home">' + render(false) + '<span>ホームお気に入り相当</span></div>',
+          '<div class="view view-hatch">' + render(false) + '<span>孵化表示相当</span></div>',
+          '</div>',
+          '<div class="meta">',
+          '<b>designVersion</b><span>' + Number(species.designVersion || 0) + '</span>',
+          '<b>viewBox</b><code>' + escapeHtml(species.viewBox) + '</code>',
+          '<b>尾羽拡大率</b><span>' + (species.peacockTailScale || 1) + 'x</span>',
+          '<b>本体縮小率</b><span>' + (species.peacockBodyScale || 1) + 'x</span>',
+          '</div>',
+          '</div>'
+        ].join("");
+      }
+
+      function peacockCompareCard(species) {
+        return [
+          '<article class="card compare-card">',
+          '<h2 class="bird-name">くじゃく</h2>',
+          '<p>試作15相当、試作16相当、試作17以降の本番版を比較します。試作22では孔雀SVGを変更していません。</p>',
+          '<div class="compare-grid">',
+          peacockViews("試作15相当", PEACOCK_V15, true),
+          peacockViews("試作16相当", PEACOCK_V16, false),
+          peacockViews("試作17以降", species, false),
+          '</div>',
+          '<div class="meta">',
+          '<b>speciesId</b><code>' + escapeHtml(species.id) + '</code>',
+          '<b>outer-outline</b><span>' + countOutline(species) + ' path</span>',
+          '<b>inner-lines</b><span>' + countInner(species) + '</span>',
+          '<b>グループ</b><code>peacock-tail-group / peacock-body-group</code>',
+          '<b>確認</b><span>尾羽約2倍、本体約0.75倍、目玉模様維持、表示切れなし</span>',
+          '</div>',
+          '</article>'
+        ].join("");
+      }
+
+      root.innerHTML = KA.companions.allSpecies().map(card).join("");
+      toggle.addEventListener("click", function () {
+        var pressed = toggle.getAttribute("aria-pressed") === "true";
+        toggle.setAttribute("aria-pressed", String(!pressed));
+        document.body.classList.toggle("hide-names", !pressed);
+        toggle.textContent = pressed ? "名前を隠す" : "名前を表示する";
+      });
+    })();
+  </script>
+</body>
+</html>

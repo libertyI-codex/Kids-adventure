@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>とりさんキッチン プレビュー</title>
+  <style>
+    :root { color-scheme: light; --ink:#263228; --muted:#657064; --line:#cfe5bf; --panel:#fffdf6; --accent:#7acb77; }
+    body { margin:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:#f5f7de; color:var(--ink); }
+    main { width:min(1080px, 100%); margin:0 auto; padding:18px max(12px, env(safe-area-inset-left)) 32px; box-sizing:border-box; }
+    h1, h2, h3 { margin:0 0 8px; }
+    p { margin:6px 0; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
+    .panel, .card { border:2px solid var(--line); background:var(--panel); border-radius:8px; padding:12px; box-shadow:0 8px 18px rgba(64,80,50,.08); }
+    .card { text-align:center; min-width:0; }
+    .svgbox { width:88px; height:88px; margin:0 auto 6px; display:grid; place-items:center; }
+    .svgbox.large { width:150px; height:150px; }
+    svg { width:100%; height:100%; overflow:visible; }
+    button { min-height:48px; border:0; border-radius:8px; padding:10px 12px; font-weight:800; background:var(--accent); color:#123019; cursor:pointer; }
+    button.secondary { background:#fff3bf; }
+    .actions { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:8px; margin-top:10px; }
+    .work { min-height:190px; display:grid; place-items:center; border:2px dashed var(--line); border-radius:8px; background:#fffef8; touch-action:manipulation; user-select:none; }
+    .muted { color:var(--muted); }
+    .badge { display:inline-block; border-radius:999px; padding:4px 8px; background:#eef8e8; font-weight:800; }
+    .notice { background:#fff7d6; color:#684900; }
+    .narrow { max-width:390px; margin:0 auto; border-left:1px dashed #cbd5bd; border-right:1px dashed #cbd5bd; }
+    @media (max-width:420px) { .grid { grid-template-columns:1fr 1fr; } .actions { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>とりさんキッチン プレビュー</h1>
+    <p class="muted">本番localStorageは使用しません。素材17種類、料理10種類、調理操作、食事、図鑑、390px表示を確認します。</p>
+
+    <section class="panel">
+      <h2>素材17種類</h2>
+      <div id="ingredients" class="grid"></div>
+    </section>
+
+    <section class="panel">
+      <h2>料理10種類</h2>
+      <div id="recipes" class="grid"></div>
+    </section>
+
+    <section class="panel narrow">
+      <h2>390px相当 操作テスト</h2>
+      <div id="demo"></div>
+    </section>
+  </main>
+
+  <script src="../js/date-utils.js"></script>
+  <script src="../js/companions.js"></script>
+  <script src="../js/kitchen.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var KA = window.KodomoAdventure;
+      var selectedRecipe = KA.kitchen.getRecipe("recipe_sandwich");
+      var selectedIngredients = [];
+      var stepIndex = 0;
+      var companion = { speciesId: "companion_owl", mealCount: 0, bondMealProgress: 2, bondLevel: 1, lastBondMealDate: "2026-01-01" };
+      function esc(value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[ch];
+        });
+      }
+      function renderIngredients() {
+        document.getElementById("ingredients").innerHTML = KA.kitchen.allIngredients().map(function (ingredient) {
+          return '<article class="card"><div class="svgbox">' + KA.kitchen.renderIngredient(ingredient.id) + '</div><h3>' + esc(ingredient.name) + '</h3><p class="muted">' + esc(ingredient.id) + '</p></article>';
+        }).join("");
+      }
+      function renderRecipes() {
+        document.getElementById("recipes").innerHTML = KA.kitchen.allRecipes().map(function (recipe) {
+          return '<article class="card"><div class="svgbox">' + KA.kitchen.renderRecipeDish(recipe.id) + '</div><h3>' + esc(recipe.name) + '</h3><p class="muted">' + recipe.ingredientIds.map(function (id) { return esc(KA.kitchen.getIngredient(id).name); }).join("、") + '</p></article>';
+        }).join("");
+      }
+      function renderDemo(message) {
+        var missing = selectedRecipe.ingredientIds.filter(function (id) { return selectedIngredients.indexOf(id) < 0; });
+        var step = selectedRecipe.steps[Math.min(stepIndex, selectedRecipe.steps.length - 1)];
+        document.getElementById("demo").innerHTML = [
+          '<div class="card"><div class="svgbox large">' + KA.kitchen.renderRecipeDish(selectedRecipe.id) + '</div><h3>' + esc(selectedRecipe.name) + '</h3><p class="muted">' + (message || "素材を選んで調理を進めます。") + '</p></div>',
+          '<h3>素材選択</h3>',
+          '<div class="grid">',
+          KA.kitchen.allIngredients().map(function (ingredient) {
+            var required = selectedRecipe.ingredientIds.indexOf(ingredient.id) >= 0;
+            var selected = selectedIngredients.indexOf(ingredient.id) >= 0;
+            return '<button class="' + (selected ? "" : "secondary") + '" data-ing="' + esc(ingredient.id) + '">' + esc(ingredient.name) + (required ? " *" : "") + '</button>';
+          }).join(""),
+          '</div>',
+          '<p><span class="badge">' + (selectedRecipe.ingredientIds.length - missing.length) + '/' + selectedRecipe.ingredientIds.length + '</span> ' + (missing.length ? "必要素材がまだあります" : "開始できます") + '</p>',
+          '<div class="work" data-work><div><div class="svgbox large">' + KA.kitchen.renderRecipeDish(selectedRecipe.id) + '</div><p>' + esc(step.instruction) + '</p><p class="muted">工程 ' + Math.min(stepIndex + 1, selectedRecipe.steps.length) + '/' + selectedRecipe.steps.length + '</p></div></div>',
+          '<div class="actions"><button data-step>代替タップで進める</button><button class="secondary" data-finish>readyへ進める</button><button data-feed>ふくろうにあげる</button></div>',
+          '<div class="panel notice"><p>アプリの とりは ふしぎな とりだよ。ほんものの とりに ひとの ごはんを あげないでね。</p></div>',
+          '<h3>メモリ状態</h3><p class="muted">mealCount: ' + companion.mealCount + ' / bondMealProgress: ' + companion.bondMealProgress + ' / bondLevel: ' + companion.bondLevel + '</p>',
+          '<h3>りょうりずかん</h3><div class="grid">' + KA.kitchen.allRecipes().map(function (recipe) {
+            return '<article class="card"><div class="svgbox">' + KA.kitchen.renderRecipeDish(recipe.id, { silhouette: recipe.id !== selectedRecipe.id }) + '</div><p>' + esc(recipe.name) + '</p><p class="muted">' + (recipe.id === selectedRecipe.id && stepIndex >= selectedRecipe.steps.length ? "作成済み" : "まだ つくっていないよ") + '</p></article>';
+          }).join("") + '</div>'
+        ].join("");
+        Array.prototype.forEach.call(document.querySelectorAll("[data-ing]"), function (button) {
+          button.addEventListener("click", function () {
+            var id = button.getAttribute("data-ing");
+            if (selectedRecipe.ingredientIds.indexOf(id) < 0) {
+              renderDemo("このりょうりには つかわないよ");
+              return;
+            }
+            if (selectedIngredients.indexOf(id) >= 0) selectedIngredients = selectedIngredients.filter(function (item) { return item !== id; });
+            else selectedIngredients.push(id);
+            renderDemo();
+          });
+        });
+        document.querySelector("[data-step]").addEventListener("click", function () {
+          if (missing.length) renderDemo("必要素材をそろえると進めるよ");
+          else {
+            stepIndex = Math.min(stepIndex + 1, selectedRecipe.steps.length);
+            renderDemo(stepIndex >= selectedRecipe.steps.length ? "できあがり！" : "いいかんじ！");
+          }
+        });
+        document.querySelector("[data-work]").addEventListener("pointerup", function () {
+          document.querySelector("[data-step]").click();
+        });
+        document.querySelector("[data-finish]").addEventListener("click", function () {
+          selectedIngredients = selectedRecipe.ingredientIds.slice();
+          stepIndex = selectedRecipe.steps.length;
+          renderDemo("料理完成状態です。");
+        });
+        document.querySelector("[data-feed]").addEventListener("click", function () {
+          companion.mealCount += 1;
+          if (companion.lastBondMealDate !== KA.date.localDateKey()) {
+            companion.bondMealProgress += 1;
+            companion.lastBondMealDate = KA.date.localDateKey();
+            if (companion.bondMealProgress >= 3) {
+              companion.bondLevel += 1;
+              companion.bondMealProgress = 0;
+              renderDemo("もっと なかよしに なったよ！");
+              return;
+            }
+          }
+          renderDemo("おいしい！ ごちそうさま！");
+        });
+      }
+      renderIngredients();
+      renderRecipes();
+      renderDemo();
+    })();
+  </script>
+</body>
+</html>

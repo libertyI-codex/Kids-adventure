@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>こどもの冒険 森配置プレビュー</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 18px;
+      background: #f5fbf2;
+      color: #24312b;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; }
+    .tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    button {
+      min-height: 44px;
+      border: 1px solid #cfe0cc;
+      border-radius: 12px;
+      background: #fff;
+      font-weight: 900;
+      padding: 8px 12px;
+      touch-action: manipulation;
+    }
+    .primary { background: #4f9f54; color: #fff; }
+    .stage-frame {
+      width: min(100%, 390px);
+      border: 1px solid #b9dcb7;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .stage {
+      position: relative;
+      width: 100%;
+      height: 520px;
+      overflow: hidden;
+      background: linear-gradient(#bdeeff 0 42%, #91d887 42% 100%);
+      touch-action: auto;
+    }
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 84% 12%, #facc15 0 18px, transparent 19px),
+        linear-gradient(150deg, transparent 0 58%, #5fbf66 59% 100%);
+    }
+    .object {
+      position: absolute;
+      width: 76px;
+      height: 76px;
+      border: 2px dashed rgba(47, 120, 55, 0.72);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.76);
+      transform: translate(-50%, -50%);
+      font-size: 2.2rem;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: none;
+    }
+    .object.is-dragging { cursor: grabbing; box-shadow: 0 10px 22px rgba(30, 70, 40, 0.24); }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      padding: 12px;
+      border: 1px solid #d7e6d5;
+      border-radius: 12px;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>森配置プレビュー</h1>
+    <p>390px相当の森で、割合座標、zIndex、配置確定、取消、自動配置へ戻す動きを確認するテストページです。本番画面からはリンクしません。</p>
+    <div class="tools">
+      <button class="primary" id="save">配置確定</button>
+      <button id="cancel">配置取消</button>
+      <button id="auto">自動配置へ戻す</button>
+      <button id="wide">幅を切り替え</button>
+    </div>
+    <section class="stage-frame" id="frame">
+      <div class="stage" id="stage"></div>
+    </section>
+    <pre id="output"></pre>
+  </main>
+  <script>
+    (function () {
+      "use strict";
+      var stage = document.getElementById("stage");
+      var frame = document.getElementById("frame");
+      var output = document.getElementById("output");
+      var saved = [
+        { id: "sample_butterfly", icon: "🦋", xPercent: 32, yPercent: 34, zIndex: 1, isManual: false },
+        { id: "sample_flower", icon: "🌼", xPercent: 70, yPercent: 72, zIndex: 2, isManual: false },
+        { id: "sample_horse", icon: "🐴", xPercent: 50, yPercent: 62, zIndex: 3, isManual: false }
+      ];
+      var working = JSON.parse(JSON.stringify(saved));
+      var drag = null;
+
+      function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+      function round(value) { return Math.round(value * 10) / 10; }
+      function safePoint(x, y) {
+        return { xPercent: round(clamp(x, 6, 94)), yPercent: round(clamp(y, 12, 90)) };
+      }
+      function render() {
+        stage.innerHTML = working.map(function (item) {
+          return '<button class="object" data-id="' + item.id + '" style="left:' + item.xPercent + '%; top:' + item.yPercent + '%; z-index:' + item.zIndex + '">' + item.icon + '</button>';
+        }).join("");
+        output.textContent = JSON.stringify(working, null, 2);
+        bind();
+      }
+      function find(id) { return working.filter(function (item) { return item.id === id; })[0]; }
+      function bind() {
+        Array.prototype.forEach.call(stage.querySelectorAll(".object"), function (el) {
+          el.addEventListener("pointerdown", function (event) {
+            var item = find(el.getAttribute("data-id"));
+            drag = {
+              id: item.id,
+              startX: event.clientX,
+              startY: event.clientY,
+              startXP: item.xPercent,
+              startYP: item.yPercent,
+              z: Math.max.apply(null, working.map(function (row) { return row.zIndex; })) + 1,
+              moved: false
+            };
+            el.setPointerCapture(event.pointerId);
+            event.preventDefault();
+          });
+          el.addEventListener("pointermove", function (event) {
+            if (!drag || drag.id !== el.getAttribute("data-id")) return;
+            var dx = event.clientX - drag.startX;
+            var dy = event.clientY - drag.startY;
+            if (!drag.moved && Math.sqrt(dx * dx + dy * dy) < 6) return;
+            drag.moved = true;
+            el.classList.add("is-dragging");
+            var rect = stage.getBoundingClientRect();
+            var point = safePoint(drag.startXP + dx / rect.width * 100, drag.startYP + dy / rect.height * 100);
+            var item = find(drag.id);
+            item.xPercent = point.xPercent;
+            item.yPercent = point.yPercent;
+            item.zIndex = drag.z;
+            item.isManual = true;
+            el.style.left = point.xPercent + "%";
+            el.style.top = point.yPercent + "%";
+            el.style.zIndex = drag.z;
+            output.textContent = JSON.stringify(working, null, 2);
+            event.preventDefault();
+          });
+          function end(event) {
+            if (!drag) return;
+            el.classList.remove("is-dragging");
+            drag = null;
+            event.preventDefault();
+          }
+          el.addEventListener("pointerup", end);
+          el.addEventListener("pointercancel", end);
+        });
+      }
+      document.getElementById("save").addEventListener("click", function () {
+        working.sort(function (a, b) { return a.zIndex - b.zIndex; }).forEach(function (item, index) { item.zIndex = index + 1; });
+        saved = JSON.parse(JSON.stringify(working));
+        render();
+      });
+      document.getElementById("cancel").addEventListener("click", function () {
+        working = JSON.parse(JSON.stringify(saved));
+        render();
+      });
+      document.getElementById("auto").addEventListener("click", function () {
+        working = [
+          { id: "sample_butterfly", icon: "🦋", xPercent: 32, yPercent: 34, zIndex: 1, isManual: false },
+          { id: "sample_flower", icon: "🌼", xPercent: 70, yPercent: 72, zIndex: 2, isManual: false },
+          { id: "sample_horse", icon: "🐴", xPercent: 50, yPercent: 62, zIndex: 3, isManual: false }
+        ];
+        render();
+      });
+      document.getElementById("wide").addEventListener("click", function () {
+        frame.style.width = frame.style.width ? "" : "min(100%, 760px)";
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>
