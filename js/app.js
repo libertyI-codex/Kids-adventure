@@ -14,6 +14,7 @@
   var eggCareEffect = null;
   var birdHouseReaction = null;
   var birdHouseTapCooldown = {};
+  var nicknameDialogReturnFocus = null;
   var outingSelection = { companionId: null, destinationId: null, confirming: false };
   var startupState = {
     startupStarted: false,
@@ -296,6 +297,11 @@
     return KA.eggs && KA.eggs.statusLabel ? KA.eggs.statusLabel(state) : "たまご";
   }
 
+  function companionDisplayName(companion) {
+    if (!KA.companions || !KA.companions.getCompanionDisplayName) return "なかま";
+    return KA.companions.getCompanionDisplayName(companion);
+  }
+
   function favoriteCompanionCard() {
     if (!KA.companions || !KA.companions.ensureCompanions) return "";
     var data = KA.state.getAppData();
@@ -317,10 +323,11 @@
     }
     var species = KA.companions.getSpecies(companion.speciesId);
     if (!species) return "";
+    var displayName = companionDisplayName(companion);
     return [
       '<div class="panel panel-pad companion-home-card">',
       '<div class="companion-home-art">' + KA.companions.renderCompanion(species.id) + '</div>',
-      '<div><p class="eyebrow">いっしょに ぼうけん</p><h3>' + escapeHtml(species.name) + '</h3>',
+      '<div><p class="eyebrow">いっしょに ぼうけん</p><h3 class="companion-display-name">' + escapeHtml(displayName) + '</h3>',
       '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span></p>',
       '<div class="quick-actions">' + button("とりのおうちへ" + (house && house.unseenItemIds && house.unseenItemIds.length ? " NEW" : ""), "btn-primary btn-small", 'data-route="bird-house"') + button("ごはんを つくる", "btn-soft btn-small", 'data-route="kitchen"') + '</div></div>',
       '</div>'
@@ -356,7 +363,7 @@
     if (companion) {
       var species = KA.companions.getSpecies(companion.speciesId);
       if (species) {
-        lines.push('<li><strong>なかま</strong><span>' + escapeHtml(species.name) + 'と なかよしレベル' + Number(companion.bondLevel || 1) + '</span></li>');
+        lines.push('<li><strong>なかま</strong><span>' + escapeHtml(companionDisplayName(companion)) + 'と なかよしレベル' + Number(companion.bondLevel || 1) + '</span></li>');
         lines.push('<li><strong>ごはん</strong><span>' + (companion.lastBondMealDate === KA.date.localDateKey() ? 'きょうは ごはんを たべたよ' : 'きょうは まだ ごはんを あげていないよ') + '</span></li>');
       }
     }
@@ -369,8 +376,9 @@
       var tripSpecies = tripCompanion && KA.companions.getSpecies(tripCompanion.speciesId);
       var destination = trip && KA.outings.getDestination(trip.destinationId);
       var prep = KA.outings.preparationStatus(data);
-      if (trip && trip.status === "returned") lines.push('<li><strong>おでかけ</strong><span>' + escapeHtml(tripSpecies ? tripSpecies.name : "なかま") + 'が かえってきたよ！</span></li>');
-      else if (trip && trip.status === "traveling") lines.push('<li><strong>おでかけ</strong><span>' + escapeHtml(tripSpecies ? tripSpecies.name : "なかま") + 'は ' + escapeHtml(destination ? destination.name : "おでかけさき") + 'へ おでかけちゅう！</span></li>');
+      var tripName = tripCompanion ? companionDisplayName(tripCompanion) : (tripSpecies ? tripSpecies.name : "なかま");
+      if (trip && trip.status === "returned") lines.push('<li><strong>おでかけ</strong><span>' + escapeHtml(tripName) + 'が かえってきたよ！</span></li>');
+      else if (trip && trip.status === "traveling") lines.push('<li><strong>おでかけ</strong><span>' + escapeHtml(tripName) + 'は ' + escapeHtml(destination ? destination.name : "おでかけさき") + 'へ おでかけちゅう！</span></li>');
       else if (owned.length && prep.complete) lines.push('<li><strong>おでかけ</strong><span>おでかけの じゅんびが できたよ！</span></li>');
       else if (owned.length) lines.push('<li><strong>おでかけ</strong><span>おでかけまで あと' + (3 - prep.count) + 'つ！</span></li>');
     }
@@ -394,6 +402,7 @@
     var prep = KA.outings.preparationStatus(data);
     var trip = outing.activeTrip;
     var species = trip ? KA.companions.getSpecies(trip.speciesId) : null;
+    var tripCompanion = trip ? KA.companions.getCompanion(data, trip.speciesId) : null;
     var destination = trip ? KA.outings.getDestination(trip.destinationId) : null;
     var departedToday = outing.history.some(function (item) { return item.departedDateKey === KA.date.localDateKey(); });
     var message;
@@ -405,7 +414,7 @@
       message = "おかえり！<br>おみやげが あるよ！";
       action = button("おみやげを うけとる", "btn-primary", 'data-route="outing"');
     } else if (trip) {
-      message = escapeHtml(species ? species.name : "なかま") + "は " + escapeHtml(destination ? destination.name : "おでかけさき") + "へ<br>おでかけしているよ！<br><small>しゅっぱつ: " + escapeHtml(KA.date.formatDisplayDate(trip.departedDateKey)) + "</small>";
+      message = escapeHtml(tripCompanion ? companionDisplayName(tripCompanion) : (species ? species.name : "なかま")) + "は " + escapeHtml(destination ? destination.name : "おでかけさき") + "へ<br>おでかけしているよ！<br><small>しゅっぱつ: " + escapeHtml(KA.date.formatDisplayDate(trip.departedDateKey)) + "</small>";
       action = button("ようすを みる", "btn-soft", 'data-route="outing"');
     } else if (departedToday) {
       message = "きょうの おでかけは おしまい。<br>また あした いこうね！";
@@ -460,13 +469,15 @@
     }) : [];
     var companion = KA.companions && KA.companions.favoriteCompanion ? KA.companions.favoriteCompanion(data) : null;
     companion = companion || owned[0] || null;
-    var tripSpecies = snapshot.trip && KA.companions ? KA.companions.getSpecies(snapshot.trip.speciesId) : null;
+    var tripCompanion = snapshot.trip && KA.companions ? KA.companions.getCompanion(data, snapshot.trip.speciesId) : null;
+    var tripSpecies = tripCompanion && KA.companions ? KA.companions.getSpecies(tripCompanion.speciesId) : null;
     var species = tripSpecies || (companion && KA.companions.getSpecies(companion.speciesId));
+    var featuredCompanion = tripCompanion || companion;
     var egg = KA.eggs && KA.eggs.activeEgg ? KA.eggs.activeEgg(data) : null;
     var art = species && KA.companions
       ? KA.companions.renderCompanion(species.id)
       : (egg && KA.eggs.renderEggSvg ? KA.eggs.renderEggSvg(egg) : '<span class="home-hero-placeholder" aria-hidden="true">★</span>');
-    var artLabel = species ? species.name : (egg ? "たまご" : "これからの なかま");
+    var artLabel = featuredCompanion ? companionDisplayName(featuredCompanion) : (species ? species.name : (egg ? "たまご" : "これからの なかま"));
     var message;
     var actionLabel;
     var actionRoute;
@@ -477,7 +488,7 @@
       actionLabel = "おみやげを うけとる";
       actionRoute = "outing";
     } else if (snapshot.trip && snapshot.trip.status === "traveling") {
-      message = escapeHtml(species ? species.name : "なかま") + "が おでかけを たのしんでいるよ";
+      message = escapeHtml(featuredCompanion ? companionDisplayName(featuredCompanion) : (species ? species.name : "なかま")) + "が おでかけを たのしんでいるよ";
       actionLabel = "ようすを みる";
       actionRoute = "outing";
       actionClass = "btn-soft";
@@ -1388,17 +1399,111 @@
     return '<section class="companion-grid">' + KA.companions.allSpecies().map(function (species) {
       var companion = companionBySpecies[species.id];
       var owned = Boolean(companion && Number(companion.hatchCount || 0) > 0);
+      var displayName = owned ? companionDisplayName(companion) : species.name;
+      var hasNickname = owned && Boolean(companion.nickname);
       return [
         '<article class="companion-card ' + (owned ? "is-owned" : "is-locked") + '">',
         '<div class="companion-art">' + KA.companions.renderCompanion(species.id, { silhouette: !owned }) + '</div>',
-        '<h3>' + escapeHtml(species.name) + '</h3>',
+        '<h3 class="companion-display-name">' + escapeHtml(displayName) + '</h3>',
+        hasNickname ? '<p class="companion-species-name">しゅるい: ' + escapeHtml(species.name) + '</p>' : '',
         owned ? '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span> <span class="badge">' + Number(companion.hatchCount || 1) + 'かい</span></p>' : '<p class="muted">まだ あっていないよ</p>',
         owned ? '<p class="muted">ごはん ' + Number(companion.mealCount || 0) + 'かい / なかよしごはん ' + Number(companion.bondMealProgress || 0) + '/3</p>' : '',
         owned ? '<p class="muted">はじめて: ' + escapeHtml((companion.firstHatchedAt || "").slice(0, 10)) + '<br>さいご: ' + escapeHtml((companion.lastHatchedAt || "").slice(0, 10)) + '</p>' : '',
-        owned ? '<div class="quick-actions">' + button("おうちで あそぶ", "btn-primary btn-small", 'data-house-for-companion="' + escapeHtml(species.id) + '"') + button("ごはんを あげる", "btn-soft btn-small", 'data-kitchen-for-companion="' + escapeHtml(species.id) + '"') + button(companion.isFavorite ? "お気に入りを はずす" : "お気に入り", companion.isFavorite ? "btn-sun btn-small" : "btn-soft btn-small", 'data-favorite-companion="' + escapeHtml(species.id) + '" data-favorite-enabled="' + (companion.isFavorite ? "false" : "true") + '"') + '</div>' : '',
+        owned ? '<div class="quick-actions">' + button(hasNickname ? "ニックネームを かえる" : "ニックネームを つける", "btn-soft btn-small", 'data-edit-companion-nickname="' + escapeHtml(species.id) + '" aria-label="' + escapeHtml(displayName) + 'のニックネームを' + (hasNickname ? '変える' : '付ける') + '"') + button("おうちで あそぶ", "btn-primary btn-small", 'data-house-for-companion="' + escapeHtml(species.id) + '"') + button("ごはんを あげる", "btn-soft btn-small", 'data-kitchen-for-companion="' + escapeHtml(species.id) + '"') + button(companion.isFavorite ? "おきにいりを はずす" : "おきにいり", companion.isFavorite ? "btn-sun btn-small" : "btn-soft btn-small", 'data-favorite-companion="' + escapeHtml(species.id) + '" data-favorite-enabled="' + (companion.isFavorite ? "false" : "true") + '" aria-label="' + escapeHtml(displayName) + 'を' + (companion.isFavorite ? 'おきにいりから外す' : 'おきにいりにする') + '"') + '</div>' : '',
         '</article>'
       ].join("");
     }).join("") + '</section>';
+  }
+
+  function focusCompanionNicknameButton(companionId) {
+    global.setTimeout(function () {
+      var selector = '[data-edit-companion-nickname="' + String(companionId || "").replace(/"/g, '\\"') + '"]';
+      var buttonEl = appEl && appEl.querySelector(selector);
+      if (buttonEl) buttonEl.focus();
+    }, 0);
+  }
+
+  function closeCompanionNicknameDialog(companionId) {
+    var returnFocus = nicknameDialogReturnFocus;
+    nicknameDialogReturnFocus = null;
+    closeDialog();
+    if (returnFocus && document.body.contains(returnFocus)) returnFocus.focus();
+    else focusCompanionNicknameButton(companionId);
+  }
+
+  function openCompanionNicknameDialog(companionId, returnFocus) {
+    var data = KA.state.getAppData();
+    var companion = KA.companions.getCompanion(data, companionId);
+    var species = companion && KA.companions.getSpecies(companion.speciesId);
+    if (!companion || !species || Number(companion.hatchCount || 0) < 1) {
+      toast("まだ ニックネームは つけられないよ");
+      return;
+    }
+    nicknameDialogReturnFocus = returnFocus || null;
+    var inputId = "companion-nickname-input";
+    modalRoot.innerHTML = [
+      '<div class="modal companion-nickname-modal" role="dialog" aria-modal="true" aria-labelledby="companion-nickname-title" aria-describedby="companion-nickname-help">',
+      '<h2 id="companion-nickname-title">このこの ニックネームを<br>つけてあげよう！</h2>',
+      '<div class="companion-nickname-target">',
+      '<div class="companion-nickname-art">' + KA.companions.renderCompanion(species.id) + '</div>',
+      '<p><span class="muted">しゅるい</span><br><strong>' + escapeHtml(species.name) + '</strong></p>',
+      '</div>',
+      '<label class="field" for="' + inputId + '"><span>ニックネーム</span><input id="' + inputId + '" data-companion-nickname-input maxlength="12" autocomplete="off" value="' + escapeHtml(companion.nickname || "") + '" aria-describedby="companion-nickname-help companion-nickname-error"></label>',
+      '<p id="companion-nickname-help" class="field-help"><span data-companion-nickname-count>' + KA.companions.companionNicknameLength(companion.nickname || "") + '</span> / 12もじまで</p>',
+      '<p id="companion-nickname-error" class="field-error" data-companion-nickname-error aria-live="polite"></p>',
+      '<div class="modal-actions companion-nickname-actions">',
+      button("キャンセル", "btn-soft", 'data-cancel-companion-nickname'),
+      companion.nickname ? button("もとの なまえに もどす", "btn-soft", 'data-clear-companion-nickname') : '',
+      button("ほぞんする", "btn-primary", 'data-save-companion-nickname'),
+      '</div>',
+      '</div>'
+    ].join("");
+    var dialog = modalRoot.querySelector(".companion-nickname-modal");
+    var input = modalRoot.querySelector("[data-companion-nickname-input]");
+    var error = modalRoot.querySelector("[data-companion-nickname-error]");
+    var count = modalRoot.querySelector("[data-companion-nickname-count]");
+    function closeEditor() {
+      closeCompanionNicknameDialog(companionId);
+    }
+    modalRoot.querySelector("[data-cancel-companion-nickname]").addEventListener("click", closeEditor);
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeEditor();
+      }
+    });
+    input.addEventListener("input", function () {
+      count.textContent = String(KA.companions.companionNicknameLength(input.value));
+      error.textContent = "";
+    });
+    modalRoot.querySelector("[data-save-companion-nickname]").addEventListener("click", function () {
+      var result = KA.companions.setCompanionNickname(companionId, input.value);
+      if (!result.ok) {
+        error.textContent = result.reason === "too_long" ? "ニックネームは 12もじまでだよ" : "ニックネームを いれてね";
+        input.focus();
+        return;
+      }
+      nicknameDialogReturnFocus = null;
+      closeDialog();
+      toast("ニックネームを ほぞんしたよ");
+      KA.router.render();
+      focusCompanionNicknameButton(companionId);
+    });
+    var clear = modalRoot.querySelector("[data-clear-companion-nickname]");
+    if (clear) {
+      clear.addEventListener("click", function () {
+        KA.companions.clearCompanionNickname(companionId);
+        nicknameDialogReturnFocus = null;
+        closeDialog();
+        toast("もとの なまえに もどしたよ");
+        KA.router.render();
+        focusCompanionNicknameButton(companionId);
+      });
+    }
+    global.setTimeout(function () {
+      input.focus();
+      input.select();
+    }, 0);
   }
 
   function renderEggs() {
@@ -1472,8 +1577,13 @@
       el.addEventListener("click", function () {
         var enabled = el.getAttribute("data-favorite-enabled") === "true";
         KA.companions.setFavorite(el.getAttribute("data-favorite-companion"), enabled);
-        toast(enabled ? "いっしょに ぼうけんするよ" : "お気に入りを はずしたよ");
+        toast(enabled ? "いっしょに ぼうけんするよ" : "おきにいりを はずしたよ");
         KA.router.render();
+      });
+    });
+    Array.prototype.forEach.call(appEl.querySelectorAll("[data-edit-companion-nickname]"), function (el) {
+      el.addEventListener("click", function () {
+        openCompanionNicknameDialog(el.getAttribute("data-edit-companion-nickname"), el);
       });
     });
     Array.prototype.forEach.call(appEl.querySelectorAll("[data-kitchen-for-companion]"), function (el) {
@@ -1628,10 +1738,12 @@
       '<div class="companion-grid kitchen-feed-grid">',
       owned.map(function (companion) {
         var species = KA.companions.getSpecies(companion.speciesId);
+        var displayName = companionDisplayName(companion);
         return [
           '<article class="companion-card is-owned">',
           '<div class="companion-art">' + KA.companions.renderCompanion(species.id) + '</div>',
-          '<h3>' + escapeHtml(species.name) + '</h3>',
+          '<h3 class="companion-display-name">' + escapeHtml(displayName) + '</h3>',
+          companion.nickname ? '<p class="companion-species-name">しゅるい: ' + escapeHtml(species.name) + '</p>' : '',
           '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span></p>',
           '<p class="muted">' + (companion.lastBondMealDate === KA.date.localDateKey() ? "きょうの なかよしごはん 済み" : "きょうは まだだよ") + '</p>',
           button("このこに あげる", "btn-primary btn-small", 'data-feed-companion="' + escapeHtml(species.id) + '"'),
@@ -1837,14 +1949,17 @@
   }
 
   function outingHistoryHtml(outing) {
+    var data = KA.state.getAppData();
     var history = (outing.history || []).slice(-20).reverse();
     return [
       '<section class="panel panel-pad outing-history">',
       '<h2>おでかけの きろく</h2>',
       history.length ? '<div class="outing-history-list">' + history.map(function (trip) {
         var species = KA.companions.getSpecies(trip.speciesId);
+        var companion = KA.companions.getCompanion(data, trip.speciesId);
         var destination = KA.outings.getDestination(trip.destinationId);
-        return '<article><strong>' + escapeHtml(KA.date.formatDisplayDate(trip.departedDateKey)) + '</strong><span>' + escapeHtml(species ? species.name : "むかしの なかま") + 'と ' + escapeHtml(destination ? destination.name : "むかしの おでかけさき") + '</span><small>' + escapeHtml(KA.outings.rewardLabel(trip.rewardPlan)) + ' / うけとりずみ</small></article>';
+        var displayName = companion ? companionDisplayName(companion) : (species ? species.name : "むかしの なかま");
+        return '<article><strong>' + escapeHtml(KA.date.formatDisplayDate(trip.departedDateKey)) + '</strong><span>' + escapeHtml(displayName) + 'と ' + escapeHtml(destination ? destination.name : "むかしの おでかけさき") + '</span><small>' + escapeHtml(KA.outings.rewardLabel(trip.rewardPlan)) + ' / うけとりずみ</small></article>';
       }).join("") + '</div>' : '<p class="muted">まだ きろくは ないよ。</p>',
       '</section>'
     ].join("");
@@ -1852,6 +1967,8 @@
 
   function renderActiveOuting(data, outing, trip) {
     var species = KA.companions.getSpecies(trip.speciesId);
+    var companion = KA.companions.getCompanion(data, trip.speciesId);
+    var displayName = companion ? companionDisplayName(companion) : (species ? species.name : "なかま");
     var destination = KA.outings.getDestination(trip.destinationId);
     var returned = trip.status === "returned";
     return [
@@ -1861,7 +1978,7 @@
       '<div class="outing-destination-art">' + KA.outings.renderDestinationIcon(destination ? destination.id : "") + '</div>',
       '<div class="outing-companion-art">' + (species ? KA.companions.renderCompanion(species.id) : "") + '</div>',
       '</div>',
-      '<h2>' + escapeHtml(species ? species.name : "なかま") + (returned ? 'が かえってきたよ！' : 'は ' + escapeHtml(destination ? destination.name : "おでかけさき") + 'へ<br>おでかけしているよ！') + '</h2>',
+      '<h2 class="companion-display-name">' + escapeHtml(displayName) + (returned ? 'が かえってきたよ！' : 'は ' + escapeHtml(destination ? destination.name : "おでかけさき") + 'へ<br>おでかけしているよ！') + '</h2>',
       returned ? '<p>' + escapeHtml(KA.outings.returnMessage(trip)) + '</p><p><strong>おみやげ: ' + escapeHtml(KA.outings.rewardLabel(trip.rewardPlan)) + '</strong></p>' + outingRewardArt(trip.rewardPlan) + '<div class="quick-actions">' + button("おみやげを うけとる", "btn-primary", 'data-claim-outing="' + escapeHtml(trip.tripId) + '"') + '</div>' : '<p>' + escapeHtml(destination ? destination.departureMessage : "たのしんでいるよ！") + '</p><p class="muted">' + escapeHtml(KA.date.formatDisplayDate(trip.departedDateKey)) + 'に しゅっぱつ<br>つぎの ひに また あおうね！</p>',
       '</section>',
       outingHistoryHtml(outing)
@@ -1878,13 +1995,14 @@
     if (!KA.outings.getDestination(outingSelection.destinationId)) outingSelection.destinationId = KA.outings.allDestinations()[0].id;
     var selectedCompanion = eligible.filter(function (companion) { return companion.speciesId === outingSelection.companionId; })[0];
     var selectedSpecies = selectedCompanion && KA.companions.getSpecies(selectedCompanion.speciesId);
+    var selectedName = selectedCompanion ? companionDisplayName(selectedCompanion) : (selectedSpecies ? selectedSpecies.name : "なかま");
     var selectedDestination = KA.outings.getDestination(outingSelection.destinationId);
     if (outingSelection.confirming) {
       return [
         '<section class="panel panel-pad outing-confirm">',
         '<p class="eyebrow">しゅっぱつの かくにん</p>',
         '<div class="outing-confirm-grid"><div>' + KA.companions.renderCompanion(selectedSpecies.id) + '</div><div>' + KA.outings.renderDestinationIcon(selectedDestination.id) + '</div></div>',
-        '<h2>' + escapeHtml(selectedSpecies.name) + 'と ' + escapeHtml(selectedDestination.name) + 'へ<br>おでかけする？</h2>',
+        '<h2 class="companion-display-name">' + escapeHtml(selectedName) + 'と ' + escapeHtml(selectedDestination.name) + 'へ<br>おでかけする？</h2>',
         '<p>主なおみやげ: ' + escapeHtml(selectedDestination.rewardType === "stars" ? "スター" : selectedDestination.rewardType === "houseItem" ? "おへやの かざり" : "りょうりの そざい") + '</p>',
         '<p class="muted">つぎの ひに かえってくるよ！</p>',
         '<div class="quick-actions">' + button("しゅっぱつ！", "btn-primary", 'data-depart-outing') + button("もどる", "btn-soft", 'data-outing-confirm-back') + '</div>',
@@ -1898,7 +2016,8 @@
       eligible.map(function (companion) {
         var species = KA.companions.getSpecies(companion.speciesId);
         var selected = companion.speciesId === outingSelection.companionId;
-        return '<button class="outing-companion-choice ' + (selected ? "is-selected" : "") + '" data-outing-companion="' + escapeHtml(companion.speciesId) + '" aria-label="' + escapeHtml(species.name) + 'と出かける" aria-pressed="' + (selected ? "true" : "false") + '"><span>' + KA.companions.renderCompanion(species.id) + '</span><strong>' + escapeHtml(species.name) + '</strong><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ごはん済み' + (companion.isFavorite ? ' / お気に入り' : '') + '</small></button>';
+        var displayName = companionDisplayName(companion);
+        return '<button class="outing-companion-choice ' + (selected ? "is-selected" : "") + '" data-outing-companion="' + escapeHtml(companion.speciesId) + '" aria-label="' + escapeHtml(displayName) + 'と出かける" aria-pressed="' + (selected ? "true" : "false") + '"><span>' + KA.companions.renderCompanion(species.id) + '</span><strong class="companion-display-name">' + escapeHtml(displayName) + '</strong><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ごはん済み' + (companion.isFavorite ? ' / おきにいり' : '') + '</small></button>';
       }).join(""),
       '</div></section>',
       '<section class="panel panel-pad"><h2>どこへ いく？</h2><div class="outing-destination-grid">',
@@ -1954,7 +2073,9 @@
       if (!result.ok) { toast(result.reason === "already_claimed" ? "おみやげは うけとりずみだよ" : "まだ うけとれないよ"); KA.router.render(); return; }
       playTone("star");
       var species = KA.companions.getSpecies(result.trip.speciesId);
-      infoDialog("やったね！", '<div class="outing-claim-result"><div>' + (species ? KA.companions.renderCompanion(species.id) : "") + '</div>' + outingRewardArt(result.reward) + '<h3>' + escapeHtml(species ? species.name : "なかま") + 'が かえってきたよ！</h3><p>' + escapeHtml(KA.outings.returnMessage(result.trip)) + '</p><p><strong>' + escapeHtml(KA.outings.rewardLabel(result.reward)) + 'を うけとったよ！</strong></p><p>また いっしょに いこうね！</p></div>');
+      var companion = KA.companions.getCompanion(KA.state.getAppData(), result.trip.speciesId);
+      var displayName = companion ? companionDisplayName(companion) : (species ? species.name : "なかま");
+      infoDialog("やったね！", '<div class="outing-claim-result"><div>' + (species ? KA.companions.renderCompanion(species.id) : "") + '</div>' + outingRewardArt(result.reward) + '<h3 class="companion-display-name">' + escapeHtml(displayName) + 'が かえってきたよ！</h3><p>' + escapeHtml(KA.outings.returnMessage(result.trip)) + '</p><p><strong>' + escapeHtml(KA.outings.rewardLabel(result.reward)) + 'を うけとったよ！</strong></p><p>また いっしょに いこうね！</p></div>');
       KA.router.render();
     });
   }
@@ -1989,14 +2110,15 @@
   }
 
   function birdHouseReactionText(species, type, companion) {
+    var displayName = companion ? companionDisplayName(companion) : species.name;
     if (companion && companion.lastFedAt && String(companion.lastFedAt).slice(0, 10) === KA.date.localDateKey()) {
-      return species.name + "が ごはん おいしかった！";
+      return displayName + "が ごはん おいしかった！";
     }
-    if (type === "tilt") return species.name + "が くびを かしげたよ！";
-    if (type === "hop") return species.name + "が ぴょんと はねたよ！";
-    if (type === "wing") return species.name + "が はねを うごかしたよ！";
-    if (type === "sleep") return species.name + "が ねむそうにしているよ";
-    return species.name + "が うれしそう！";
+    if (type === "tilt") return displayName + "が くびを かしげたよ！";
+    if (type === "hop") return displayName + "が ぴょんと はねたよ！";
+    if (type === "wing") return displayName + "が はねを うごかしたよ！";
+    if (type === "sleep") return displayName + "が ねむそうにしているよ";
+    return displayName + "が うれしそう！";
   }
 
   function pickBirdHouseReaction(speciesId) {
@@ -2011,12 +2133,13 @@
     return layoutData.map(function (entry) {
       var species = entry.species;
       var companion = entry.companion;
+      var displayName = companionDisplayName(companion);
       var active = birdHouseReaction && birdHouseReaction.speciesId === species.id;
       var reactionClass = active ? " is-reacting reaction-" + birdHouseReaction.type : "";
       return [
-        '<button class="bird-house-bird ' + (entry.isFocus ? "is-focus" : "") + reactionClass + '" data-house-bird="' + escapeHtml(species.id) + '" style="left:' + entry.x + '%;top:' + entry.y + '%;--bird-scale:' + entry.scale + '" aria-label="' + escapeHtml(species.name) + 'とあそぶ">',
+        '<button class="bird-house-bird ' + (entry.isFocus ? "is-focus" : "") + reactionClass + '" data-house-bird="' + escapeHtml(species.id) + '" style="left:' + entry.x + '%;top:' + entry.y + '%;--bird-scale:' + entry.scale + '" aria-label="' + escapeHtml(displayName) + 'とあそぶ">',
         '<span class="bird-house-bird-art">' + KA.companions.renderCompanion(species.id) + '</span>',
-        '<span class="bird-house-bird-label">' + escapeHtml(species.name) + '<br><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ごはん ' + Number(companion.mealCount || 0) + 'かい</small></span>',
+        '<span class="bird-house-bird-label companion-display-name">' + escapeHtml(displayName) + '<br><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ごはん ' + Number(companion.mealCount || 0) + 'かい</small></span>',
         active ? '<span class="bird-house-heart" aria-hidden="true">♥</span>' : '',
         '</button>'
       ].join("");
@@ -2041,6 +2164,7 @@
     var focusId = opts.focusSpeciesId;
     var awayId = KA.outings && KA.outings.travelingSpeciesId ? KA.outings.travelingSpeciesId(data) : null;
     var awaySpecies = awayId ? KA.companions.getSpecies(awayId) : null;
+    var awayCompanion = awayId ? KA.companions.getCompanion(data, awayId) : null;
     var visibleCount = KA.birdHouse.companionLayout(data, focusId).length;
     var missingMessage = owned.length > 0 && owned.length < KA.companions.allSpecies().length ? '<p class="bird-house-maybe">まだ だれかが くるかも？</p>' : '';
     return [
@@ -2052,7 +2176,7 @@
       '<div class="bird-house-front-layer">' + renderBirdHouseFurnitureLayer(placements, "floor", "front") + '</div>',
       opts.decorate ? '<div class="bird-house-slot-layer">' + renderBirdHouseSlotButtons(placements, opts.selectedSlotId) + '</div>' : '',
       birdHouseReaction ? '<div class="bird-house-reaction" aria-live="polite">' + escapeHtml(birdHouseReaction.message) + '</div>' : '',
-      awaySpecies ? '<div class="bird-house-away-message" aria-live="polite">' + (visibleCount ? escapeHtml(awaySpecies.name) + 'は おでかけちゅう！' : 'いまは おでかけちゅうだよ！<br>かえってくるのを まとうね') + '</div>' : '',
+      awaySpecies ? '<div class="bird-house-away-message" aria-live="polite">' + (visibleCount ? escapeHtml(awayCompanion ? companionDisplayName(awayCompanion) : awaySpecies.name) + 'は おでかけちゅう！' : 'いまは おでかけちゅうだよ！<br>かえってくるのを まとうね') + '</div>' : '',
       missingMessage,
       '</section>'
     ].join("");
@@ -2608,7 +2732,7 @@
         button('上へ', 'btn-soft btn-small', 'data-parent-job-up="' + taskId + '" aria-label="' + title + 'を上へ移動" ' + (index === 0 ? 'disabled' : '')),
         button('下へ', 'btn-soft btn-small', 'data-parent-job-down="' + taskId + '" aria-label="' + title + 'を下へ移動" ' + (index === tasks.length - 1 ? 'disabled' : '')),
         '</div>',
-        task.isCustom ? '<div class="job-edit-controls">' + button('編集', 'btn-soft btn-small', 'data-edit-custom-job="' + taskId + '"') + button('削除', 'btn-soft btn-small', 'data-delete-custom-job="' + taskId + '"') + '</div>' : '<label class="field compact-field parent-job-reward"><span>報酬スター</span><input type="number" min="0" max="9" value="' + Number(task.rewardStars || 0) + '" data-parent-task-reward="' + taskId + '"></label>',
+        task.isCustom ? '<div class="job-edit-controls">' + button('編集', 'btn-soft btn-small', 'data-edit-custom-job="' + taskId + '"') + button('削除', 'btn-soft btn-small', 'data-delete-custom-job="' + taskId + '"') + '</div>' : (task.taskId === "job_cleanup" ? '<p class="parent-job-reward-fixed"><span>報酬スター</span><strong>⭐ 2</strong><small>このおしごとは 2こ</small></p>' : '<label class="field compact-field parent-job-reward"><span>報酬スター</span><input type="number" min="0" max="9" value="' + Number(task.rewardStars || 0) + '" data-parent-task-reward="' + taskId + '"></label>'),
         '<p><span class="badge">' + (done ? '今日 完了' : '今日 未完了') + '</span></p>',
         done ? button('完了を訂正', 'btn-danger btn-small', 'data-undo-task="' + taskId + '"') : '',
         '</div>',

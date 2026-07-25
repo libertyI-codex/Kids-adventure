@@ -475,7 +475,8 @@
       existing.sortOrder = defaults.sortOrder;
       existing.availableDays = clone(defaults.availableDays);
       existing.timeOfDay = defaults.timeOfDay;
-      if (typeof existing.rewardStars === "undefined") existing.rewardStars = defaults.rewardStars;
+      if (defaults.taskId === "job_cleanup") existing.rewardStars = defaults.rewardStars;
+      else if (typeof existing.rewardStars === "undefined") existing.rewardStars = defaults.rewardStars;
       if (typeof existing.active === "undefined") existing.active = defaults.active;
       if (before !== JSON.stringify(existing)) existing.updatedAt = KA.date.localIsoString();
     });

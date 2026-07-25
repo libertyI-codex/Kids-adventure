@@ -372,6 +372,24 @@
     return Math.abs(hash);
   }
 
+  function companionNicknameLength(value) {
+    if (typeof value !== "string") return 0;
+    return Array.from ? Array.from(value).length : value.length;
+  }
+
+  function cleanCompanionNickname(value) {
+    if (typeof value !== "string") return "";
+    return value
+      .replace(/[\u0000-\u001f\u007f-\u009f]/g, "")
+      .replace(/^\s+|\s+$/g, "");
+  }
+
+  function normalizeCompanionNickname(value) {
+    var cleaned = cleanCompanionNickname(value);
+    if (!cleaned) return "";
+    return Array.from ? Array.from(cleaned).slice(0, 12).join("") : cleaned.slice(0, 12);
+  }
+
   function ensureCompanions(appData) {
     appData.companions = Array.isArray(appData.companions) ? appData.companions : [];
     appData.companions.forEach(function (companion) {
@@ -387,6 +405,7 @@
       companion.bondMealProgress = Math.max(0, Math.min(2, Number(companion.bondMealProgress || 0)));
       companion.lastBondMealDate = companion.lastBondMealDate || null;
       companion.lastFedAt = companion.lastFedAt || null;
+      companion.nickname = normalizeCompanionNickname(companion.nickname);
     });
     var favoriteSeen = false;
     appData.companions.forEach(function (companion) {
@@ -401,6 +420,46 @@
     return ensureCompanions(appData).filter(function (companion) {
       return companion && companion.speciesId === speciesId;
     })[0] || null;
+  }
+
+  function getCompanionSpeciesName(companion) {
+    var speciesId = companion && (companion.speciesId || companion.id);
+    var species = getSpecies(speciesId);
+    return species ? species.name : "なかま";
+  }
+
+  function getCompanionDisplayName(companion) {
+    return normalizeCompanionNickname(companion && companion.nickname) || getCompanionSpeciesName(companion);
+  }
+
+  function findOwnedCompanion(companionId) {
+    return ensureCompanions(KA.state.getAppData()).filter(function (companion) {
+      return companion &&
+        Number(companion.hatchCount || 0) > 0 &&
+        isValidSpeciesId(companion.speciesId) &&
+        (companion.id === companionId || companion.speciesId === companionId);
+    })[0] || null;
+  }
+
+  function setCompanionNickname(companionId, value) {
+    var companion = findOwnedCompanion(companionId);
+    var cleaned = cleanCompanionNickname(value);
+    if (!companion) return { ok: false, reason: "not_owned" };
+    if (!cleaned) return { ok: false, reason: "required" };
+    if (companionNicknameLength(cleaned) > 12) return { ok: false, reason: "too_long" };
+    companion.nickname = cleaned;
+    KA.state.getAppData().updatedAt = KA.date.localIsoString();
+    KA.state.saveAppData();
+    return { ok: true, companion: companion, nickname: cleaned };
+  }
+
+  function clearCompanionNickname(companionId) {
+    var companion = findOwnedCompanion(companionId);
+    if (!companion) return { ok: false, reason: "not_owned" };
+    companion.nickname = "";
+    KA.state.getAppData().updatedAt = KA.date.localIsoString();
+    KA.state.saveAppData();
+    return { ok: true, companion: companion };
   }
 
   function ownedSpeciesIds(appData) {
@@ -440,7 +499,8 @@
         mealCount: 0,
         bondMealProgress: 0,
         lastBondMealDate: null,
-        lastFedAt: null
+        lastFedAt: null,
+        nickname: ""
       };
       list.push(companion);
     } else {
@@ -583,6 +643,12 @@
     isValidSpeciesId: isValidSpeciesId,
     ensureCompanions: ensureCompanions,
     getCompanion: getCompanion,
+    getCompanionSpeciesName: getCompanionSpeciesName,
+    getCompanionDisplayName: getCompanionDisplayName,
+    normalizeCompanionNickname: normalizeCompanionNickname,
+    companionNicknameLength: companionNicknameLength,
+    setCompanionNickname: setCompanionNickname,
+    clearCompanionNickname: clearCompanionNickname,
     ownedSpeciesIds: ownedSpeciesIds,
     pickSpeciesForEgg: pickCompanionSpeciesForEgg,
     recordHatch: recordHatch,

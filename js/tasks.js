@@ -157,6 +157,7 @@
       if (!task || standardIds().indexOf(task.taskId) < 0) return;
       task.isCustom = false;
       task.active = settings.enabledJobIds.indexOf(task.taskId) >= 0;
+      if (task.taskId === "job_cleanup") task.rewardStars = 2;
       map[task.taskId] = task;
     });
     settings.customJobs.forEach(function (job) {
@@ -284,9 +285,14 @@
       title: completion.taskTitle || "以前のおしごと",
       rewardStars: Number(completion.rewardStars || 0)
     };
+    var correctionTask = {
+      taskId: task.taskId,
+      title: completion.taskTitle || task.title,
+      rewardStars: Number(completion.rewardStars || 0)
+    };
     completion.status = "undone";
     completion.undoneAt = KA.date.localIsoString();
-    var ledger = KA.stars.adjustUndoTask(task);
+    var ledger = KA.stars.adjustUndoTask(correctionTask);
     record.earnedStarsToday = Math.max(0, Number(record.earnedStarsToday || 0) - Number(completion.rewardStars || task.rewardStars || 0));
     record.corrections = record.corrections || [];
     record.corrections.push({
@@ -438,7 +444,7 @@
       if (!result.ok) return false;
     }
     if (typeof updates.rewardStars !== "undefined" && !task.isCustom) {
-      task.rewardStars = Math.max(0, Number(updates.rewardStars || 0));
+      task.rewardStars = task.taskId === "job_cleanup" ? 2 : Math.max(0, Number(updates.rewardStars || 0));
       task.updatedAt = KA.date.localIsoString();
       KA.state.saveAppData();
     }
