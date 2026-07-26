@@ -15,6 +15,7 @@
   var birdHouseReaction = null;
   var birdHouseTapCooldown = {};
   var nicknameDialogReturnFocus = null;
+  var evolutionDialogReturnFocus = null;
   var outingSelection = { companionId: null, destinationId: null, confirming: false };
   var startupState = {
     startupStarted: false,
@@ -302,6 +303,111 @@
     return KA.companions.getCompanionDisplayName(companion);
   }
 
+  function companionEvolutionProgress(companion) {
+    if (!KA.companions || !KA.companions.getEvolutionProgress) {
+      return { stage: 1, label: "ちいさなすがた", nextStage: 2, nextLevel: 3, remaining: 2 };
+    }
+    return KA.companions.getEvolutionProgress(companion);
+  }
+
+  function evolutionProgressHtml(companion, compact) {
+    var progress = companionEvolutionProgress(companion);
+    if (compact) {
+      return '<span class="badge evolution-badge">なかよし進化: ' + escapeHtml(progress.label) + '</span>';
+    }
+    return [
+      '<section class="companion-evolution-status" aria-label="なかよし進化の状況">',
+      '<p class="eyebrow">なかよし進化</p>',
+      '<p><strong>いま: ' + escapeHtml(progress.label) + '</strong></p>',
+      progress.stage < 3
+        ? '<p class="muted">なかよしレベル' + progress.nextLevel + 'で<br>' + escapeHtml(KA.companions.getEvolutionStageLabel(progress.nextStage)) + '</p><p class="evolution-next">つぎの せいちょうまで あと' + progress.remaining + '</p>'
+        : '<p class="evolution-next">いちばん なかよしなすがただよ！</p>',
+      '</section>'
+    ].join("");
+  }
+
+  function focusAfterEvolutionDialog() {
+    var returnFocus = evolutionDialogReturnFocus;
+    evolutionDialogReturnFocus = null;
+    if (returnFocus && document.body.contains(returnFocus)) {
+      returnFocus.focus();
+      return;
+    }
+    var fallback = appEl && appEl.querySelector("[data-show-evolution], button, [tabindex]");
+    if (fallback) fallback.focus();
+  }
+
+  function closeEvolutionDialog() {
+    closeDialog();
+    focusAfterEvolutionDialog();
+  }
+
+  function showCompanionEvolutionDialog(companions, returnFocus) {
+    var list = Array.isArray(companions) ? companions : [companions];
+    list = list.filter(function (companion) {
+      return companion && KA.companions.isValidSpeciesId(companion.speciesId) && Number(companion.hatchCount || 0) > 0;
+    });
+    if (!list.length) return false;
+    evolutionDialogReturnFocus = returnFocus || document.activeElement;
+    list.forEach(function (companion) {
+      KA.companions.markEvolutionStageSeen(companion);
+    });
+    KA.state.saveAppData();
+    modalRoot.innerHTML = [
+      '<div class="modal companion-evolution-modal" role="dialog" aria-modal="true" aria-labelledby="companion-evolution-title">',
+      '<div class="companion-evolution-announcement" aria-live="polite">',
+      '<p class="eyebrow">もっと すてきなすがたに なったよ！</p>',
+      '<h2 id="companion-evolution-title">なかよし進化</h2>',
+      '<div class="companion-evolution-list">',
+      list.map(function (companion) {
+        var species = KA.companions.getSpecies(companion.speciesId);
+        var progress = companionEvolutionProgress(companion);
+        var displayName = companionDisplayName(companion);
+        return [
+          '<article class="companion-evolution-result">',
+          '<div class="companion-evolution-glow" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div>',
+          '<div class="companion-evolution-art">' + KA.companions.renderCompanion(species.id, { companion: companion }) + '</div>',
+          '<h3 class="companion-display-name">' + escapeHtml(displayName) + 'が<br>なかよし進化したよ！</h3>',
+          '<p><strong>' + escapeHtml(progress.label) + '</strong>に なったよ！</p>',
+          '</article>'
+        ].join("");
+      }).join(""),
+      '</div>',
+      '</div>',
+      '<div class="modal-actions">',
+      button("とじる", "btn-primary", 'data-close-companion-evolution'),
+      '</div>',
+      '</div>'
+    ].join("");
+    var dialog = modalRoot.querySelector(".companion-evolution-modal");
+    var closeButton = modalRoot.querySelector("[data-close-companion-evolution]");
+    closeButton.addEventListener("click", closeEvolutionDialog);
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeEvolutionDialog();
+      }
+    });
+    global.setTimeout(function () {
+      closeButton.focus();
+    }, 0);
+    return true;
+  }
+
+  function pendingEvolutionNotice(data) {
+    var pending = KA.companions && KA.companions.pendingEvolutionCompanions
+      ? KA.companions.pendingEvolutionCompanions(data)
+      : [];
+    if (!pending.length) return "";
+    return [
+      '<section class="panel panel-pad evolution-home-notice" aria-live="polite">',
+      '<div><p class="eyebrow">なかよし進化</p><h2>なかよし進化した なかまがいるよ！</h2>',
+      '<p class="muted">' + pending.length + 'わの せいちょうを みてみよう。</p></div>',
+      button("せいちょうを みる", "btn-primary", 'data-show-evolution'),
+      '</section>'
+    ].join("");
+  }
+
   function favoriteCompanionCard() {
     if (!KA.companions || !KA.companions.ensureCompanions) return "";
     var data = KA.state.getAppData();
@@ -328,7 +434,7 @@
       '<div class="panel panel-pad companion-home-card">',
       '<div class="companion-home-art">' + KA.companions.renderCompanion(species.id) + '</div>',
       '<div><p class="eyebrow">いっしょに ぼうけん</p><h3 class="companion-display-name">' + escapeHtml(displayName) + '</h3>',
-      '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span></p>',
+      '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span> ' + evolutionProgressHtml(companion, true) + '</p>',
       '<div class="quick-actions">' + button("とりのおうちへ" + (house && house.unseenItemIds && house.unseenItemIds.length ? " NEW" : ""), "btn-primary btn-small", 'data-route="bird-house"') + button("ごはんを つくる", "btn-soft btn-small", 'data-route="kitchen"') + '</div></div>',
       '</div>'
     ].join("");
@@ -363,7 +469,7 @@
     if (companion) {
       var species = KA.companions.getSpecies(companion.speciesId);
       if (species) {
-        lines.push('<li><strong>なかま</strong><span>' + escapeHtml(companionDisplayName(companion)) + 'と なかよしレベル' + Number(companion.bondLevel || 1) + '</span></li>');
+        lines.push('<li><strong>なかま</strong><span>' + escapeHtml(companionDisplayName(companion)) + 'と なかよしレベル' + Number(companion.bondLevel || 1) + '<br>' + escapeHtml(companionEvolutionProgress(companion).label) + '</span></li>');
         lines.push('<li><strong>ごはん</strong><span>' + (companion.lastBondMealDate === KA.date.localDateKey() ? 'きょうは ごはんを たべたよ' : 'きょうは まだ ごはんを あげていないよ') + '</span></li>');
       }
     }
@@ -579,6 +685,7 @@
     var body = [
       '<section class="home-flow">',
       renderHomeHero(data, snapshot),
+      pendingEvolutionNotice(data),
       '<div class="home-star-strip" role="group" aria-label="スターの数">',
       '<div class="home-star-mini" aria-label="つかえるほし ' + Number(data.profile.starTotals.spendableStars || 0) + 'こ"><span>つかえるほし</span><strong>⭐' + Number(data.profile.starTotals.spendableStars || 0) + '</strong></div>',
       '<div class="home-star-mini" aria-label="あつめたほし ' + Number(data.profile.starTotals.lifetimeStars || 0) + 'こ"><span>あつめたほし</span><strong>⭐' + Number(data.profile.starTotals.lifetimeStars || 0) + '</strong></div>',
@@ -596,6 +703,12 @@
       '</section>'
     ].join("");
     layout(KA.constants.APP_DISPLAY_NAME, body, { subtitle: KA.constants.VERSION_LABEL });
+    var evolutionButton = appEl.querySelector("[data-show-evolution]");
+    if (evolutionButton) {
+      evolutionButton.addEventListener("click", function () {
+        showCompanionEvolutionDialog(KA.companions.pendingEvolutionCompanions(data), evolutionButton);
+      });
+    }
   }
 
   function renderTasks() {
@@ -1408,6 +1521,7 @@
         hasNickname ? '<p class="companion-species-name">しゅるい: ' + escapeHtml(species.name) + '</p>' : '',
         owned ? '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span> <span class="badge">' + Number(companion.hatchCount || 1) + 'かい</span></p>' : '<p class="muted">まだ あっていないよ</p>',
         owned ? '<p class="muted">ごはん ' + Number(companion.mealCount || 0) + 'かい / なかよしごはん ' + Number(companion.bondMealProgress || 0) + '/3</p>' : '',
+        owned ? evolutionProgressHtml(companion, false) : '',
         owned ? '<p class="muted">はじめて: ' + escapeHtml((companion.firstHatchedAt || "").slice(0, 10)) + '<br>さいご: ' + escapeHtml((companion.lastHatchedAt || "").slice(0, 10)) + '</p>' : '',
         owned ? '<div class="quick-actions">' + button(hasNickname ? "ニックネームを かえる" : "ニックネームを つける", "btn-soft btn-small", 'data-edit-companion-nickname="' + escapeHtml(species.id) + '" aria-label="' + escapeHtml(displayName) + 'のニックネームを' + (hasNickname ? '変える' : '付ける') + '"') + button("おうちで あそぶ", "btn-primary btn-small", 'data-house-for-companion="' + escapeHtml(species.id) + '"') + button("ごはんを あげる", "btn-soft btn-small", 'data-kitchen-for-companion="' + escapeHtml(species.id) + '"') + button(companion.isFavorite ? "おきにいりを はずす" : "おきにいり", companion.isFavorite ? "btn-sun btn-small" : "btn-soft btn-small", 'data-favorite-companion="' + escapeHtml(species.id) + '" data-favorite-enabled="' + (companion.isFavorite ? "false" : "true") + '" aria-label="' + escapeHtml(displayName) + 'を' + (companion.isFavorite ? 'おきにいりから外す' : 'おきにいりにする') + '"') + '</div>' : '',
         '</article>'
@@ -1569,8 +1683,13 @@
           return;
         }
         playTone("hatch");
-        var html = '<div class="hatch-result"><div class="egg-hatch-pop">' + KA.companions.renderCompanion(result.species.id) + '</div><h3>なかまが うまれたよ！</h3><p>' + escapeHtml(result.species.name) + 'が なかまになったよ。</p><p><span class="badge star">なかよし ' + Number(result.companion.bondLevel || 1) + '</span></p></div>';
-        infoDialog("たまごが かえったよ", html);
+        var evolved = KA.companions.pendingEvolutionCompanions(KA.state.getAppData()).filter(function (companion) {
+          return companion.speciesId === result.companion.speciesId;
+        });
+        if (!showCompanionEvolutionDialog(evolved, hatchButton)) {
+          var html = '<div class="hatch-result"><div class="egg-hatch-pop">' + KA.companions.renderCompanion(result.species.id) + '</div><h3>なかまが うまれたよ！</h3><p>' + escapeHtml(result.species.name) + 'が なかまになったよ。</p><p><span class="badge star">なかよし ' + Number(result.companion.bondLevel || 1) + '</span></p></div>';
+          infoDialog("たまごが かえったよ", html);
+        }
       });
     }
     Array.prototype.forEach.call(appEl.querySelectorAll("[data-favorite-companion]"), function (el) {
@@ -1745,6 +1864,7 @@
           '<h3 class="companion-display-name">' + escapeHtml(displayName) + '</h3>',
           companion.nickname ? '<p class="companion-species-name">しゅるい: ' + escapeHtml(species.name) + '</p>' : '',
           '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span></p>',
+          '<p class="muted">' + escapeHtml(companionEvolutionProgress(companion).label) + '</p>',
           '<p class="muted">' + (companion.lastBondMealDate === KA.date.localDateKey() ? "きょうの なかよしごはん 済み" : "きょうは まだだよ") + '</p>',
           button("このこに あげる", "btn-primary btn-small", 'data-feed-companion="' + escapeHtml(species.id) + '"'),
           '</article>'
@@ -1917,7 +2037,12 @@
           return;
         }
         playTone(result.levelUp ? "hatch" : "complete");
-        infoDialog("おいしい！", '<div class="kitchen-fed-result"><div class="kitchen-fed-art">' + KA.companions.renderCompanion(result.companion.speciesId) + '</div><div class="kitchen-fed-dish">' + KA.kitchen.renderRecipeDish(result.recipe.id) + '</div><h3>ごちそうさま！</h3><p>' + escapeHtml(result.recipe.name) + 'を よろこんで たべたよ。</p>' + (result.levelUp ? '<p><span class="badge star">もっと なかよしに なったよ！</span></p>' : '') + '</div>');
+        var evolved = result.levelUp ? KA.companions.pendingEvolutionCompanions(KA.state.getAppData()).filter(function (companion) {
+          return companion.speciesId === result.companion.speciesId;
+        }) : [];
+        if (!showCompanionEvolutionDialog(evolved, el)) {
+          infoDialog("おいしい！", '<div class="kitchen-fed-result"><div class="kitchen-fed-art">' + KA.companions.renderCompanion(result.companion.speciesId) + '</div><div class="kitchen-fed-dish">' + KA.kitchen.renderRecipeDish(result.recipe.id) + '</div><h3>ごちそうさま！</h3><p>' + escapeHtml(result.recipe.name) + 'を よろこんで たべたよ。</p>' + (result.levelUp ? '<p><span class="badge star">もっと なかよしに なったよ！</span></p>' : '') + '</div>');
+        }
         KA.router.render();
       });
     });
@@ -2017,7 +2142,7 @@
         var species = KA.companions.getSpecies(companion.speciesId);
         var selected = companion.speciesId === outingSelection.companionId;
         var displayName = companionDisplayName(companion);
-        return '<button class="outing-companion-choice ' + (selected ? "is-selected" : "") + '" data-outing-companion="' + escapeHtml(companion.speciesId) + '" aria-label="' + escapeHtml(displayName) + 'と出かける" aria-pressed="' + (selected ? "true" : "false") + '"><span>' + KA.companions.renderCompanion(species.id) + '</span><strong class="companion-display-name">' + escapeHtml(displayName) + '</strong><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ごはん済み' + (companion.isFavorite ? ' / おきにいり' : '') + '</small></button>';
+        return '<button class="outing-companion-choice ' + (selected ? "is-selected" : "") + '" data-outing-companion="' + escapeHtml(companion.speciesId) + '" aria-label="' + escapeHtml(displayName) + 'と出かける、' + escapeHtml(companionEvolutionProgress(companion).label) + '" aria-pressed="' + (selected ? "true" : "false") + '"><span>' + KA.companions.renderCompanion(species.id) + '</span><strong class="companion-display-name">' + escapeHtml(displayName) + '</strong><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ' + escapeHtml(companionEvolutionProgress(companion).label) + '<br>ごはん済み' + (companion.isFavorite ? ' / おきにいり' : '') + '</small></button>';
       }).join(""),
       '</div></section>',
       '<section class="panel panel-pad"><h2>どこへ いく？</h2><div class="outing-destination-grid">',
@@ -2137,9 +2262,9 @@
       var active = birdHouseReaction && birdHouseReaction.speciesId === species.id;
       var reactionClass = active ? " is-reacting reaction-" + birdHouseReaction.type : "";
       return [
-        '<button class="bird-house-bird ' + (entry.isFocus ? "is-focus" : "") + reactionClass + '" data-house-bird="' + escapeHtml(species.id) + '" style="left:' + entry.x + '%;top:' + entry.y + '%;--bird-scale:' + entry.scale + '" aria-label="' + escapeHtml(displayName) + 'とあそぶ">',
+        '<button class="bird-house-bird ' + (entry.isFocus ? "is-focus" : "") + reactionClass + '" data-house-bird="' + escapeHtml(species.id) + '" style="left:' + entry.x + '%;top:' + entry.y + '%;--bird-scale:' + entry.scale + '" aria-label="' + escapeHtml(displayName) + 'とあそぶ、' + escapeHtml(companionEvolutionProgress(companion).label) + '">',
         '<span class="bird-house-bird-art">' + KA.companions.renderCompanion(species.id) + '</span>',
-        '<span class="bird-house-bird-label companion-display-name">' + escapeHtml(displayName) + '<br><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ごはん ' + Number(companion.mealCount || 0) + 'かい</small></span>',
+        '<span class="bird-house-bird-label companion-display-name">' + escapeHtml(displayName) + '<br><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ' + escapeHtml(companionEvolutionProgress(companion).label) + '<br>ごはん ' + Number(companion.mealCount || 0) + 'かい</small></span>',
         active ? '<span class="bird-house-heart" aria-hidden="true">♥</span>' : '',
         '</button>'
       ].join("");

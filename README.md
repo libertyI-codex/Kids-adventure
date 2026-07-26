@@ -3,16 +3,49 @@
 ## 概要
 「こどもの冒険」は、毎日のおしごと、スター、ぬりえ、作品を置く世界、たまご育成をローカル保存で楽しむ子ども向けWebアプリです。
 
-Ver.1.0 試作24では、標準おしごと `job_cleanup` を「おかたづけBOXをからにする」へ改称し、当日の初回達成報酬を2スターへ変更しました。利用者向けのおきにいり表記をひらがなへ統一し、取得済みの鳥11種類へ最大12文字のニックネームを付けられます。
+Ver.1.0 試作26では、13種類の鳥がなかよしレベルに応じて同じ鳥のまま3段階に成長する「なかよし進化」を追加しました。試作25の姿をstage 1として維持し、stage 2・3では鳥ごとの個性に合う羽模様、冠羽、尾羽、光の装飾を共通レンダラーで重ねます。
 
 既存のホーム画面アイコンは古いHTML設定を保持するため、一度削除してからSafariで最新版を開き、改めてホーム画面へ追加してください。
 
 ## バージョン
 - 表示名: 結羽ちゃんの冒険
-- バージョン: Ver.1.0 試作24
-- appVersion: `1.0.0-prototype.24`
+- バージョン: Ver.1.0 試作26
+- appVersion: `1.0.0-prototype.26`
 - schemaVersion: `1`
-- キャッシュ対策: `?v=10p24`
+- キャッシュ対策: `?v=10p26`
+
+## 試作26のなかよし進化
+
+- bondLevel 1～2はstage 1「ちいさなすがた」
+- bondLevel 3～4はstage 2「せいちょうしたすがた」
+- bondLevel 5以上はstage 3「とくべつなすがた」
+- stageは保存せず、現在の `bondLevel` から共通関数で毎回算出
+- stage 1は試作25の13種類のSVG定義と同じ姿を維持
+- stage 2・3は元のSVGへ鳥ごとの装飾レイヤーだけを追加し、speciesId、正式名称、カード数を変更しない
+- 再孵化と料理による既存のbondLevel上昇条件・上昇量を維持
+- 閾値を越えた時はニックネームを優先した「なかよし進化」演出を一度だけ表示
+- 進化演出の既読は各companionの任意項目 `lastSeenEvolutionStage` へ保存
+- 試作25以前の既存データは現在のstageを既読扱いとし、連続ダイアログを表示しない
+- 図鑑で現在の姿、次の成長条件、残りレベルを文字でも表示
+- ホーム、なかまのようす、図鑑、とりのおうち、キッチン、おでかけへ共通レンダラーで反映
+- ニックネーム、おきにいり、`hatchCount`、`bondLevel`、`mealCount`、`lastFedAt`を維持
+- JSONバックアップ・復元で進化既読情報を維持し、stage自体は復元後もbondLevelから再計算
+- 390px、safe-area、フォーカス復帰、Escape、`prefers-reduced-motion`へ対応
+- 鳥13種類、ぬりえ11種類、保存キー4種、`schemaVersion: 1`は変更なし
+
+## 試作25の仲間とぬりえ
+
+- `companion_thunder_legend_bird`（でんせつの かみなりのとり、`designVersion: 1`）を追加
+- `companion_fire_legend_bird`（でんせつの ほのおのとり、`designVersion: 1`）を追加
+- 正式な孵化候補は既存11種類を維持して合計13種類
+- 新しい2羽も未取得種優先、fixed seed、`plannedSpeciesId`、再孵化、図鑑、おうち、キッチン、おでかけへ共通定義から反映
+- 新しい2羽もおきにいりと最大12文字のニックネームに対応
+- `coloring_electric_mouse`（びりびり ねずみ、`designVersion: 1`）を追加
+- びりびり ねずみは、体、おなか、左右の耳と耳内、左右の星形の頬、両手足、渦巻きの尾、火花、毛束の15領域
+- ぬりえは既存10種類を維持して合計11種類
+- 新しいぬりえも既存形式で作品アルバム、`renderAlbum()`、JSONバックアップ・復元へ対応
+- キャラクターは内部の手書きSVGだけで構成し、外部画像・外部SVG・生成画像・CDN・外部APIは不使用
+- 保存キー4種と `schemaVersion: 1` は変更なし
 
 ## 試作24の表示名とニックネーム
 
@@ -366,7 +399,7 @@ birdHouseデータは `appData.birdHouse` に保存します。
 初めて孵化させるたまごは `isFirstHatchEgg: true` として保存し、`targetGrowthPoints: 4` でreadyになります。2個目以降のたまごは `targetGrowthPoints: 6` です。ready後も自動孵化はせず、「うまれる！」ボタンを押した時だけ孵化します。
 
 ## 鳥の仲間
-たまごから生まれる正式な仲間は鳥類6種類だけです。
+たまごから生まれる正式な仲間は鳥類13種類です。
 
 | 仲間 | speciesId | designVersion |
 | --- | --- | ---: |
@@ -376,6 +409,13 @@ birdHouseデータは `appData.birdHouse` に保存します。
 | くじゃく | `companion_peacock` | 4 |
 | ふくろう | `companion_owl` | 2 |
 | すずめ | `companion_sparrow` | 2 |
+| ぺんぎん | `companion_penguin` | 1 |
+| しまえなが | `companion_shimaenaga` | 1 |
+| いんこ | `companion_parakeet` | 1 |
+| ぶんちょう | `companion_java_sparrow` | 1 |
+| こおりの でんせつどり | `companion_ice_legend_bird` | 1 |
+| でんせつの かみなりのとり | `companion_thunder_legend_bird` | 1 |
+| でんせつの ほのおのとり | `companion_fire_legend_bird` | 1 |
 
 鳥はぬりえ作品とは独立した `companions` データとして管理します。`templateId`、`regionColors`、作品ID、作品配置、親コメント、作品のおきにいり状態は共有しません。
 
@@ -391,7 +431,7 @@ birdHouseデータは `appData.birdHouse` に保存します。
 ## スタート画面
 アプリ起動時に、採用済みの `apple-touch-icon.png` をそのまま表示するスタート画面を追加しました。
 
-- 画像パス: `./apple-touch-icon.png?v=10p24`
+- 画像パス: `./apple-touch-icon.png?v=10p26`
 - 最低表示時間: 1.2秒
 - 通常終了目安: 初期化完了後
 - フェイルセーフ: 約4秒
@@ -405,7 +445,7 @@ iPhoneのホーム画面から独立Webアプリとして起動できるよう�
 
 - `apple-mobile-web-app-capable`: `yes`
 - `apple-mobile-web-app-title`: `こどもの冒険`
-- manifest: `./manifest.webmanifest?v=10p24`
+- manifest: `./manifest.webmanifest?v=10p26`
 - manifest `display`: `standalone`
 - manifest `start_url`: `./`
 - manifest `scope`: `./`
@@ -416,7 +456,7 @@ iPhoneのホーム画面から独立Webアプリとして起動できるよう�
 親モードには「起動診断」を追加しています。通常Safariで開いた場合は「Safari」、ホーム画面からstandalone起動できている場合は `navigator.standalone` または `display-mode: standalone` に基づいて「独立アプリ」と表示します。子ども側の画面には表示されません。
 
 ## ぬりえ
-ぬりえは10種類を維持しています。表の必要スターは標準値です。親モードの「ぬりえ設定」で変更した場合、子ども側のぬりえ一覧と解放時の消費スターへ反映されます。
+ぬりえは11種類です。表の必要スターは標準値です。親モードの「ぬりえ設定」で変更した場合、子ども側のぬりえ一覧と解放時の消費スターへ反映されます。
 
 | ぬりえ | templateId | 必要スター | designVersion |
 | --- | --- | ---: | ---: |
@@ -430,6 +470,7 @@ iPhoneのホーム画面から独立Webアプリとして起動できるよう�
 | ライオン | `coloring_lion` | 32 | 2 |
 | パンダ | `coloring_panda` | 36 | 1 |
 | バッタ | `coloring_grasshopper` | 40 | 2 |
+| びりびり ねずみ | `coloring_electric_mouse` | 44 | 1 |
 
 12色クレヨンパレット、まほうの仕上げ、アルバム、世界選択、世界間移動、自由配置は維持しています。
 

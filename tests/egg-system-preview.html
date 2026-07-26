@@ -190,7 +190,7 @@
           <button data-action="ready">readyへ進める</button>
           <button class="primary" data-action="hatch">孵化する</button>
           <button data-action="duplicate">同じ鳥を再孵化</button>
-          <button data-action="favorite">お気に入り変更</button>
+          <button data-action="favorite">おきにいり変更</button>
           <button class="danger" data-action="reset">データリセット</button>
         </div>
         <p id="status" class="status"></p>
@@ -291,7 +291,7 @@
             KA.companions.renderCompanion(species.id, { silhouette: !owned }),
             '<h3>' + escapeHtml(species.name) + '</h3>',
             owned ? '<p><span class="badge">なかよし ' + Number(owned.bondLevel || 1) + '</span></p><p>' + Number(owned.hatchCount || 1) + '回</p>' : '<p>まだ あっていないよ</p>',
-            owned && owned.isFavorite ? '<p class="badge">お気に入り</p>' : '',
+            owned && owned.isFavorite ? '<p class="badge">おきにいり</p>' : '',
             '</article>'
           ].join("");
         }).join("");
@@ -398,7 +398,7 @@
             data.companions.forEach(function (item) { item.isFavorite = false; });
             companion.isFavorite = !companion.isFavorite;
           }
-          setStatus("お気に入りを切り替えました。");
+          setStatus("おきにいりを切り替えました。");
           render();
         }
         if (action === "reset") {

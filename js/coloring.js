@@ -776,6 +776,131 @@
               "back_leg",
               "antennae"
           ]
+      },
+      "coloring_electric_mouse": {
+          "templateId": "coloring_electric_mouse",
+          "viewBox": "0 0 240 180",
+          "sourceLabel": "original",
+          "candidateVersion": 1,
+          "designVersion": 1,
+          "regions": [
+              {
+                  "id": "tail",
+                  "d": "M158 118 C181 124 205 112 204 94 C203 80 186 75 177 85 C169 95 177 107 188 104 C194 102 197 97 196 91 C205 108 189 129 158 132 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "tail_spark",
+                  "d": "M204 76 C209 80 213 80 219 77 C217 83 218 88 222 92 C215 91 211 93 208 99 C206 93 202 90 196 89 C201 85 203 82 204 76 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "left_ear",
+                  "d": "M77 62 C56 60 41 47 43 29 C45 14 61 8 74 17 C88 26 93 44 88 58 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "right_ear",
+                  "d": "M153 58 C148 43 153 25 167 17 C181 9 196 16 197 31 C199 49 184 61 163 62 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "left_ear_inner",
+                  "d": "M70 53 C58 51 51 43 52 31 C53 23 61 20 68 25 C77 31 81 42 79 51 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "right_ear_inner",
+                  "d": "M162 51 C160 41 164 30 173 25 C180 21 188 24 188 32 C189 44 181 52 169 54 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "body",
+                  "d": "M77 62 C71 50 80 36 98 31 C120 25 147 34 158 51 C167 65 163 80 155 89 C168 103 171 130 158 148 C143 169 100 173 79 153 C61 136 62 105 76 90 C68 81 69 70 77 62 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "belly",
+                  "d": "M96 101 C107 92 135 92 146 103 C157 118 151 145 122 151 C94 146 86 119 96 101 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "left_arm",
+                  "d": "M77 91 C62 91 47 97 36 108 C40 116 51 119 62 115 C70 112 77 105 82 98 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "right_arm",
+                  "d": "M158 90 C174 91 189 97 200 108 C196 116 185 119 174 115 C166 112 159 105 154 98 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "left_foot",
+                  "d": "M85 144 C70 148 65 162 76 170 C89 173 103 169 108 158 C103 148 95 143 85 144 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "right_foot",
+                  "d": "M153 144 C168 148 173 162 162 170 C149 173 135 169 130 158 C135 148 143 143 153 144 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "head_tuft",
+                  "d": "M101 33 C96 22 101 14 109 9 C110 18 115 23 120 27 C122 17 129 12 138 12 C134 21 134 28 138 35 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "left_cheek_star",
+                  "d": "M87 75 L91 82 L99 82 L93 88 L95 96 L87 92 L80 96 L81 88 L75 83 L84 82 Z",
+                  "fallback": "#FFFFFF"
+              },
+              {
+                  "id": "right_cheek_star",
+                  "d": "M149 75 L153 82 L162 82 L155 88 L157 96 L149 92 L142 96 L143 88 L137 83 L146 82 Z",
+                  "fallback": "#FFFFFF"
+              }
+          ],
+          "outer": [
+              "M77 62 C56 60 41 47 43 29 C45 14 61 8 74 17 C88 26 93 44 88 58",
+              "M153 58 C148 43 153 25 167 17 C181 9 196 16 197 31 C199 49 184 61 163 62",
+              "M77 62 C71 50 80 36 98 31 C120 25 147 34 158 51 C167 65 163 80 155 89 C168 103 171 130 158 148 C143 169 100 173 79 153 C61 136 62 105 76 90 C68 81 69 70 77 62 Z",
+              "M77 91 C62 91 47 97 36 108 C40 116 51 119 62 115 C70 112 77 105 82 98",
+              "M158 90 C174 91 189 97 200 108 C196 116 185 119 174 115 C166 112 159 105 154 98",
+              "M85 144 C70 148 65 162 76 170 C89 173 103 169 108 158",
+              "M153 144 C168 148 173 162 162 170 C149 173 135 169 130 158",
+              "M158 118 C181 124 205 112 204 94 C203 80 186 75 177 85 C169 95 177 107 188 104 C194 102 197 97 196 91",
+              "M204 76 C209 80 213 80 219 77 C217 83 218 88 222 92 C215 91 211 93 208 99 C206 93 202 90 196 89 C201 85 203 82 204 76 Z",
+              "M101 33 C96 22 101 14 109 9 C110 18 115 23 120 27 C122 17 129 12 138 12 C134 21 134 28 138 35"
+          ],
+          "inner": [
+              {
+                  "d": "M58 32 C64 36 71 40 78 42"
+              },
+              {
+                  "d": "M162 42 C169 39 176 35 182 31"
+              },
+              {
+                  "d": "M96 101 C108 109 134 109 146 103"
+              },
+              {
+                  "d": "M79 153 C94 158 108 159 122 151 C136 159 149 157 158 148"
+              },
+              {
+                  "d": "M47 108 C55 109 63 106 70 101"
+              },
+              {
+                  "d": "M189 108 C181 109 173 106 166 101"
+              }
+          ],
+          "face": "<ellipse cx=\"105\" cy=\"68\" rx=\"4\" ry=\"5\" fill=\"#263238\"/><ellipse cx=\"136\" cy=\"68\" rx=\"4\" ry=\"5\" fill=\"#263238\"/><circle cx=\"106\" cy=\"67\" r=\"1.2\" fill=\"#ffffff\"/><circle cx=\"137\" cy=\"67\" r=\"1.2\" fill=\"#ffffff\"/><path d=\"M117 79 C120 76 123 76 126 79 C124 84 119 84 117 79 Z\" fill=\"#6B4A42\"/><path d=\"M121 84 C116 89 109 88 106 84 M121 84 C126 89 133 88 136 84\" fill=\"none\" stroke=\"#4A3A36\" stroke-width=\"2\" stroke-linecap=\"round\"/>",
+          "hitAreas": [
+              "left_ear_inner",
+              "right_ear_inner",
+              "left_cheek_star",
+              "right_cheek_star",
+              "tail_spark",
+              "head_tuft"
+          ]
       }
   };
 
@@ -939,6 +1064,10 @@
     return svgLayeredAnimal("coloring_grasshopper", "バッタ", colors, className);
   }
 
+  function svgElectricMouse(colors, className) {
+    return svgLayeredAnimal("coloring_electric_mouse", "びりびり ねずみ", colors, className);
+  }
+
   function renderTemplate(templateId, regionColors, className) {
     if (templateId === "coloring_butterfly_001") return svgButterfly(regionColors, className);
     if (templateId === "coloring_flower_001") return svgFlower(regionColors, className);
@@ -950,6 +1079,7 @@
     if (templateId === "coloring_lion") return svgLion(regionColors, className);
     if (templateId === "coloring_panda") return svgPanda(regionColors, className);
     if (templateId === "coloring_grasshopper") return svgGrasshopper(regionColors, className);
+    if (templateId === "coloring_electric_mouse") return svgElectricMouse(regionColors, className);
     return "";
   }
 

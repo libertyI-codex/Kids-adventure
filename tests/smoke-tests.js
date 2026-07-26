@@ -43,6 +43,10 @@ function sha256File(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex").toUpperCase();
 }
 
+function sha256Json(value) {
+  return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex").toUpperCase();
+}
+
 function pngInfo(filePath) {
   const bytes = fs.readFileSync(filePath);
   return {
@@ -69,8 +73,8 @@ jsFiles.forEach((file) => {
   new vm.Script(read(path.join("js", file)), { filename: file });
 });
 [
-  ["app.js", ["renderHome", "getHomeAdventureSnapshot", "renderHomeHero", "renderHomeAdventure", "renderCompanionStatus", "renderParentJobSettings", "customJobEditor", "bindParentJobSettings"]],
-  ["companions.js", ["renderCompanion"]],
+  ["app.js", ["renderHome", "getHomeAdventureSnapshot", "renderHomeHero", "renderHomeAdventure", "renderCompanionStatus", "renderParentJobSettings", "customJobEditor", "openCompanionNicknameDialog", "showCompanionEvolutionDialog", "bindParentJobSettings"]],
+  ["companions.js", ["renderCompanion", "normalizeCompanionNickname", "getCompanionDisplayName", "setCompanionNickname", "clearCompanionNickname", "getCompanionEvolutionStage", "increaseCompanionBond"]],
   ["tasks.js", ["ensureJobSettings", "dailyTasks", "completeTask", "setJobEnabled", "addCustomJob", "updateCustomJob", "deleteCustomJob"]],
   ["migrations.js", ["ensureDataShape", "createDefaultAppData"]]
 ].forEach(([file, expectedNames]) => {
@@ -107,8 +111,11 @@ const bootJs = read(path.join("js", "boot.js"));
 const appJs = read(path.join("js", "app.js"));
 const stylesCss = read(path.join("css", "styles.css"));
 const uiPolishPreview = read(path.join("tests", "ui-polish-preview.html"));
-const cacheQuery = "10p23";
-const scriptOrder = Array.from(indexHtml.matchAll(/<script\s+defer\s+src="js\/([^"?]+)\?v=10p23"><\/script>/g)).map((match) => match[1]);
+const nicknamePreview = read(path.join("tests", "companion-nickname-preview.html"));
+const legendPreview = read(path.join("tests", "legend-companions-coloring-preview.html"));
+const evolutionPreview = read(path.join("tests", "companion-evolution-preview.html"));
+const cacheQuery = "10p26";
+const scriptOrder = Array.from(indexHtml.matchAll(/<script\s+defer\s+src="js\/([^"?]+)\?v=10p26"><\/script>/g)).map((match) => match[1]);
 assert(scriptOrder[0] === "boot.js", "boot.js should load before app scripts");
 assert(scriptOrder.indexOf("constants.js") > scriptOrder.indexOf("boot.js"), "constants should load after boot.js");
 assert(scriptOrder.indexOf("companions.js") > scriptOrder.indexOf("eggs.js"), "companions.js should load after eggs.js");
@@ -131,20 +138,23 @@ assert(indexHtml.indexOf("10p19") < 0 && bootJs.indexOf("10p19") < 0 && appJs.in
 assert(!/10p21(?!h1)/.test(indexHtml + bootJs + JSON.stringify(manifestJson)), "old v=10p21 query should not remain in production code");
 assert(indexHtml.indexOf("10p21h1") < 0 && bootJs.indexOf("10p21h1") < 0 && appJs.indexOf("10p21h1") < 0 && JSON.stringify(manifestJson).indexOf("10p21h1") < 0, "old v=10p21h1 query should not remain in production code");
 assert(indexHtml.indexOf("10p22") < 0 && bootJs.indexOf("10p22") < 0 && appJs.indexOf("10p22") < 0 && JSON.stringify(manifestJson).indexOf("10p22") < 0, "old v=10p22 query should not remain in production code");
+assert(indexHtml.indexOf("10p23") < 0 && bootJs.indexOf("10p23") < 0 && appJs.indexOf("10p23") < 0 && JSON.stringify(manifestJson).indexOf("10p23") < 0, "old v=10p23 query should not remain in production code");
+assert(indexHtml.indexOf("10p24") < 0 && bootJs.indexOf("10p24") < 0 && appJs.indexOf("10p24") < 0 && JSON.stringify(manifestJson).indexOf("10p24") < 0, "old v=10p24 query should not remain in production code");
+assert(indexHtml.indexOf("10p25") < 0 && bootJs.indexOf("10p25") < 0 && appJs.indexOf("10p25") < 0 && JSON.stringify(manifestJson).indexOf("10p25") < 0, "old v=10p25 query should not remain in production code");
 assert(indexHtml.indexOf('name="apple-mobile-web-app-capable" content="yes"') >= 0, "apple mobile web app capable meta missing");
 assert(indexHtml.indexOf('name="apple-mobile-web-app-title" content="こどもの冒険"') >= 0, "apple mobile web app title meta missing");
-assert(indexHtml.indexOf('rel="manifest" href="./manifest.webmanifest?v=10p23"') >= 0, "manifest link missing");
+assert(indexHtml.indexOf('rel="manifest" href="./manifest.webmanifest?v=10p26"') >= 0, "manifest link missing");
 assert(manifestJson.display === "standalone", "manifest display should be standalone");
 assert(manifestJson.start_url === "./", "manifest start_url should match deployed directory");
 assert(manifestJson.scope === "./", "manifest scope should match deployed directory");
 assert(Array.isArray(manifestJson.icons) && manifestJson.icons.length >= 1, "manifest should include icons");
-assert(manifestJson.icons[0].src === "./apple-touch-icon.png?v=10p23", "manifest icon should use apple touch icon");
+assert(manifestJson.icons[0].src === "./apple-touch-icon.png?v=10p26", "manifest icon should use apple touch icon");
 assert(indexHtml.indexOf("serviceWorker") < 0 && bootJs.indexOf("serviceWorker") < 0 && appJs.indexOf("serviceWorker") < 0, "service worker should not be added for standalone support");
-assert(indexHtml.indexOf('src="./apple-touch-icon.png?v=10p23"') >= 0, "startup splash should use apple-touch-icon v=10p23");
-assert(indexHtml.indexOf('rel="preload" as="image" href="./apple-touch-icon.png?v=10p23"') >= 0, "startup preload missing");
+assert(indexHtml.indexOf('src="./apple-touch-icon.png?v=10p26"') >= 0, "startup splash should use apple-touch-icon v=10p26");
+assert(indexHtml.indexOf('rel="preload" as="image" href="./apple-touch-icon.png?v=10p26"') >= 0, "startup preload missing");
 const appleTouchLinks = Array.from(indexHtml.matchAll(/<link\s+[^>]*rel=["']apple-touch-icon["'][^>]*>/g));
 assert(appleTouchLinks.length === 1, "apple-touch-icon should exist exactly once");
-assert(appleTouchLinks[0][0].indexOf('href="./apple-touch-icon.png?v=10p23"') >= 0, "apple-touch-icon href should use v=10p23");
+assert(appleTouchLinks[0][0].indexOf('href="./apple-touch-icon.png?v=10p26"') >= 0, "apple-touch-icon href should use v=10p26");
 assert((indexHtml.match(/data-startup-splash/g) || []).length === 1, "startup splash DOM should exist once");
 assert((indexHtml.match(/id="boot-recovery-root"/g) || []).length === 1, "boot recovery root should exist once");
 assert(indexHtml.indexOf('data-min-ms="1200"') >= 0, "startup splash should have minimum display time");
@@ -302,8 +312,8 @@ function runStartupCase(name, storedAppData, storedUiState, options) {
     webkitAudioContext: function () {},
     navigator: { userAgent: "SmokeTest Safari", clipboard: null },
     location: {
-      href: opts.safeStart ? "file:///kodomo/index.html?safeStart=1&v=10p23" : "file:///kodomo/index.html?v=10p23",
-      search: opts.safeStart ? "?safeStart=1&v=10p23" : "?v=10p23",
+      href: opts.safeStart ? "file:///kodomo/index.html?safeStart=1&v=10p26" : "file:///kodomo/index.html?v=10p26",
+      search: opts.safeStart ? "?safeStart=1&v=10p26" : "?v=10p26",
       reload() { caseContext.__reloaded = true; }
     },
     addEventListener(name, handler) {
@@ -412,21 +422,23 @@ if (fs.existsSync(adoptedIconPath)) {
 
 const appData = KA.state.getAppData();
 assert(appData.schemaVersion === 1, "schemaVersion should stay 1");
-assert(appData.appVersion === "1.0.0-prototype.23", "appVersion should be prototype 23");
-assert(KA.constants.VERSION_LABEL === "Ver.1.0 試作23", "version label mismatch");
+assert(appData.appVersion === "1.0.0-prototype.26", "appVersion should be prototype 26");
+assert(KA.constants.VERSION_LABEL === "Ver.1.0 試作26", "version label mismatch");
 assert(KA.constants.STORAGE_KEYS.appData === "kodomoAdventure.appData.v1", "app data key changed");
 assert(KA.constants.STORAGE_KEYS.uiState === "kodomoAdventure.uiState.v1", "ui state key changed");
 assert(KA.constants.STORAGE_KEYS.backup === "kodomoAdventure.backup.v1", "backup key changed");
 assert(KA.constants.SCHEMA_VERSION === 1, "constant schemaVersion should stay 1");
-assert(KA.constants.COLORING_TEMPLATES.length === 10, "coloring templates should remain 10");
+assert(KA.constants.COLORING_TEMPLATES.length === 11, "coloring templates should be 11");
+assert(sha256Json(KA.constants.COLORING_TEMPLATES.slice(0, 10)) === "7269D4ACE6DD52140005A9CD84939B1F08EDD3BAA9456E22282C9CC7221A2AE2", "the existing ten coloring definitions should remain unchanged");
 assert(KA.constants.WORLD_DEFINITIONS.length === 6, "worlds should remain 6");
 assert(appData.worlds.world_secret_base && appData.worlds.world_secret_base.designVersion === 1, "secret base should remain available");
 assert(KA.constants.DEFAULT_TASKS.length === 7, "formal jobs should include the six existing jobs and cleanup");
 const formalJobIds = KA.constants.DEFAULT_TASKS.map((task) => task.taskId);
 assert(new Set(formalJobIds).size === formalJobIds.length, "formal job IDs should be unique");
 const cleanupJob = KA.constants.DEFAULT_TASKS.filter((task) => task.taskId === "job_cleanup")[0];
-assert(cleanupJob && cleanupJob.title === "おかたづけ", "job_cleanup should be a formal job");
-assert(cleanupJob.active === true && cleanupJob.rewardStars === 1, "job_cleanup should be initially enabled with the standard reward");
+assert(cleanupJob && cleanupJob.title === "おかたづけBOXをからにする", "job_cleanup should keep its ID and use the prototype 24 title");
+assert(cleanupJob.active === true && cleanupJob.rewardStars === 2, "job_cleanup should be initially enabled with the two-star reward");
+assert(KA.constants.DEFAULT_TASKS.filter((task) => task.taskId !== "job_cleanup").every((task) => task.rewardStars === 1), "other formal job rewards should remain unchanged");
 assert(cleanupJob.description && cleanupJob.iconKey === "toybox", "job_cleanup should include description and a hand-drawn icon key");
 assert(KA.tasks.renderTaskIcon(cleanupJob).indexOf("<svg") >= 0, "job_cleanup should render inline SVG");
 
@@ -444,7 +456,30 @@ assert(stylesCss.indexOf(".bird-house-room.is-decorating") >= 0, "bird-house dec
 assert(stylesCss.indexOf("@media (prefers-reduced-motion: reduce)") >= 0, "reduced-motion support should remain");
 assert(uiPolishPreview.indexOf("きょうの ぼうけん") >= 0 && uiPolishPreview.indexOf("data-route=") < 0, "UI polish preview should include today's adventure without linking to production navigation");
 assert(uiPolishPreview.indexOf("localStorage.") < 0, "UI polish preview should not access production localStorage");
-assert(uiPolishPreview.indexOf("../css/styles.css?v=10p23") >= 0, "UI polish preview should use prototype 23 styles");
+assert(uiPolishPreview.indexOf("../css/styles.css?v=10p26") >= 0, "UI polish preview should use prototype 26 styles");
+assert(nicknamePreview.indexOf("本番localStorageを使用しません") >= 0, "nickname preview should not use production localStorage");
+assert(nicknamePreview.indexOf("../js/companions.js?v=10p26") >= 0, "nickname preview should use prototype 26 companion renderer");
+assert(legendPreview.indexOf("本番localStorageを使用しません") >= 0 && legendPreview.indexOf("localStorage.") < 0, "legend preview should avoid production localStorage");
+["でんせつの かみなりのとり", "でんせつの ほのおのとり", "びりびり ねずみ", "取得前カード", "取得後カード", "とりのおうち表示", "キッチンの鳥選択", "おでかけの鳥選択", "孵化ダイアログ", "作品サムネイル", "390px", "reduced-motion"].forEach((label) => {
+  assert(legendPreview.indexOf(label) >= 0, "legend preview should include " + label);
+});
+assert(legendPreview.indexOf("../js/coloring.js?v=10p26") >= 0, "legend preview should use prototype 26 coloring renderer");
+assert(evolutionPreview.indexOf("本番localStorageは使いません") >= 0 && evolutionPreview.indexOf("localStorage.") < 0, "evolution preview should avoid production localStorage");
+assert(evolutionPreview.indexOf("../js/companions.js?v=10p26") >= 0, "evolution preview should use prototype 26 companion renderer");
+["13種類 × 3段階", "stage 1", "stage 2", "stage 3", "進化演出", "とりのおうち 13羽"].forEach((label) => {
+  assert(evolutionPreview.indexOf(label) >= 0, "evolution preview should include " + label);
+});
+assert(appJs.indexOf("お気に入り") < 0, "old user-facing favorite spelling should not remain in app UI");
+assert(appJs.indexOf("おきにいり") >= 0, "hiragana favorite spelling should exist in app UI");
+assert(appJs.indexOf("isFavorite") >= 0 && read("js/companions.js").indexOf("favoriteCompanion") >= 0, "internal favorite identifiers should remain unchanged");
+assert(appJs.indexOf('data-edit-companion-nickname') >= 0 && appJs.indexOf('maxlength="12"') >= 0, "owned companion cards should expose a twelve-character nickname editor");
+assert(appJs.indexOf("getCompanionDisplayName") >= 0, "screens should use the shared companion display-name function");
+assert(appJs.indexOf("data-clear-companion-nickname") >= 0, "nickname editor should support restoring the formal name");
+assert(stylesCss.indexOf(".companion-display-name") >= 0 && stylesCss.indexOf("overflow-wrap: anywhere") >= 0, "long nickname styles should prevent horizontal overflow");
+assert(nicknamePreview.indexOf("localStorage.") < 0, "nickname preview should not call localStorage");
+["ホーム", "なかまずかん", "とりのおうち", "キッチン", "おでかけ", "12文字", "HTMLタグ風"].forEach((label) => {
+  assert(nicknamePreview.indexOf(label) >= 0, "nickname preview should include " + label);
+});
 assert(homeSource.indexOf("なかまのようす") < 0 && appJs.indexOf("function renderCompanionStatus") >= 0, "companion status should be rendered through the inline status function");
 assert(appJs.indexOf("なかまのようす") >= 0, "companion status heading should exist");
 assert(appJs.indexOf("きょうのようす") < 0, "old user-facing today status label should be removed");
@@ -543,17 +578,36 @@ KA.tasks.resetJobSettings(true);
 assert(KA.tasks.activeTasks().length === 7, "standard reset should restore all seven formal daily jobs");
 const currentRecord = KA.state.getDailyRecord();
 const eggActivityBeforeJobSetting = JSON.stringify(appData.eggSystem.dailyActivity || {});
+const cleanupSpendableBefore = appData.profile.starTotals.spendableStars;
+const cleanupLifetimeBefore = appData.profile.starTotals.lifetimeStars;
+const cleanupEarnedBefore = Number(currentRecord.earnedStarsToday || 0);
+currentRecord.completedTasks = currentRecord.completedTasks.filter((item) => item.taskId !== "job_cleanup");
+const cleanupCompletion = KA.tasks.completeTask("job_cleanup");
+assert(cleanupCompletion.ok && cleanupCompletion.task.rewardStars === 2, "job_cleanup should complete through the standard task path with two stars");
+assert(appData.profile.starTotals.spendableStars === cleanupSpendableBefore + 2, "cleanup should add two spendable stars");
+assert(appData.profile.starTotals.lifetimeStars === cleanupLifetimeBefore + 2, "cleanup should add two lifetime stars");
+assert(Number(currentRecord.earnedStarsToday || 0) === cleanupEarnedBefore + 2, "cleanup should add two stars to today's ledger total");
+assert(!KA.tasks.completeTask("job_cleanup").ok, "cleanup should not grant stars twice on the same day");
+assert(KA.tasks.undoTask("job_cleanup").ok, "cleanup test completion should be undoable");
+assert(appData.profile.starTotals.spendableStars === cleanupSpendableBefore, "cleanup undo should use the completion reward snapshot");
+assert(appData.profile.starTotals.lifetimeStars === cleanupLifetimeBefore, "cleanup undo should restore lifetime stars");
+appData.eggSystem.dailyActivity = JSON.parse(eggActivityBeforeJobSetting || "{}");
 currentRecord.completedTasks.push({ taskId: "job_cleanup", taskTitle: "おかたづけ", rewardStars: 1, status: "completed" });
 assert(KA.tasks.setJobEnabled("job_cleanup", false).ok, "cleanup should be disableable from parent settings");
 assert(currentRecord.completedTasks.some((item) => item.taskId === "job_cleanup" && item.status === "completed"), "disabling a job should preserve completed history");
 assert(JSON.stringify(appData.eggSystem.dailyActivity || {}) === eggActivityBeforeJobSetting, "job settings should not rewind egg activity");
-currentRecord.completedTasks = currentRecord.completedTasks.filter((item) => !(item.taskId === "job_cleanup" && item.taskTitle === "おかたづけ"));
+KA.migrations.ensureDataShape(appData);
+const legacyCleanupCompletion = currentRecord.completedTasks.filter((item) => item.taskId === "job_cleanup" && item.taskTitle === "おかたづけ")[0];
+assert(legacyCleanupCompletion && legacyCleanupCompletion.rewardStars === 1, "old cleanup history should not receive a retroactive star difference");
+currentRecord.completedTasks = currentRecord.completedTasks.filter((item) => item.taskId !== "job_cleanup");
 KA.tasks.resetJobSettings(true);
 const settingsBeforeEnsure = JSON.stringify(appData.jobSettings);
 KA.migrations.ensureDataShape(appData);
 assert(JSON.stringify(appData.jobSettings) === settingsBeforeEnsure, "ensureDataShape should not reset valid job settings");
 assert(appData.coloringSettings && Array.isArray(appData.coloringSettings.order), "coloringSettings order should be present");
-assert(appData.coloringSettings.order.length === 10, "coloringSettings order should contain 10 templateIds");
+assert(appData.coloringSettings.order.length === 11, "coloringSettings order should contain 11 templateIds");
+assert(appData.coloringSettings.order[10] === "coloring_electric_mouse", "prototype 24 coloring order should append the new template");
+assert(appData.coloringSettings.starCosts.coloring_electric_mouse === 44, "electric mouse should use the standard 44-star cost");
 assert(appData.coloringSettings.starCosts.coloring_butterfly_001 === 4, "default butterfly star cost should be 4");
 assert(KA.coloring.getEffectiveColoringStarCost("coloring_butterfly_001") === 4, "standard star cost should be effective by default");
 assert(KA.coloring.getOrderedColoringTemplates()[0].templateId === "coloring_butterfly_001", "standard coloring order should be used by default");
@@ -573,7 +627,7 @@ const malformedEnsured = KA.migrations.ensureDataShape(malformedColoringSettings
 assert(malformedEnsured.order[0] === "coloring_panda", "valid custom order should be preserved first");
 assert(malformedEnsured.order.indexOf("missing_template") < 0, "invalid templateId should be removed from order");
 assert(malformedEnsured.order.filter((id) => id === "coloring_panda").length === 1, "duplicate templateId should be removed");
-assert(malformedEnsured.order.length === 10, "missing templateIds should be appended");
+assert(malformedEnsured.order.length === 11, "missing templateIds should be appended");
 assert(malformedEnsured.starCosts.coloring_panda === 0, "full-width zero should normalize to 0");
 assert(malformedEnsured.starCosts.coloring_flower_001 === 999, "999 star cost should be valid");
 assert(malformedEnsured.starCosts.coloring_butterfly_001 === 4, "negative cost should fall back to standard");
@@ -593,7 +647,7 @@ assert(preservedTwice.coloringSettings.starCosts.coloring_lion === 999, "user st
 
 const beforeSettingStars = appData.profile.starTotals.spendableStars;
 KA.coloring.saveColoringSettings({
-  order: ["coloring_panda", "coloring_butterfly_001", "coloring_flower_001", "coloring_rabbit_001", "coloring_cat_001", "coloring_dolphin_001", "coloring_dinosaur_001", "coloring_horse_001", "coloring_lion", "coloring_grasshopper"],
+  order: ["coloring_panda", "coloring_butterfly_001", "coloring_flower_001", "coloring_rabbit_001", "coloring_cat_001", "coloring_dolphin_001", "coloring_dinosaur_001", "coloring_horse_001", "coloring_lion", "coloring_grasshopper", "coloring_electric_mouse"],
   starCosts: {
     coloring_panda: 0,
     coloring_flower_001: 0,
@@ -842,8 +896,8 @@ const houseLayoutData = KA.birdHouse.companionLayout(houseConditionData, "compan
 assert(houseLayoutData.length === 6, "house should render acquired birds only");
 assert(houseLayoutData.filter((entry) => entry.species.id === "companion_peacock")[0].isFocus === true, "focused or favorite bird should be central");
 assert(new Set(houseLayoutData.map((entry) => entry.species.id)).size === houseLayoutData.length, "house should not duplicate species");
-const elevenBirdHouseData = KA.migrations.createDefaultAppData();
-elevenBirdHouseData.companions = KA.companions.allSpecies().map((item, index) => ({
+const thirteenBirdHouseData = KA.migrations.createDefaultAppData();
+thirteenBirdHouseData.companions = KA.companions.allSpecies().map((item, index) => ({
   id: item.id,
   speciesId: item.id,
   firstHatchedAt: "2026-07-01T09:00:00+09:00",
@@ -853,13 +907,13 @@ elevenBirdHouseData.companions = KA.companions.allSpecies().map((item, index) =>
   mealCount: 0,
   isFavorite: index === 6
 }));
-const elevenBirdLayout = KA.birdHouse.companionLayout(elevenBirdHouseData);
-assert(elevenBirdLayout.length === 11, "bird house should render all eleven acquired species");
-assert(new Set(elevenBirdLayout.map((entry) => entry.x + ":" + entry.y)).size === 11, "eleven-bird house positions should not overlap exactly");
-elevenBirdLayout.forEach((entry) => {
-  assert(entry.x >= 10 && entry.x <= 90 && entry.y >= 46 && entry.y <= 82, entry.species.id + " should stay inside the fixed house layout");
+const thirteenBirdLayout = KA.birdHouse.companionLayout(thirteenBirdHouseData);
+assert(thirteenBirdLayout.length === 13, "bird house should render all thirteen acquired species");
+assert(new Set(thirteenBirdLayout.map((entry) => entry.x + ":" + entry.y)).size === 13, "thirteen-bird house positions should not overlap exactly");
+thirteenBirdLayout.forEach((entry) => {
+  assert(entry.x >= 8 && entry.x <= 92 && entry.y >= 44 && entry.y <= 82, entry.species.id + " should stay inside the fixed house layout");
 });
-assert(elevenBirdLayout[0].species.id === "companion_penguin" && elevenBirdLayout[0].isFocus, "favorite new species should receive the focus position");
+assert(thirteenBirdLayout[0].species.id === "companion_penguin" && thirteenBirdLayout[0].isFocus, "favorite new species should receive the focus position");
 KA.birdHouse.recordInteraction("companion_chick", houseConditionData);
 assert(houseConditionData.birdHouse.lastInteractedCompanionId === "companion_chick", "house interaction should save only the last interacted companion");
 KA.birdHouse.clearUnseen(houseConditionData);
@@ -917,7 +971,7 @@ assert(clickBoot(recoveryCase.document, "data-boot-reload"), "reload button shou
 assert(recoveryCase.context.__reloaded === true, "reload button should call location.reload");
 assert(clickBoot(recoveryCase.document, "data-boot-safe-start"), "safeStart button should be handled by boot");
 assert(recoveryCase.context.location.href.indexOf("safeStart=1") >= 0, "safeStart button should navigate with safeStart=1");
-assert(recoveryCase.context.location.href.indexOf("v=10p23") >= 0, "safeStart button should keep prototype 23 cache query");
+assert(recoveryCase.context.location.href.indexOf("v=10p26") >= 0, "safeStart button should keep prototype 26 cache query");
 assert(clickBoot(recoveryCase.document, "data-boot-copy"), "copy button should be handled by boot");
 const diagnostics = JSON.parse(recoveryCase.storage["kodomoAdventure.bootDiagnostic.v1"]);
 assert(Array.isArray(diagnostics) && diagnostics.length >= 1, "diagnostics should be saved");
@@ -933,7 +987,8 @@ const expectedTemplates = {
   coloring_horse_001: 9,
   coloring_lion: 2,
   coloring_panda: 1,
-  coloring_grasshopper: 2
+  coloring_grasshopper: 2,
+  coloring_electric_mouse: 1
 };
 Object.keys(expectedTemplates).forEach((templateId) => {
   const template = KA.coloring.getTemplate(templateId);
@@ -941,9 +996,86 @@ Object.keys(expectedTemplates).forEach((templateId) => {
   assert(template.designVersion === expectedTemplates[templateId], templateId + " designVersion changed");
 });
 
+const electricMouseTemplate = KA.coloring.getTemplate("coloring_electric_mouse");
+const electricMouseDefinition = KA.coloring.getLayeredDefinition("coloring_electric_mouse");
+const electricMouseRequiredRegions = [
+  "body",
+  "belly",
+  "left_ear",
+  "right_ear",
+  "left_ear_inner",
+  "right_ear_inner",
+  "left_cheek_star",
+  "right_cheek_star",
+  "left_arm",
+  "right_arm",
+  "left_foot",
+  "right_foot",
+  "tail",
+  "tail_spark",
+  "head_tuft"
+];
+assert(electricMouseTemplate && electricMouseTemplate.title === "びりびり ねずみ", "electric mouse coloring should have the formal title");
+assert(electricMouseTemplate.regionIds.length === 15 && new Set(electricMouseTemplate.regionIds).size === 15, "electric mouse coloring should have fifteen unique regions");
+electricMouseRequiredRegions.forEach((regionId) => {
+  assert(electricMouseTemplate.regionIds.indexOf(regionId) >= 0, "electric mouse template should include " + regionId);
+});
+assert(electricMouseDefinition && electricMouseDefinition.regions.length === 15, "electric mouse layered SVG should define fifteen regions");
+assert(new Set(electricMouseDefinition.regions.map((region) => region.id)).size === 15, "electric mouse layered SVG region IDs should be unique");
+const electricMouseSvg = KA.coloring.renderTemplate("coloring_electric_mouse", {
+  body: "#9AD4C8",
+  belly: "#FFF4C9",
+  left_ear: "#B7D7F0",
+  right_ear: "#B7D7F0",
+  left_ear_inner: "#F3B7C8",
+  right_ear_inner: "#F3B7C8",
+  left_cheek_star: "#F7CF67",
+  right_cheek_star: "#F7CF67",
+  left_arm: "#9AD4C8",
+  right_arm: "#9AD4C8",
+  left_foot: "#C4A7E7",
+  right_foot: "#C4A7E7",
+  tail: "#78B6C8",
+  tail_spark: "#F7CF67",
+  head_tuft: "#80C6AE"
+}, "editable-svg");
+assert(electricMouseSvg.indexOf('aria-label="びりびり ねずみ"') >= 0, "electric mouse SVG should have an accessible label");
+assert((electricMouseSvg.match(/class="color-region"/g) || []).length === 15, "electric mouse should render fifteen colorable regions");
+assert(electricMouseSvg.indexOf("<img") < 0 && electricMouseSvg.indexOf("http") < 0 && electricMouseSvg.indexOf("<use") < 0, "electric mouse should use only internal SVG paths");
+assert(electricMouseDefinition.regions.filter((region) => region.id === "tail")[0].d.indexOf("C181 124 205 112") >= 0, "electric mouse should use a curled tail");
+assert(electricMouseDefinition.regions.filter((region) => region.id === "left_cheek_star")[0].d.indexOf("L91 82") >= 0, "electric mouse cheek should use a star shape");
+const electricArtworkBefore = appData.artworks.length;
+const electricArtworkResult = KA.coloring.createArtwork("coloring_electric_mouse", {
+  body: "#9AD4C8",
+  belly: "#FFF4C9",
+  left_ear: "#B7D7F0",
+  right_ear: "#B7D7F0",
+  left_ear_inner: "#F3B7C8",
+  right_ear_inner: "#F3B7C8",
+  left_cheek_star: "#F7CF67",
+  right_cheek_star: "#F7CF67",
+  left_arm: "#9AD4C8",
+  right_arm: "#9AD4C8",
+  left_foot: "#C4A7E7",
+  right_foot: "#C4A7E7",
+  tail: "#78B6C8",
+  tail_spark: "#F7CF67",
+  head_tuft: "#80C6AE"
+});
+assert(electricArtworkResult.ok && appData.artworks.length === electricArtworkBefore + 1, "electric mouse artwork should save through the existing artwork format");
+assert(electricArtworkResult.artwork.templateId === "coloring_electric_mouse" && electricArtworkResult.artwork.regionColors.tail_spark === "#F7CF67", "electric mouse artwork should preserve template and region colors");
+assert(KA.coloring.renderTemplate(electricArtworkResult.artwork.templateId, electricArtworkResult.artwork.regionColors, "").indexOf("<svg") >= 0, "saved electric mouse artwork should render as an album thumbnail");
+const restoredElectricArtworkData = KA.migrations.createDefaultAppData();
+restoredElectricArtworkData.artworks = [JSON.parse(JSON.stringify(electricArtworkResult.artwork))];
+KA.migrations.ensureDataShape(restoredElectricArtworkData);
+assert(restoredElectricArtworkData.artworks[0].templateId === "coloring_electric_mouse", "JSON migration should preserve electric mouse artwork");
+assert(restoredElectricArtworkData.artworks[0].regionColors.left_cheek_star === "#F7CF67", "JSON migration should preserve electric mouse region colors");
+
 const species = KA.companions.allSpecies();
 const speciesIds = species.map((item) => item.id);
-assert(species.length === 11, "formal companion species should be 11");
+assert(species.length === 13, "formal companion species should be 13");
+assert(sha256Json(species) === "383C1C719B736C5C7DCDBDAEC4B379C3B0B68D9982CB1E45B8144A1A64EF3F47", "all thirteen stage 1 species definitions should remain identical to prototype 25");
+assert(sha256Json(species.slice(0, 11)) === "65579F80D55AAF1C56DD8584C7E9CA53342DE57BFE084152598470D8A8AF83DB", "the existing eleven companion definitions should remain unchanged");
 [
   "companion_chick",
   "companion_duck",
@@ -955,7 +1087,9 @@ assert(species.length === 11, "formal companion species should be 11");
   "companion_shimaenaga",
   "companion_parakeet",
   "companion_java_sparrow",
-  "companion_ice_legend_bird"
+  "companion_ice_legend_bird",
+  "companion_thunder_legend_bird",
+  "companion_fire_legend_bird"
 ].forEach((speciesId, index) => {
   const item = KA.companions.getSpecies(speciesId);
   assert(item, speciesId + " should exist");
@@ -1020,7 +1154,9 @@ assert(sparrow.regions.filter((region) => region.id === "beak")[0].d.indexOf("L3
   { id: "companion_shimaenaga", name: "しまえなが", regions: ["body", "wing", "tail", "beak", "legs"] },
   { id: "companion_parakeet", name: "いんこ", regions: ["body", "head", "wing", "tail", "beak"] },
   { id: "companion_java_sparrow", name: "ぶんちょう", regions: ["body", "head", "wing", "tail", "beak"] },
-  { id: "companion_ice_legend_bird", name: "こおりの でんせつどり", regions: ["left_wing", "right_wing", "body", "crest", "tail"] }
+  { id: "companion_ice_legend_bird", name: "こおりの でんせつどり", regions: ["left_wing", "right_wing", "body", "crest", "tail"] },
+  { id: "companion_thunder_legend_bird", name: "でんせつの かみなりのとり", regions: ["left_wing", "right_wing", "body", "chest_cloud", "lightning_marks", "crest", "tail"] },
+  { id: "companion_fire_legend_bird", name: "でんせつの ほのおのとり", regions: ["left_wing", "right_wing", "left_wing_layer", "right_wing_layer", "body", "chest_petal", "spark_marks", "tail"] }
 ].forEach((expected) => {
   const item = KA.companions.getSpecies(expected.id);
   assert(item && item.name === expected.name && item.designVersion === 1, expected.id + " should be a formal version 1 species");
@@ -1045,15 +1181,114 @@ oldOwnedData.companions = species.slice(0, 6).map((item, index) => ({
 const newSpeciesIds = species.slice(6).map((item) => item.id);
 for (let candidateIndex = 0; candidateIndex < 20; candidateIndex += 1) {
   const candidateId = KA.companions.pickSpeciesForEgg({ id: "egg_new_candidate_" + candidateIndex }, oldOwnedData);
-  assert(newSpeciesIds.indexOf(candidateId) >= 0, "unowned-priority hatch pool should select one of the five new species");
+  assert(newSpeciesIds.indexOf(candidateId) >= 0, "unowned-priority hatch pool should select one of the seven species added after the original six");
 }
 assert(
   KA.companions.pickSpeciesForEgg({ id: "egg_planned", plannedSpeciesId: "companion_java_sparrow" }, oldOwnedData) === "companion_java_sparrow",
   "valid plannedSpeciesId should remain fixed after the species expansion"
 );
+const prototype24OwnedData = KA.migrations.createDefaultAppData();
+prototype24OwnedData.companions = species.slice(0, 11).map((item) => ({
+  id: item.id,
+  speciesId: item.id,
+  firstHatchedAt: "2026-07-01T09:00:00+09:00",
+  lastHatchedAt: "2026-07-01T09:00:00+09:00",
+  hatchCount: 1,
+  bondLevel: 1,
+  isFavorite: false
+}));
+const prototype25SpeciesIds = species.slice(11).map((item) => item.id);
+for (let candidateIndex = 0; candidateIndex < 20; candidateIndex += 1) {
+  const egg = { id: "egg_p25_candidate_" + candidateIndex };
+  const firstPick = KA.companions.pickSpeciesForEgg(egg, prototype24OwnedData);
+  const secondPick = KA.companions.pickSpeciesForEgg(egg, prototype24OwnedData);
+  assert(prototype25SpeciesIds.indexOf(firstPick) >= 0, "prototype 24 data should prioritize one of the two newly unowned species");
+  assert(firstPick === secondPick, "fixed seed should return the same newly added species for the same egg");
+}
+assert(
+  KA.companions.pickSpeciesForEgg({ id: "egg_p25_planned", plannedSpeciesId: "companion_thunder_legend_bird" }, prototype24OwnedData) === "companion_thunder_legend_bird",
+  "plannedSpeciesId should preserve the new thunder species"
+);
+const rehatchData = KA.migrations.createDefaultAppData();
+const firstThunderHatch = KA.companions.recordHatch(rehatchData, "companion_thunder_legend_bird", "2026-07-20T09:00:00+09:00");
+firstThunderHatch.nickname = "らいと";
+firstThunderHatch.isFavorite = true;
+const secondThunderHatch = KA.companions.recordHatch(rehatchData, "companion_thunder_legend_bird", "2026-07-21T09:00:00+09:00");
+assert(rehatchData.companions.length === 1, "rehatching a new legend bird should not duplicate its card");
+assert(secondThunderHatch.hatchCount === 2 && secondThunderHatch.bondLevel === 2, "rehatching should increase hatchCount and bondLevel once");
+assert(secondThunderHatch.nickname === "らいと" && secondThunderHatch.isFavorite === true, "rehatching should preserve nickname and favorite state");
+assert(KA.companions.getCompanionDisplayName(secondThunderHatch) === "らいと", "new legend birds should use the shared nickname display function");
 ["coloring_rabbit_001", "coloring_cat_001", "coloring_lion", "coloring_panda", "coloring_grasshopper", "coloring_flower_001"].forEach((notSpecies) => {
   assert(speciesIds.indexOf(notSpecies) === -1, notSpecies + " must not be a companion species");
 });
+
+assert(KA.companions.getCompanionEvolutionStage({ bondLevel: 1 }) === 1, "bondLevel 1 should use evolution stage 1");
+assert(KA.companions.getCompanionEvolutionStage({ bondLevel: 2 }) === 1, "bondLevel 2 should use evolution stage 1");
+assert(KA.companions.getCompanionEvolutionStage({ bondLevel: 3 }) === 2, "bondLevel 3 should use evolution stage 2");
+assert(KA.companions.getCompanionEvolutionStage({ bondLevel: 4 }) === 2, "bondLevel 4 should use evolution stage 2");
+assert(KA.companions.getCompanionEvolutionStage({ bondLevel: 5 }) === 3, "bondLevel 5 should use evolution stage 3");
+assert(KA.companions.getCompanionEvolutionStage({ bondLevel: 99 }) === 3, "bondLevel above 5 should use evolution stage 3");
+[undefined, null, NaN, -1, "5", {}, []].forEach((bondLevel) => {
+  assert(KA.companions.getCompanionEvolutionStage({ bondLevel }) === 1, "invalid bondLevel should safely use evolution stage 1");
+});
+assert(KA.companions.getEvolutionStageLabel(1) === "ちいさなすがた", "stage 1 label mismatch");
+assert(KA.companions.getEvolutionStageLabel(2) === "せいちょうしたすがた", "stage 2 label mismatch");
+assert(KA.companions.getEvolutionStageLabel(3) === "とくべつなすがた", "stage 3 label mismatch");
+assert(Object.keys(KA.companions.evolutionDecorations).length === 13, "all thirteen species should define evolution decorations");
+speciesIds.forEach((speciesId) => {
+  const stage1 = KA.companions.renderCompanion(speciesId, { stage: 1 });
+  const stage2 = KA.companions.renderCompanion(speciesId, { stage: 2 });
+  const stage3 = KA.companions.renderCompanion(speciesId, { stage: 3 });
+  assert(stage1.indexOf("companion-evolution-decoration") < 0, speciesId + " stage 1 should not add evolution decoration");
+  assert(stage2.indexOf('data-evolution-stage="2"') >= 0, speciesId + " stage 2 should add evolution decoration");
+  assert(stage3.indexOf('data-evolution-stage="3"') >= 0, speciesId + " stage 3 should add evolution decoration");
+  assert(stage2.indexOf("role=\"img\"") >= 0 && stage2.indexOf("せいちょうしたすがた") >= 0, speciesId + " stage 2 should expose an accessible SVG label");
+  assert(stage3.indexOf("とくべつなすがた") >= 0, speciesId + " stage 3 should expose its stage in the SVG label");
+});
+assert(appJs.indexOf("KA.companions.renderCompanion") >= 0 && appJs.indexOf("getCompanionEvolutionStage") < 0, "screens should use the shared renderer instead of duplicating stage thresholds");
+assert(appJs.indexOf("data-show-evolution") >= 0 && appJs.indexOf("data-close-companion-evolution") >= 0, "home and dialog should expose evolution controls");
+assert(appJs.indexOf('role="dialog" aria-modal="true" aria-labelledby="companion-evolution-title"') >= 0, "evolution dialog should have dialog semantics");
+assert(appJs.indexOf('event.key === "Escape"') >= 0, "evolution dialog should support Escape");
+assert(stylesCss.indexOf(".companion-evolution-modal") >= 0 && stylesCss.indexOf("@keyframes evolutionReveal") >= 0, "evolution dialog should have a gentle reveal");
+assert(stylesCss.indexOf("@media (prefers-reduced-motion: reduce)") >= 0, "evolution effects should honor reduced motion");
+
+const legacyEvolutionData = KA.migrations.createDefaultAppData();
+legacyEvolutionData.companions = [
+  { id: "companion_chick", speciesId: "companion_chick", hatchCount: 2, bondLevel: 4, isFavorite: true, nickname: "ぴよ", mealCount: 8, lastFedAt: "2026-07-20T09:00:00+09:00" },
+  { id: "companion_duck", speciesId: "companion_duck", hatchCount: 1, bondLevel: 5, isFavorite: false, nickname: "", mealCount: 2, lastFedAt: null }
+];
+KA.migrations.ensureDataShape(legacyEvolutionData);
+assert(legacyEvolutionData.companions[0].lastSeenEvolutionStage === 2 && legacyEvolutionData.companions[1].lastSeenEvolutionStage === 3, "prototype 25 data should mark the current evolution stage as seen");
+assert(KA.companions.pendingEvolutionCompanions(legacyEvolutionData).length === 0, "existing users should not receive a chain of migration dialogs");
+assert(legacyEvolutionData.companions[0].nickname === "ぴよ" && legacyEvolutionData.companions[0].isFavorite === true, "evolution migration should preserve nickname and favorite");
+assert(legacyEvolutionData.companions[0].hatchCount === 2 && legacyEvolutionData.companions[0].bondLevel === 4 && legacyEvolutionData.companions[0].mealCount === 8, "evolution migration should preserve companion progress");
+const legacyEvolutionOnce = JSON.stringify(legacyEvolutionData.companions);
+KA.migrations.ensureDataShape(legacyEvolutionData);
+assert(JSON.stringify(legacyEvolutionData.companions) === legacyEvolutionOnce, "evolution migration should be idempotent");
+
+const stageTwoEvolutionData = KA.migrations.createDefaultAppData();
+const stageTwoCompanion = KA.companions.recordHatch(stageTwoEvolutionData, "companion_penguin", "2026-07-21T09:00:00+09:00");
+stageTwoCompanion.bondLevel = 2;
+stageTwoCompanion.lastSeenEvolutionStage = 1;
+stageTwoCompanion.nickname = "ぺんちゃん";
+stageTwoCompanion.isFavorite = true;
+stageTwoCompanion.mealCount = 3;
+const stageTwoResult = KA.companions.increaseCompanionBond(stageTwoCompanion, 1, "test");
+assert(stageTwoResult.evolved && stageTwoResult.previousStage === 1 && stageTwoResult.currentStage === 2, "bondLevel 2 to 3 should trigger stage 2");
+assert(KA.companions.pendingEvolutionCompanions(stageTwoEvolutionData).length === 1, "unseen stage 2 should be pending exactly once");
+KA.companions.markEvolutionStageSeen(stageTwoCompanion);
+assert(KA.companions.pendingEvolutionCompanions(stageTwoEvolutionData).length === 0, "seen stage 2 should not repeat");
+assert(stageTwoCompanion.nickname === "ぺんちゃん" && stageTwoCompanion.isFavorite === true && stageTwoCompanion.mealCount === 3, "stage 2 should preserve nickname, favorite and meals");
+
+stageTwoCompanion.bondLevel = 4;
+stageTwoCompanion.lastSeenEvolutionStage = 2;
+const stageThreeResult = KA.companions.increaseCompanionBond(stageTwoCompanion, 1, "test");
+assert(stageThreeResult.evolved && stageThreeResult.previousStage === 2 && stageThreeResult.currentStage === 3, "bondLevel 4 to 5 should trigger stage 3");
+assert(KA.companions.pendingEvolutionCompanions(stageTwoEvolutionData).length === 1, "unseen stage 3 should be pending exactly once");
+KA.companions.markEvolutionStageSeen(stageTwoCompanion);
+assert(KA.companions.pendingEvolutionCompanions(stageTwoEvolutionData).length === 0, "seen stage 3 should not repeat after reload");
+assert(read(path.join("js", "kitchen.js")).indexOf('increaseCompanionBond(companion, 1, "meal")') >= 0, "meal bond increases should use the shared bond function");
+assert(read(path.join("js", "companions.js")).indexOf('increaseCompanionBond(companion, 1, "rehatch")') >= 0, "rehatch bond increases should use the shared bond function");
 
 function countActiveLike(data) {
   return data.eggInventory.filter((egg) => ["active", "warm", "glowing", "cracked", "ready"].indexOf(egg.state) >= 0).length;
@@ -1204,6 +1439,30 @@ assert(hatch2.ok, "repeat hatch should succeed");
 assert(data.companions.filter((companion) => companion.speciesId === hatch1.species.id).length === 1, "repeat hatch should not duplicate companion card");
 const repeated = KA.companions.getCompanion(data, hatch1.species.id);
 assert(repeated.hatchCount === 2 && repeated.bondLevel === 2, "repeat hatch should increase count and bond");
+assert(repeated.nickname === "", "older companion data should receive an empty nickname safely");
+assert(KA.companions.getCompanionDisplayName(repeated) === hatch1.species.name, "display name should fall back to the formal species name");
+const nicknameSet = KA.companions.setCompanionNickname(hatch1.species.id, " ぴよ\nちゃん ");
+assert(nicknameSet.ok && repeated.nickname === "ぴよちゃん", "nickname should trim outer spaces and remove line breaks");
+assert(KA.companions.getCompanionDisplayName(repeated) === "ぴよちゃん", "display name should prefer the nickname");
+assert(!KA.companions.setCompanionNickname("companion_penguin", "ぺんちゃん").ok, "an unowned companion should not accept a nickname");
+assert(!KA.companions.setCompanionNickname(hatch1.species.id, "　　　　　　").ok, "spaces-only nickname should be rejected");
+assert(!KA.companions.setCompanionNickname(hatch1.species.id, "1234567890123").ok, "nickname longer than twelve characters should be rejected");
+assert(repeated.nickname === "ぴよちゃん", "invalid nickname input should not replace the saved nickname");
+assert(KA.companions.clearCompanionNickname(hatch1.species.id).ok && repeated.nickname === "", "nickname should be removable");
+assert(KA.companions.getCompanionDisplayName(repeated) === hatch1.species.name, "clearing nickname should restore the formal species name");
+const malformedNicknameData = KA.migrations.createDefaultAppData();
+malformedNicknameData.companions = [
+  { id: "companion_chick", speciesId: "companion_chick", hatchCount: 1, bondLevel: 4, isFavorite: true, nickname: "<b>ぴよ</b>\n長い長い長い長い名前" },
+  { id: "companion_duck", speciesId: "companion_duck", hatchCount: 1, bondLevel: 2, nickname: { bad: true } }
+];
+KA.migrations.ensureDataShape(malformedNicknameData);
+assert(KA.companions.companionNicknameLength(malformedNicknameData.companions[0].nickname) <= 12, "imported nickname should normalize to at most twelve characters");
+assert(malformedNicknameData.companions[0].nickname.indexOf("\n") < 0, "imported nickname should remove line breaks");
+assert(malformedNicknameData.companions[0].nickname.indexOf("<b>") >= 0, "HTML-like nickname should be preserved only as display text");
+assert(malformedNicknameData.companions[1].nickname === "", "non-string nickname should normalize to unset");
+const nicknameDataOnce = JSON.stringify(malformedNicknameData.companions);
+KA.migrations.ensureDataShape(malformedNicknameData);
+assert(JSON.stringify(malformedNicknameData.companions) === nicknameDataOnce, "nickname migration should be idempotent");
 KA.companions.setFavorite(hatch1.species.id, true);
 assert(KA.companions.favoriteCompanion(data).speciesId === hatch1.species.id, "favorite should be set");
 KA.companions.setFavorite(hatch1.species.id, false);
@@ -1347,7 +1606,7 @@ const exportPayload = {
   uiState: KA.state.getUiState()
 };
 const exportText = JSON.stringify(exportPayload);
-["eggInventory", "eggSystem", "dailyActivity", "growthPoints", "targetGrowthPoints", "isFirstHatchEgg", "warmed", "sang", "plannedSpeciesId", "companionId", "companions", "firstHatchedAt", "lastHatchedAt", "hatchCount", "bondLevel", "isFavorite", "mealCount", "bondMealProgress", "lastBondMealDate", "lastFedAt", "kitchen", "currentCooking", "recipeStats", "cookingHistory", "ingredientInventory", "birdHouse", "unlockedItemIds", "unlockedAtByItemId", "unseenItemIds", "placements", "lastVisitedAt", "lastInteractedCompanionId", "outing", "activeTrip", "history", "totalTripCount", "destinationStats", "lastClaimedTripId", "claimedTripIds", "rewardPlan", "tripId", "claimedAt", "coloringSettings", "starCosts", "order", "jobSettings", "dailyDisplayCount", "enabledJobIds", "displayOrder", "customJobs", "dailySelectionsByDate"].forEach((key) => {
+["eggInventory", "eggSystem", "dailyActivity", "growthPoints", "targetGrowthPoints", "isFirstHatchEgg", "warmed", "sang", "plannedSpeciesId", "companionId", "companions", "firstHatchedAt", "lastHatchedAt", "hatchCount", "bondLevel", "lastSeenEvolutionStage", "isFavorite", "nickname", "mealCount", "bondMealProgress", "lastBondMealDate", "lastFedAt", "kitchen", "currentCooking", "recipeStats", "cookingHistory", "ingredientInventory", "birdHouse", "unlockedItemIds", "unlockedAtByItemId", "unseenItemIds", "placements", "lastVisitedAt", "lastInteractedCompanionId", "outing", "activeTrip", "history", "totalTripCount", "destinationStats", "lastClaimedTripId", "claimedTripIds", "rewardPlan", "tripId", "claimedAt", "coloringSettings", "starCosts", "order", "jobSettings", "dailyDisplayCount", "enabledJobIds", "displayOrder", "customJobs", "dailySelectionsByDate"].forEach((key) => {
   assert(exportText.indexOf(key) >= 0, "JSON export shape should include " + key);
 });
 

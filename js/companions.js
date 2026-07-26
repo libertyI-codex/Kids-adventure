@@ -339,11 +339,299 @@
         "M98 145 C91 149 85 149 79 146 M133 145 C140 149 146 149 152 146"
       ],
       face: '<circle cx="116" cy="48" r="3.4" fill="#1E3A8A"/><circle cx="117" cy="47" r="1.1" fill="#fff"/><path d="M100 58 C107 63 116 64 124 60" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round"/>'
+    },
+    {
+      id: "companion_thunder_legend_bird",
+      name: "でんせつの かみなりのとり",
+      displayOrder: 12,
+      designVersion: 1,
+      preferredWorldIds: ["world_sky_island", "world_secret_base", "world_castle"],
+      defaultColors: { body: "#4F83B3", chest: "#FFF7DD", wing: "#80C7E8", tail: "#5AA6D6", beak: "#F6D66A", leg: "#476A87" },
+      viewBox: "0 0 240 170",
+      transparentOuterBox: true,
+      outlineStroke: "#386B93",
+      outlineWidth: 2.6,
+      innerStroke: "#4F83B3",
+      innerWidth: 2,
+      outer: [
+        "M92 69 C70 64 48 49 20 35 C15 55 23 73 39 84 C28 87 21 96 22 108 C48 111 70 103 91 90 Z",
+        "M148 69 C170 64 192 49 220 35 C225 55 217 73 201 84 C212 87 219 96 218 108 C192 111 170 103 149 90 Z",
+        "M94 54 C103 39 126 36 140 49 C156 64 157 103 142 126 C132 143 108 143 98 126 C83 103 80 74 94 54 Z",
+        "M98 43 C94 31 99 20 108 16 C111 25 114 31 119 35 C123 25 131 20 140 22 C135 32 134 39 137 47 Z",
+        "M98 122 C87 136 83 150 86 164 L113 143 L120 166 L128 143 L155 164 C157 149 151 135 141 122 Z"
+      ],
+      regions: [
+        { id: "left_wing", d: "M91 69 C69 64 48 50 21 37 C18 54 25 70 42 82 C32 88 27 96 26 104 C49 107 70 99 90 88 Z", fill: "#80C7E8" },
+        { id: "right_wing", d: "M149 69 C171 64 192 50 219 37 C222 54 215 70 198 82 C208 88 213 96 214 104 C191 107 170 99 150 88 Z", fill: "#80C7E8" },
+        { id: "body", d: "M96 57 C106 43 127 42 138 54 C153 70 152 103 139 124 C129 140 110 140 100 124 C87 103 85 73 96 57 Z", fill: "#4F83B3" },
+        { id: "chest_cloud", d: "M100 82 C99 73 108 67 116 71 C121 63 133 66 134 76 C144 77 147 89 139 95 C142 109 133 126 120 129 C107 126 98 110 101 96 C91 91 92 80 100 82 Z", fill: "#FFF7DD" },
+        { id: "head", d: "M96 49 C105 36 126 34 139 47 C151 59 145 76 131 82 C116 88 96 81 90 67 C87 59 90 53 96 49 Z", fill: "#A8DDF0" },
+        { id: "crest", d: "M99 43 C96 32 100 22 108 18 C110 27 114 33 119 37 C123 28 130 23 138 24 C134 34 133 40 136 46 Z", fill: "#DDF4FA" },
+        { id: "tail", d: "M99 121 C89 136 86 149 88 160 L113 141 L120 164 L128 141 L153 160 C154 147 149 135 140 121 Z", fill: "#5AA6D6" },
+        { id: "lightning_marks", d: "M44 58 C52 60 58 63 65 67 L59 73 C66 76 72 80 78 86 C67 82 57 78 48 72 L55 67 C50 64 46 62 44 58 Z M196 58 C188 60 182 63 175 67 L181 73 C174 76 168 80 162 86 C173 82 183 78 192 72 L185 67 C190 64 194 62 196 58 Z", fill: "#F6D66A" },
+        { id: "beak", d: "M138 57 C153 58 159 65 153 74 C146 70 141 65 138 57 Z", fill: "#F6D66A" },
+        { id: "feet", d: "M107 135 L103 151 M132 135 L137 151", fill: "none" }
+      ],
+      inner: [
+        "M34 74 C48 78 63 84 78 91",
+        "M206 74 C192 78 177 84 162 91",
+        "M99 91 C109 98 130 99 140 91",
+        "M103 124 C111 132 129 132 137 124",
+        "M103 151 C96 155 90 155 84 152 M137 151 C144 155 150 155 156 152"
+      ],
+      face: '<circle cx="115" cy="55" r="3.5" fill="#24445F"/><circle cx="116" cy="54" r="1.1" fill="#fff"/><path d="M100 65 C107 71 118 72 126 67" fill="none" stroke="#386B93" stroke-width="2" stroke-linecap="round"/>'
+    },
+    {
+      id: "companion_fire_legend_bird",
+      name: "でんせつの ほのおのとり",
+      displayOrder: 13,
+      designVersion: 1,
+      preferredWorldIds: ["world_castle", "world_sky_island", "world_island"],
+      defaultColors: { body: "#E56F61", chest: "#FFF0D6", wing: "#F39A67", tail: "#D95D52", beak: "#F6CF72", leg: "#9B5A46" },
+      viewBox: "0 0 240 170",
+      transparentOuterBox: true,
+      outlineStroke: "#9F5A4D",
+      outlineWidth: 2.6,
+      innerStroke: "#B96A54",
+      innerWidth: 2,
+      outer: [
+        "M92 69 C69 65 44 51 17 37 C17 57 27 75 45 84 C34 90 28 99 29 110 C52 111 73 102 93 90 Z",
+        "M148 69 C171 65 196 51 223 37 C223 57 213 75 195 84 C206 90 212 99 211 110 C188 111 167 102 147 90 Z",
+        "M94 52 C106 37 129 38 141 52 C156 69 155 104 141 127 C131 143 109 143 99 127 C84 104 82 70 94 52 Z",
+        "M95 121 C75 133 61 148 55 164 L93 150 L120 166 L147 150 L185 164 C179 147 165 133 145 121 Z"
+      ],
+      regions: [
+        { id: "left_wing", d: "M92 69 C70 65 45 52 19 39 C20 57 29 72 47 82 C38 89 33 97 33 106 C55 107 75 99 93 88 Z", fill: "#F39A67" },
+        { id: "right_wing", d: "M148 69 C170 65 195 52 221 39 C220 57 211 72 193 82 C202 89 207 97 207 106 C185 107 165 99 147 88 Z", fill: "#F39A67" },
+        { id: "left_wing_layer", d: "M49 57 C61 63 74 70 88 75 L84 89 C68 84 54 77 42 68 Z", fill: "#F7B57D" },
+        { id: "right_wing_layer", d: "M191 57 C179 63 166 70 152 75 L156 89 C172 84 186 77 198 68 Z", fill: "#F7B57D" },
+        { id: "body", d: "M96 55 C107 42 128 42 139 55 C153 72 152 103 138 125 C129 140 111 140 101 125 C87 103 85 72 96 55 Z", fill: "#E56F61" },
+        { id: "chest_petal", d: "M120 70 C132 81 135 96 128 108 C124 115 116 115 111 108 C103 96 107 81 120 70 Z", fill: "#FFF0D6" },
+        { id: "head", d: "M96 48 C108 35 129 37 140 50 C151 63 144 79 129 84 C114 89 96 81 90 67 C87 59 90 53 96 48 Z", fill: "#F2A177" },
+        { id: "tail", d: "M96 120 C77 132 64 145 59 159 L94 147 L120 163 L146 147 L181 159 C176 145 163 132 144 120 Z", fill: "#D95D52" },
+        { id: "spark_marks", d: "M44 91 C48 86 53 86 56 91 C53 97 47 97 44 91 Z M66 101 C70 96 75 97 78 102 C74 107 69 107 66 101 Z M184 91 C187 86 192 86 196 91 C193 97 187 97 184 91 Z M162 102 C165 97 170 96 174 101 C171 107 166 107 162 102 Z M82 145 C86 140 91 140 94 146 C90 151 85 151 82 145 Z M146 145 C149 140 154 140 158 145 C155 151 149 151 146 145 Z", fill: "#F6CF72" },
+        { id: "beak", d: "M139 57 C154 58 160 65 154 74 C147 70 142 65 139 57 Z", fill: "#F6CF72" },
+        { id: "feet", d: "M107 135 L103 151 M132 135 L137 151", fill: "none" }
+      ],
+      inner: [
+        "M29 64 C45 72 63 81 82 89",
+        "M211 64 C195 72 177 81 158 89",
+        "M49 57 C61 64 74 71 88 75",
+        "M191 57 C179 64 166 71 152 75",
+        "M101 124 C111 132 129 132 139 124",
+        "M103 151 C96 155 90 155 84 152 M137 151 C144 155 150 155 156 152"
+      ],
+      face: '<circle cx="116" cy="54" r="3.5" fill="#6B3B32"/><circle cx="117" cy="53" r="1.1" fill="#fff"/><path d="M101 65 C108 71 119 71 127 66" fill="none" stroke="#9F5A4D" stroke-width="2" stroke-linecap="round"/>'
     }
   ];
 
+  var EVOLUTION_STAGE_LABELS = {
+    1: "ちいさなすがた",
+    2: "せいちょうしたすがた",
+    3: "とくべつなすがた"
+  };
+
+  var EVOLUTION_DECORATIONS = {
+    companion_chick: {
+      2: {
+        front: '<path d="M43 79 Q55 69 67 78 M96 78 Q108 69 119 79 M74 28 Q78 19 82 28" fill="none" stroke="#E3A827" stroke-width="3" stroke-linecap="round"/><path d="M53 76 l7 5 -8 3 M109 76 l-7 5 8 3" fill="#FFF1A8"/>'
+      },
+      3: {
+        front: '<path d="M38 72 Q53 58 69 70 M94 70 Q110 58 125 72 M70 27 Q76 13 81 27 M82 27 Q88 14 92 29" fill="none" stroke="#D99B1E" stroke-width="3" stroke-linecap="round"/><g fill="#F7C948"><path d="M25 48 l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"/><path d="M132 42 l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></g>'
+      }
+    },
+    companion_duck: {
+      2: {
+        front: '<path d="M58 83 Q72 72 88 78 M72 92 Q85 82 100 88" fill="none" stroke="#E6A83B" stroke-width="3" stroke-linecap="round"/><path d="M93 54 Q100 64 93 70 Q86 64 93 54Z" fill="#BDEBFA" stroke="#6AB7D6" stroke-width="2"/>'
+      },
+      3: {
+        front: '<path d="M49 76 Q70 59 94 70 M54 91 Q76 72 103 83 M111 94 Q123 86 136 91" fill="none" stroke="#D99A32" stroke-width="3" stroke-linecap="round"/><g fill="#8FD7F2"><circle cx="35" cy="49" r="4"/><circle cx="141" cy="39" r="3"/><path d="M27 71 q5-9 10 0 q-5 7-10 0z"/></g>'
+      }
+    },
+    companion_parrot: {
+      2: {
+        front: '<path d="M49 82 Q63 68 78 74 M54 94 Q68 80 83 86 M82 35 Q86 23 90 36" fill="none" stroke="#2F8F65" stroke-width="3" stroke-linecap="round"/><path d="M61 84 l8 4 -7 5z" fill="#F4D35E"/>'
+      },
+      3: {
+        front: '<path d="M42 75 Q62 56 82 67 M47 91 Q68 70 88 82 M82 35 Q86 18 91 35 M91 36 Q97 22 101 39 M91 116 l-6 19 M101 116 l5 20" fill="none" stroke="#247A59" stroke-width="3" stroke-linecap="round"/><g fill="#F4D35E"><circle cx="29" cy="55" r="3"/><circle cx="136" cy="48" r="3"/><path d="M139 67 v11 q8-4 8 2 q-1 7-10 4 v-17z"/></g>'
+      }
+    },
+    companion_peacock: {
+      2: {
+        front: '<g fill="none" stroke="#D8B84D" stroke-width="3"><circle cx="-55" cy="-30" r="10"/><circle cx="192" cy="-31" r="10"/></g><g fill="#5CB7A5"><circle cx="-55" cy="-30" r="4"/><circle cx="192" cy="-31" r="4"/></g>'
+      },
+      3: {
+        front: '<g fill="none" stroke="#E8CE65" stroke-width="3"><circle cx="-74" cy="10" r="9"/><circle cx="210" cy="10" r="9"/><circle cx="69" cy="-73" r="10"/></g><g fill="#2F8C86"><circle cx="-74" cy="10" r="3.5"/><circle cx="210" cy="10" r="3.5"/><circle cx="69" cy="-73" r="4"/></g><g fill="#F5D96F"><path d="M-91 -39 l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path d="M224 -37 l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></g>'
+      }
+    },
+    companion_owl: {
+      2: {
+        front: '<path d="M55 87 l10 8 10-8 10 8 10-8 M65 105 l10 7 10-7" fill="none" stroke="#A77B4D" stroke-width="3" stroke-linecap="round"/><path d="M55 39 l8-9 5 12 M104 39 l-8-9-5 12" fill="#D7B27B"/>'
+      },
+      3: {
+        front: '<path d="M48 81 l13 10 13-10 13 10 13-10 M55 101 l11 9 11-9 11 9 11-9" fill="none" stroke="#93663E" stroke-width="3" stroke-linecap="round"/><g fill="#F2CD61"><path d="M30 46 l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path d="M130 38 q-10 11 1 20-17-2-14-14 2-7 13-6z"/></g>'
+      }
+    },
+    companion_sparrow: {
+      2: {
+        front: '<path d="M51 75 Q65 63 80 70 M56 86 Q70 73 84 81 M97 104 l8 15" fill="none" stroke="#8B6546" stroke-width="3" stroke-linecap="round"/><path d="M39 50 q8-7 15 0-7 8-15 0z" fill="#E8B78D"/>'
+      },
+      3: {
+        front: '<path d="M43 70 Q64 51 84 65 M49 86 Q70 66 90 80 M94 103 l6 21 M103 102 l12 18" fill="none" stroke="#765338" stroke-width="3" stroke-linecap="round"/><g fill="#EAAE8A"><path d="M25 54 q7-10 14 0-7 9-14 0z"/><path d="M132 42 q6-9 12 0-6 8-12 0z"/></g><circle cx="126" cy="74" r="3" fill="#F2CF69"/>'
+      }
+    },
+    companion_penguin: {
+      2: {
+        front: '<path d="M68 73 l15 14 15-14 M74 92 l9 9 9-9" fill="none" stroke="#83CDE5" stroke-width="3" stroke-linecap="round"/><g fill="#C9F1FA"><circle cx="39" cy="54" r="3"/><circle cx="130" cy="48" r="3"/></g>'
+      },
+      3: {
+        front: '<path d="M61 68 l22 19 22-19 M66 91 l17 15 17-15" fill="none" stroke="#65B9D6" stroke-width="3" stroke-linecap="round"/><g fill="none" stroke="#AEE7F4" stroke-width="2"><path d="M31 52 h14 M38 45 v14 M33 47 l10 10 M43 47 l-10 10"/><path d="M124 40 h14 M131 33 v14 M126 35 l10 10 M136 35 l-10 10"/></g>'
+      }
+    },
+    companion_shimaenaga: {
+      2: {
+        front: '<path d="M82 96 Q73 117 61 133 M98 96 Q105 117 117 132" fill="none" stroke="#A8B6C5" stroke-width="3" stroke-linecap="round"/><g fill="#D8EDF7"><circle cx="48" cy="47" r="4"/><circle cx="139" cy="52" r="3"/></g>'
+      },
+      3: {
+        front: '<path d="M79 94 Q67 121 51 137 M99 94 Q111 121 128 137 M88 99 L87 137" fill="none" stroke="#91A6BA" stroke-width="3" stroke-linecap="round"/><path d="M45 38 Q91 8 143 39" fill="none" stroke="#E4C6DA" stroke-width="3" stroke-linecap="round"/><g fill="#F2D6E5"><circle cx="34" cy="61" r="4"/><circle cx="151" cy="64" r="4"/></g>'
+      }
+    },
+    companion_parakeet: {
+      2: {
+        front: '<path d="M50 82 Q64 67 80 74 M55 95 Q70 79 86 87 M84 37 Q88 24 93 38" fill="none" stroke="#4E9F58" stroke-width="3" stroke-linecap="round"/><path d="M61 82 l8 5-8 5z" fill="#8ED16C"/>'
+      },
+      3: {
+        front: '<path d="M43 75 Q63 55 84 68 M49 92 Q70 70 91 83 M84 37 Q89 18 94 37 M94 38 Q101 23 105 41 M87 119 l-6 23 M99 118 l8 23" fill="none" stroke="#3C8748" stroke-width="3" stroke-linecap="round"/><g fill="#F2D35E"><path d="M137 61 v12 q8-4 8 3-1 7-10 3 v-18z"/><circle cx="29" cy="52" r="3"/></g>'
+      }
+    },
+    companion_java_sparrow: {
+      2: {
+        front: '<path d="M56 78 Q70 65 85 73 M61 91 Q75 78 90 86 M87 99 Q94 106 101 99" fill="none" stroke="#9C7D86" stroke-width="3" stroke-linecap="round"/>'
+      },
+      3: {
+        front: '<path d="M48 72 Q69 53 89 68 M54 89 Q76 69 96 84 M78 102 Q88 113 99 102" fill="none" stroke="#82636D" stroke-width="3" stroke-linecap="round"/><g fill="#F2B7C5"><path d="M32 51 q8-10 16 0-8 10-16 0z"/><path d="M137 45 q7-9 14 0-7 9-14 0z"/></g><circle cx="129" cy="73" r="3" fill="#F3D36B"/>'
+      }
+    },
+    companion_ice_legend_bird: {
+      2: {
+        front: '<path d="M54 77 Q75 62 95 72 M176 77 Q155 62 135 72 M104 91 l11 12 11-12" fill="none" stroke="#7FC8EB" stroke-width="3" stroke-linecap="round"/><g fill="none" stroke="#BDEBFA" stroke-width="2"><path d="M37 52 h14 M44 45 v14 M39 47 l10 10 M49 47 l-10 10"/></g>'
+      },
+      3: {
+        front: '<path d="M45 70 Q73 48 101 64 M185 70 Q157 48 129 64 M99 90 l16 17 16-17 M104 31 Q114 15 124 32" fill="none" stroke="#5EAFDC" stroke-width="3" stroke-linecap="round"/><g fill="none" stroke="#D9F5FC" stroke-width="2"><path d="M25 48 h16 M33 40 v16 M27 42 l12 12 M39 42 l-12 12"/><path d="M190 43 h16 M198 35 v16 M192 37 l12 12 M204 37 l-12 12"/></g>'
+      }
+    },
+    companion_thunder_legend_bird: {
+      2: {
+        front: '<path d="M91 87 Q105 76 120 84 Q135 76 150 87 M53 70 l11 7-8 7 12 7 M187 70 l-11 7 8 7-12 7" fill="none" stroke="#F3D45F" stroke-width="3" stroke-linecap="round"/>'
+      },
+      3: {
+        front: '<path d="M82 82 Q101 64 120 78 Q139 64 158 82 M43 62 l14 9-10 9 16 10 M197 62 l-14 9 10 9-16 10 M105 31 Q112 14 118 32 M121 31 Q130 15 135 36" fill="none" stroke="#F5DC72" stroke-width="3" stroke-linecap="round"/><g fill="#FFF0A1"><path d="M27 47 l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path d="M211 43 l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></g>'
+      }
+    },
+    companion_fire_legend_bird: {
+      2: {
+        front: '<path d="M48 85 q7-10 14 0-7 9-14 0z M72 98 q7-10 14 0-7 9-14 0z M178 85 q7-10 14 0-7 9-14 0z M154 98 q7-10 14 0-7 9-14 0z" fill="#F7C76D"/><path d="M96 118 Q120 132 144 118" fill="none" stroke="#E88958" stroke-width="3" stroke-linecap="round"/>'
+      },
+      3: {
+        front: '<g fill="#F7D681"><path d="M35 74 q9-13 18 0-9 12-18 0z"/><path d="M187 74 q9-13 18 0-9 12-18 0z"/><path d="M71 139 q8-12 16 0-8 11-16 0z"/><path d="M153 139 q8-12 16 0-8 11-16 0z"/></g><path d="M88 113 Q120 138 152 113 M104 38 Q112 23 120 39 M120 39 Q129 23 136 43" fill="none" stroke="#D97852" stroke-width="3" stroke-linecap="round"/><g fill="#FFF0B0"><circle cx="26" cy="48" r="3"/><circle cx="214" cy="48" r="3"/></g>'
+      }
+    }
+  };
+
   function cloneSpeciesData(value) {
     return JSON.parse(JSON.stringify(value));
+  }
+
+  function getCompanionEvolutionStage(companion) {
+    var level = companion && companion.bondLevel;
+    if (typeof level !== "number" || !isFinite(level) || level < 1) return 1;
+    if (level >= 5) return 3;
+    if (level >= 3) return 2;
+    return 1;
+  }
+
+  function getEvolutionStageLabel(stage) {
+    return EVOLUTION_STAGE_LABELS[stage] || EVOLUTION_STAGE_LABELS[1];
+  }
+
+  function getEvolutionProgress(companion) {
+    var stage = getCompanionEvolutionStage(companion);
+    var level = companion && typeof companion.bondLevel === "number" && isFinite(companion.bondLevel) && companion.bondLevel >= 1
+      ? companion.bondLevel
+      : 1;
+    if (stage === 1) return { stage: 1, label: getEvolutionStageLabel(1), nextStage: 2, nextLevel: 3, remaining: Math.max(0, 3 - level) };
+    if (stage === 2) return { stage: 2, label: getEvolutionStageLabel(2), nextStage: 3, nextLevel: 5, remaining: Math.max(0, 5 - level) };
+    return { stage: 3, label: getEvolutionStageLabel(3), nextStage: null, nextLevel: null, remaining: 0 };
+  }
+
+  function normalizeSeenEvolutionStage(value, currentStage) {
+    if (typeof value !== "number" || !isFinite(value) || value < 1 || value > 3 || Math.floor(value) !== value) {
+      return currentStage;
+    }
+    return Math.min(value, currentStage);
+  }
+
+  function ensureCompanionEvolutionState(companion) {
+    if (!companion || typeof companion !== "object") return companion;
+    var currentStage = getCompanionEvolutionStage(companion);
+    companion.lastSeenEvolutionStage = normalizeSeenEvolutionStage(companion.lastSeenEvolutionStage, currentStage);
+    return companion;
+  }
+
+  function pendingEvolutionCompanions(appData) {
+    return ensureCompanions(appData).filter(function (companion) {
+      return companion &&
+        Number(companion.hatchCount || 0) > 0 &&
+        isValidSpeciesId(companion.speciesId) &&
+        getCompanionEvolutionStage(companion) > Number(companion.lastSeenEvolutionStage || 1);
+    });
+  }
+
+  function markEvolutionStageSeen(companion) {
+    if (!companion || typeof companion !== "object") return false;
+    companion.lastSeenEvolutionStage = getCompanionEvolutionStage(companion);
+    return true;
+  }
+
+  function increaseCompanionBond(companion, amount, reason) {
+    var previousLevel = companion && typeof companion.bondLevel === "number" && isFinite(companion.bondLevel) && companion.bondLevel >= 0
+      ? companion.bondLevel
+      : 0;
+    var previousStage = getCompanionEvolutionStage({ bondLevel: previousLevel });
+    var increment = typeof amount === "number" && isFinite(amount) && amount > 0 ? amount : 0;
+    if (!companion || !increment) {
+      return { ok: false, previousLevel: previousLevel, currentLevel: previousLevel, previousStage: previousStage, currentStage: previousStage, evolved: false, reason: reason || null };
+    }
+    companion.bondLevel = previousLevel + increment;
+    var currentStage = getCompanionEvolutionStage(companion);
+    return {
+      ok: true,
+      previousLevel: previousLevel,
+      currentLevel: companion.bondLevel,
+      previousStage: previousStage,
+      currentStage: currentStage,
+      evolved: currentStage > previousStage,
+      reason: reason || null
+    };
+  }
+
+  function evolutionDecorationMarkup(speciesId, stage, layer) {
+    var definition = EVOLUTION_DECORATIONS[speciesId];
+    var parts = [];
+    if (!definition || stage < 2) return "";
+    for (var current = 2; current <= stage; current += 1) {
+      if (definition[current] && definition[current][layer]) parts.push(definition[current][layer]);
+    }
+    if (!parts.length) return "";
+    return '<g class="companion-evolution-decoration evolution-decoration-' + layer + '" data-evolution-stage="' + stage + '" aria-hidden="true">' + parts.join("") + '</g>';
+  }
+
+  function escapeSvgAttribute(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   }
 
   function allSpecies() {
@@ -397,7 +685,9 @@
       companion.id = companion.id || companion.speciesId;
       companion.speciesId = companion.speciesId || companion.id;
       companion.hatchCount = Math.max(0, Number(companion.hatchCount || 0));
-      companion.bondLevel = Math.max(0, Number(companion.bondLevel || 0));
+      companion.bondLevel = typeof companion.bondLevel === "number" && isFinite(companion.bondLevel) && companion.bondLevel >= 0
+        ? companion.bondLevel
+        : 0;
       companion.isFavorite = Boolean(companion.isFavorite);
       companion.firstHatchedAt = companion.firstHatchedAt || companion.lastHatchedAt || null;
       companion.lastHatchedAt = companion.lastHatchedAt || companion.firstHatchedAt || null;
@@ -406,6 +696,7 @@
       companion.lastBondMealDate = companion.lastBondMealDate || null;
       companion.lastFedAt = companion.lastFedAt || null;
       companion.nickname = normalizeCompanionNickname(companion.nickname);
+      ensureCompanionEvolutionState(companion);
     });
     var favoriteSeen = false;
     appData.companions.forEach(function (companion) {
@@ -500,14 +791,15 @@
         bondMealProgress: 0,
         lastBondMealDate: null,
         lastFedAt: null,
-        nickname: ""
+        nickname: "",
+        lastSeenEvolutionStage: 1
       };
       list.push(companion);
     } else {
       companion.firstHatchedAt = companion.firstHatchedAt || hatchedAt;
       companion.lastHatchedAt = hatchedAt;
       companion.hatchCount = Math.max(0, Number(companion.hatchCount || 0)) + 1;
-      companion.bondLevel = Math.max(0, Number(companion.bondLevel || 0)) + 1;
+      increaseCompanionBond(companion, 1, "rehatch");
     }
     data.updatedAt = KA.date.localIsoString();
     return companion;
@@ -537,6 +829,32 @@
     }).join("");
   }
 
+  function companionForRender(speciesId, opts) {
+    if (opts.companion) return opts.companion;
+    if (!KA.state || !KA.state.getAppData) return null;
+    try {
+      var data = KA.state.getAppData();
+      return data ? getCompanion(data, speciesId) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function renderEvolutionContext(species, opts) {
+    var companion = companionForRender(species.id, opts);
+    var requestedStage = Number(opts.stage);
+    var stage = requestedStage >= 1 && requestedStage <= 3 && Math.floor(requestedStage) === requestedStage
+      ? requestedStage
+      : getCompanionEvolutionStage(companion);
+    var displayName = opts.displayName || (companion ? getCompanionDisplayName(companion) : species.name);
+    return {
+      companion: companion,
+      stage: stage,
+      label: getEvolutionStageLabel(stage),
+      ariaLabel: opts.ariaLabel || (displayName + "、" + getEvolutionStageLabel(stage))
+    };
+  }
+
   function renderPeacockCompanion(species, opts) {
     var outlineStroke = species.outlineStroke || "#28312d";
     var innerStroke = species.innerStroke || "#5b4631";
@@ -550,6 +868,7 @@
     });
     var tailInner = species.inner.slice(0, 5);
     var bodyInner = species.inner.slice(5);
+    var evolution = renderEvolutionContext(species, opts);
     if (opts.silhouette) {
       return [
         '<svg class="companion-svg companion-silhouette companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
@@ -565,7 +884,8 @@
       ].join("");
     }
     return [
-      '<svg class="companion-svg companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+      '<svg class="companion-svg companion-peacock evolution-stage-' + evolution.stage + '" viewBox="' + species.viewBox + '" role="img" aria-label="' + escapeSvgAttribute(evolution.ariaLabel) + '" focusable="false">',
+      evolutionDecorationMarkup(species.id, evolution.stage, "back"),
       '<g class="body-regions">',
       '<g class="peacock-tail-group" transform="' + tailTransform + '">',
       tailRegions.map(function (region) {
@@ -592,6 +912,7 @@
       '<g class="face-details peacock-body-group" transform="' + bodyTransform + '">',
       species.face,
       '</g>',
+      evolutionDecorationMarkup(species.id, evolution.stage, "front"),
       '</svg>'
     ].join("");
   }
@@ -604,6 +925,7 @@
     var outlineWidth = Number(species.outlineWidth || 4.2);
     var innerWidth = Number(species.innerWidth || 2.2);
     var transparentBoxClass = species.transparentOuterBox ? " companion-transparent-box" : "";
+    var evolution = renderEvolutionContext(species, opts);
     if (species.id === "companion_peacock") {
       return renderPeacockCompanion(species, opts);
     }
@@ -615,7 +937,8 @@
       ].join("");
     }
     return [
-      '<svg class="companion-svg companion-' + species.id.replace("companion_", "") + transparentBoxClass + '" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+      '<svg class="companion-svg companion-' + species.id.replace("companion_", "") + transparentBoxClass + ' evolution-stage-' + evolution.stage + '" viewBox="' + species.viewBox + '" role="img" aria-label="' + escapeSvgAttribute(evolution.ariaLabel) + '" focusable="false">',
+      evolutionDecorationMarkup(species.id, evolution.stage, "back"),
       '<g class="body-regions">',
       species.regions.map(function (region) {
         if (region.fill === "none") {
@@ -633,6 +956,7 @@
       '<g class="face-details">',
       species.face,
       '</g>',
+      evolutionDecorationMarkup(species.id, evolution.stage, "front"),
       '</svg>'
     ].join("");
   }
@@ -645,6 +969,13 @@
     getCompanion: getCompanion,
     getCompanionSpeciesName: getCompanionSpeciesName,
     getCompanionDisplayName: getCompanionDisplayName,
+    getCompanionEvolutionStage: getCompanionEvolutionStage,
+    getEvolutionStageLabel: getEvolutionStageLabel,
+    getEvolutionProgress: getEvolutionProgress,
+    pendingEvolutionCompanions: pendingEvolutionCompanions,
+    markEvolutionStageSeen: markEvolutionStageSeen,
+    increaseCompanionBond: increaseCompanionBond,
+    evolutionDecorations: cloneSpeciesData(EVOLUTION_DECORATIONS),
     normalizeCompanionNickname: normalizeCompanionNickname,
     companionNicknameLength: companionNicknameLength,
     setCompanionNickname: setCompanionNickname,

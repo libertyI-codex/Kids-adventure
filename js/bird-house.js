@@ -302,9 +302,11 @@
       8: [{ x: 50, y: 49, scale: 0.76 }, { x: 16, y: 63, scale: 0.59 }, { x: 38, y: 64, scale: 0.59 }, { x: 62, y: 64, scale: 0.59 }, { x: 84, y: 63, scale: 0.57 }, { x: 22, y: 82, scale: 0.53 }, { x: 50, y: 82, scale: 0.53 }, { x: 78, y: 82, scale: 0.53 }],
       9: [{ x: 50, y: 48, scale: 0.74 }, { x: 14, y: 62, scale: 0.56 }, { x: 38, y: 63, scale: 0.56 }, { x: 62, y: 63, scale: 0.56 }, { x: 86, y: 62, scale: 0.54 }, { x: 15, y: 82, scale: 0.5 }, { x: 38, y: 82, scale: 0.5 }, { x: 62, y: 82, scale: 0.5 }, { x: 85, y: 82, scale: 0.5 }],
       10: [{ x: 50, y: 47, scale: 0.72 }, { x: 11, y: 62, scale: 0.53 }, { x: 30, y: 63, scale: 0.53 }, { x: 50, y: 64, scale: 0.53 }, { x: 70, y: 63, scale: 0.53 }, { x: 89, y: 62, scale: 0.51 }, { x: 18, y: 82, scale: 0.48 }, { x: 39, y: 82, scale: 0.48 }, { x: 61, y: 82, scale: 0.48 }, { x: 82, y: 82, scale: 0.48 }],
-      11: [{ x: 50, y: 46, scale: 0.7 }, { x: 10, y: 62, scale: 0.5 }, { x: 30, y: 63, scale: 0.5 }, { x: 50, y: 64, scale: 0.5 }, { x: 70, y: 63, scale: 0.5 }, { x: 90, y: 62, scale: 0.48 }, { x: 10, y: 82, scale: 0.46 }, { x: 30, y: 82, scale: 0.46 }, { x: 50, y: 82, scale: 0.46 }, { x: 70, y: 82, scale: 0.46 }, { x: 90, y: 82, scale: 0.46 }]
+      11: [{ x: 50, y: 46, scale: 0.7 }, { x: 10, y: 62, scale: 0.5 }, { x: 30, y: 63, scale: 0.5 }, { x: 50, y: 64, scale: 0.5 }, { x: 70, y: 63, scale: 0.5 }, { x: 90, y: 62, scale: 0.48 }, { x: 10, y: 82, scale: 0.46 }, { x: 30, y: 82, scale: 0.46 }, { x: 50, y: 82, scale: 0.46 }, { x: 70, y: 82, scale: 0.46 }, { x: 90, y: 82, scale: 0.46 }],
+      12: [{ x: 50, y: 45, scale: 0.65 }, { x: 10, y: 61, scale: 0.46 }, { x: 30, y: 62, scale: 0.46 }, { x: 50, y: 63, scale: 0.46 }, { x: 70, y: 62, scale: 0.46 }, { x: 90, y: 61, scale: 0.44 }, { x: 8, y: 82, scale: 0.42 }, { x: 25, y: 82, scale: 0.42 }, { x: 42, y: 82, scale: 0.42 }, { x: 58, y: 82, scale: 0.42 }, { x: 75, y: 82, scale: 0.42 }, { x: 92, y: 82, scale: 0.4 }],
+      13: [{ x: 50, y: 44, scale: 0.62 }, { x: 8, y: 61, scale: 0.43 }, { x: 25, y: 62, scale: 0.43 }, { x: 42, y: 63, scale: 0.43 }, { x: 58, y: 63, scale: 0.43 }, { x: 75, y: 62, scale: 0.43 }, { x: 92, y: 61, scale: 0.41 }, { x: 8, y: 82, scale: 0.4 }, { x: 25, y: 82, scale: 0.4 }, { x: 42, y: 82, scale: 0.4 }, { x: 58, y: 82, scale: 0.4 }, { x: 75, y: 82, scale: 0.4 }, { x: 92, y: 82, scale: 0.38 }]
     };
-    var positions = sets[Math.min(11, Math.max(1, owned.length))] || [];
+    var positions = sets[Math.min(13, Math.max(1, owned.length))] || [];
     return owned.map(function (companion, index) {
       var species = KA.companions.getSpecies(companion.speciesId);
       var position = positions[index] || { x: 50, y: 70, scale: 0.75 };

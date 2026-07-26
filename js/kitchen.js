@@ -352,7 +352,7 @@
       companion.bondMealProgress += 1;
       companion.lastBondMealDate = today;
       if (companion.bondMealProgress >= 3) {
-        companion.bondLevel = Math.max(0, Number(companion.bondLevel || 0)) + 1;
+        KA.companions.increaseCompanionBond(companion, 1, "meal");
         companion.bondMealProgress = 0;
         levelUp = true;
       }

@@ -10,8 +10,8 @@
   KA.constants = {
     APP_DISPLAY_NAME: "結羽ちゃんの冒険",
     PROJECT_NAME: "こどもの冒険",
-    APP_VERSION: "1.0.0-prototype.24",
-    VERSION_LABEL: "Ver.1.0 試作24",
+    APP_VERSION: "1.0.0-prototype.26",
+    VERSION_LABEL: "Ver.1.0 試作26",
     SCHEMA_VERSION: 1,
     PROFILE_ID: "profile_yuwa",
     WORLD_ID: "world_forest",
@@ -452,6 +452,39 @@
           { id: "middle_leg", label: "なかあし" },
           { id: "back_leg", label: "うしろあし" },
           { id: "body_segments", label: "からだのふし" }
+        ],
+        defaultUnlocked: false
+      },
+      {
+        templateId: "coloring_electric_mouse",
+        title: "びりびり ねずみ",
+        kind: "creature",
+        icon: "✦",
+        requiredStars: 44,
+        sortOrder: 110,
+        active: true,
+        worldObjectType: "electric_mouse",
+        designVersion: 1,
+        svgKey: "electric_mouse_original_v1",
+        viewBox: "0 0 240 180",
+        regionAliases: {},
+        regionIds: ["body", "belly", "left_ear", "right_ear", "left_ear_inner", "right_ear_inner", "left_cheek_star", "right_cheek_star", "left_arm", "right_arm", "left_foot", "right_foot", "tail", "tail_spark", "head_tuft"],
+        regions: [
+          { id: "body", label: "からだ" },
+          { id: "belly", label: "おなか" },
+          { id: "left_ear", label: "ひだりのみみ" },
+          { id: "right_ear", label: "みぎのみみ" },
+          { id: "left_ear_inner", label: "ひだりのみみのなか" },
+          { id: "right_ear_inner", label: "みぎのみみのなか" },
+          { id: "left_cheek_star", label: "ひだりのほしほっぺ" },
+          { id: "right_cheek_star", label: "みぎのほしほっぺ" },
+          { id: "left_arm", label: "ひだりのて" },
+          { id: "right_arm", label: "みぎのて" },
+          { id: "left_foot", label: "ひだりのあし" },
+          { id: "right_foot", label: "みぎのあし" },
+          { id: "tail", label: "しっぽ" },
+          { id: "tail_spark", label: "しっぽのひばな" },
+          { id: "head_tuft", label: "あたまのけ" }
         ],
         defaultUnlocked: false
       }

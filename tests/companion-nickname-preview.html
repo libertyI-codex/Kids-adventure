@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>試作26 鳥のニックネーム確認</title>
+  <link rel="stylesheet" href="../css/styles.css?v=10p26">
+  <style>
+    body { background: #f4fbf6; }
+    .preview-shell { width: min(760px, calc(100% - 24px)); margin: 0 auto; padding: 20px 0 40px; }
+    .preview-note { padding: 10px 12px; border-radius: 12px; background: #fff8d8; }
+    .preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+    .preview-context { min-width: 0; padding: 14px; border: 1px solid #dce9df; border-radius: 18px; background: #fff; text-align: center; }
+    .preview-context .companion-svg { width: 96px; height: 96px; }
+    .preview-context strong { display: block; min-width: 0; overflow-wrap: anywhere; }
+    .preview-controls { display: grid; gap: 10px; }
+    .preview-presets { display: flex; flex-wrap: wrap; gap: 8px; }
+    @media (max-width: 390px) {
+      .preview-shell { width: min(100% - 16px, 390px); }
+      .preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="preview-shell">
+    <p class="eyebrow">Ver.1.0 試作26</p>
+    <h1>ニックネーム確認</h1>
+    <p class="preview-note">このページは専用メモリデータだけを使い、本番localStorageを使用しません。</p>
+
+    <section class="panel panel-pad preview-controls" aria-labelledby="editor-title">
+      <h2 id="editor-title">設定・変更・削除</h2>
+      <div class="companion-nickname-target">
+        <div class="companion-nickname-art" id="bird-art"></div>
+        <p><span class="muted">しゅるい</span><br><strong>ぺんぎん</strong></p>
+      </div>
+      <label class="field" for="nickname"><span>ニックネーム</span><input id="nickname" maxlength="12" autocomplete="off" value="ぺんちゃん" aria-describedby="count status"></label>
+      <p id="count" class="field-help">5 / 12もじまで</p>
+      <p id="status" class="field-error" aria-live="polite"></p>
+      <div class="quick-actions">
+        <button class="btn btn-primary" id="save">ほぞんする</button>
+        <button class="btn btn-soft" id="clear">もとの なまえに もどす</button>
+      </div>
+      <div class="preview-presets" aria-label="入力確認">
+        <button class="btn btn-soft btn-small" data-value="ひ">1文字</button>
+        <button class="btn btn-soft btn-small" data-value="ぺんぎんスター号">ひらがな</button>
+        <button class="btn btn-soft btn-small" data-value="ペンチャン">カタカナ</button>
+        <button class="btn btn-soft btn-small" data-value="青空">漢字</button>
+        <button class="btn btn-soft btn-small" data-value="PEN24">英数字</button>
+        <button class="btn btn-soft btn-small" data-value="ぺん🐧">絵文字</button>
+        <button class="btn btn-soft btn-small" data-value="123456789012">12文字</button>
+        <button class="btn btn-soft btn-small" data-value="  ぺんちゃん  ">前後空白</button>
+        <button class="btn btn-soft btn-small" data-value="   ">空白のみ</button>
+        <button class="btn btn-soft btn-small" data-value="<b>ぺん</b>">HTMLタグ風</button>
+        <button class="btn btn-soft btn-small" id="too-long">12文字超過</button>
+      </div>
+    </section>
+
+    <section class="panel panel-pad">
+      <h2>各画面の長い名前</h2>
+      <p class="muted">ホーム、図鑑、とりのおうち、キッチン、おでかけ相当を390pxでも確認できます。</p>
+      <div class="preview-grid" id="contexts"></div>
+    </section>
+
+    <section class="panel panel-pad">
+      <h2>確認状態</h2>
+      <ul>
+        <li>ニックネーム未設定 / 設定済み</li>
+        <li>保存後の即時反映 / 変更 / 削除</li>
+        <li>1文字 / 12文字 / 12文字超過</li>
+        <li>ひらがな / カタカナ / 漢字 / 英数字 / 絵文字</li>
+        <li>前後空白 / 空白のみ / HTMLタグ風文字列</li>
+        <li>390px / 横スクロールなし / reduced-motion / safeStart相当</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    window.KodomoAdventure = {
+      state: {
+        getAppData: function () { return window.nicknamePreviewData; },
+        saveAppData: function () {}
+      },
+      date: {
+        localIsoString: function () { return "2026-07-25T12:00:00+09:00"; }
+      }
+    };
+    window.nicknamePreviewData = {
+      companions: [{
+        id: "companion_penguin",
+        speciesId: "companion_penguin",
+        hatchCount: 1,
+        bondLevel: 3,
+        isFavorite: true,
+        mealCount: 4,
+        nickname: "ぺんちゃん"
+      }]
+    };
+  </script>
+  <script src="../js/companions.js?v=10p26"></script>
+  <script>
+    (function () {
+      "use strict";
+      var KA = window.KodomoAdventure;
+      var companion = KA.companions.ensureCompanions(window.nicknamePreviewData)[0];
+      var input = document.getElementById("nickname");
+      var count = document.getElementById("count");
+      var status = document.getElementById("status");
+      var contexts = document.getElementById("contexts");
+      document.getElementById("bird-art").innerHTML = KA.companions.renderCompanion(companion.speciesId);
+
+      function renderContexts() {
+        var name = KA.companions.getCompanionDisplayName(companion);
+        var labels = ["ホーム", "なかまずかん", "とりのおうち", "キッチン", "おでかけ"];
+        contexts.innerHTML = "";
+        labels.forEach(function (label) {
+          var card = document.createElement("article");
+          var title = document.createElement("small");
+          var art = document.createElement("div");
+          var strong = document.createElement("strong");
+          var species = document.createElement("span");
+          card.className = "preview-context";
+          title.textContent = label;
+          art.innerHTML = KA.companions.renderCompanion(companion.speciesId);
+          strong.className = "companion-display-name";
+          strong.textContent = name;
+          species.className = "companion-species-name";
+          species.textContent = companion.nickname ? "しゅるい: ぺんぎん" : "ニックネーム未設定";
+          card.appendChild(title);
+          card.appendChild(art);
+          card.appendChild(strong);
+          card.appendChild(species);
+          contexts.appendChild(card);
+        });
+      }
+
+      function updateCount() {
+        count.textContent = KA.companions.companionNicknameLength(input.value) + " / 12もじまで";
+        status.textContent = "";
+      }
+
+      input.addEventListener("input", updateCount);
+      document.getElementById("save").addEventListener("click", function () {
+        var result = KA.companions.setCompanionNickname(companion.id, input.value);
+        if (!result.ok) {
+          status.textContent = result.reason === "too_long" ? "ニックネームは 12もじまでだよ" : "ニックネームを いれてね";
+          return;
+        }
+        input.value = companion.nickname;
+        updateCount();
+        status.textContent = "ほぞんしたよ";
+        renderContexts();
+      });
+      document.getElementById("clear").addEventListener("click", function () {
+        KA.companions.clearCompanionNickname(companion.id);
+        input.value = "";
+        updateCount();
+        status.textContent = "もとの なまえに もどしたよ";
+        renderContexts();
+      });
+      Array.prototype.forEach.call(document.querySelectorAll("[data-value]"), function (button) {
+        button.addEventListener("click", function () {
+          input.value = button.getAttribute("data-value");
+          updateCount();
+          input.focus();
+        });
+      });
+      document.getElementById("too-long").addEventListener("click", function () {
+        var result = KA.companions.setCompanionNickname(companion.id, "1234567890123");
+        status.textContent = result.ok ? "想定外です" : "12文字を超える入力を保存しません";
+      });
+      renderContexts();
+      updateCount();
+    })();
+  </script>
+</body>
+</html>

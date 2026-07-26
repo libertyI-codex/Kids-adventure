@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>なかよし進化 確認</title>
+  <link rel="stylesheet" href="../css/styles.css?v=10p26">
+  <style>
+    body { padding: 14px; background: #f6fbf3; }
+    .preview-shell { width: min(100%, 900px); margin: 0 auto; display: grid; gap: 16px; }
+    .preview-note { margin: 0; color: #526255; font-weight: 750; }
+    .evolution-species-list { display: grid; gap: 12px; }
+    .evolution-species-row { padding: 12px; border: 1px solid #dce7d9; border-radius: 18px; background: #fff; box-shadow: var(--shadow-soft); }
+    .evolution-species-row h2 { margin: 0 0 8px; font-size: 1rem; overflow-wrap: anywhere; }
+    .evolution-stage-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .evolution-stage-card { min-width: 0; padding: 8px; border-radius: 14px; background: #f7fbf4; text-align: center; }
+    .evolution-stage-card strong, .evolution-stage-card small { display: block; overflow-wrap: anywhere; }
+    .evolution-stage-card .companion-svg { width: 100%; height: 112px; }
+    .context-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .context-card { min-width: 0; padding: 12px; border: 1px solid #dce7d9; border-radius: 18px; background: #fff; text-align: center; }
+    .context-card .companion-svg { width: min(100%, 136px); height: 120px; }
+    .preview-house { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; min-height: 360px; padding: 12px; border-radius: 20px; background: linear-gradient(#fff8d9 0 52%, #d8b579 53%); }
+    .preview-house-bird { min-width: 0; text-align: center; font-size: 0.68rem; font-weight: 850; overflow-wrap: anywhere; }
+    .preview-house-bird .companion-svg { width: 100%; height: 82px; }
+    .preview-modal { position: fixed; inset: 0; z-index: 90; display: none; place-items: center; padding: 16px; background: rgba(24, 37, 29, 0.42); }
+    .preview-modal.is-open { display: grid; }
+    .preview-modal-card { width: min(100%, 390px); padding: 18px; border-radius: 20px; background: #fff; text-align: center; }
+    .preview-modal-card .companion-svg { width: 190px; max-width: 100%; }
+    .preview-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    @media (max-width: 420px) {
+      body { padding: 10px; }
+      .evolution-stage-card { padding: 5px; }
+      .evolution-stage-card .companion-svg { height: 92px; }
+      .context-grid { grid-template-columns: 1fr 1fr; }
+      .preview-house { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .preview-house-bird .companion-svg { height: 72px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="preview-shell">
+    <header class="panel panel-pad">
+      <p class="eyebrow">本番localStorageは使いません</p>
+      <h1>なかよし進化 確認</h1>
+      <p class="preview-note">13種類のstage 1・stage 2・stage 3、各画面の縮小表示、12文字名、演出を確認します。</p>
+      <div class="preview-actions">
+        <button class="btn btn-primary" id="show-evolution">進化演出</button>
+        <button class="btn btn-soft" id="toggle-reduced">簡易表示</button>
+      </div>
+    </header>
+
+    <section class="panel panel-pad">
+      <h2>13種類 × 3段階</h2>
+      <div id="species-list" class="evolution-species-list"></div>
+    </section>
+
+    <section class="panel panel-pad">
+      <h2>既存画面の表示例</h2>
+      <div id="context-grid" class="context-grid"></div>
+    </section>
+
+    <section class="panel panel-pad">
+      <h2>とりのおうち 13羽</h2>
+      <div id="house" class="preview-house"></div>
+    </section>
+  </main>
+
+  <div id="preview-modal" class="preview-modal" aria-hidden="true">
+    <div class="preview-modal-card companion-evolution-modal" role="dialog" aria-modal="true" aria-labelledby="preview-evolution-title">
+      <p class="eyebrow">もっと すてきなすがたに なったよ！</p>
+      <h2 id="preview-evolution-title">なかよし進化</h2>
+      <div id="modal-art" class="companion-evolution-art"></div>
+      <p><strong>ながいニックネーム１２号</strong>が<br>なかよし進化したよ！</p>
+      <p>とくべつなすがたに なったよ！</p>
+      <button class="btn btn-primary" id="close-evolution">とじる</button>
+    </div>
+  </div>
+
+  <script src="../js/companions.js?v=10p26"></script>
+  <script>
+    (function () {
+      "use strict";
+      var KA = window.KodomoAdventure;
+      var species = KA.companions.allSpecies();
+      var speciesList = document.getElementById("species-list");
+      var longNickname = "ながいニックネーム１２号";
+
+      speciesList.innerHTML = species.map(function (item) {
+        return [
+          '<article class="evolution-species-row" data-species-id="' + item.id + '">',
+          '<h2>' + item.name + '</h2>',
+          '<div class="evolution-stage-grid">',
+          [1, 2, 3].map(function (stage) {
+            return '<div class="evolution-stage-card" data-stage="' + stage + '">' +
+              KA.companions.renderCompanion(item.id, { stage: stage, displayName: item.name }) +
+              '<strong>stage ' + stage + '</strong><small>' + KA.companions.getEvolutionStageLabel(stage) + '</small></div>';
+          }).join(""),
+          '</div></article>'
+        ].join("");
+      }).join("");
+
+      var contexts = [
+        ["ホーム", "companion_chick", 2],
+        ["図鑑・詳細", "companion_peacock", 3],
+        ["キッチン", "companion_penguin", 2],
+        ["おでかけ", "companion_thunder_legend_bird", 3]
+      ];
+      document.getElementById("context-grid").innerHTML = contexts.map(function (context, index) {
+        return '<article class="context-card"><p class="eyebrow">' + context[0] + '</p>' +
+          KA.companions.renderCompanion(context[1], { stage: context[2], displayName: index === 1 ? longNickname : KA.companions.getSpecies(context[1]).name }) +
+          '<h3 class="companion-display-name">' + (index === 1 ? longNickname : KA.companions.getSpecies(context[1]).name) + '</h3>' +
+          '<p><span class="badge evolution-badge">' + KA.companions.getEvolutionStageLabel(context[2]) + '</span>' + (index === 1 ? ' <span class="badge">おきにいり</span>' : '') + '</p></article>';
+      }).join("");
+
+      document.getElementById("house").innerHTML = species.map(function (item, index) {
+        var stage = (index % 3) + 1;
+        return '<div class="preview-house-bird">' + KA.companions.renderCompanion(item.id, { stage: stage, displayName: item.name }) +
+          '<span>' + item.name + '<br>' + KA.companions.getEvolutionStageLabel(stage) + '</span></div>';
+      }).join("");
+
+      var modal = document.getElementById("preview-modal");
+      var openButton = document.getElementById("show-evolution");
+      var closeButton = document.getElementById("close-evolution");
+      document.getElementById("modal-art").innerHTML = KA.companions.renderCompanion("companion_fire_legend_bird", { stage: 3, displayName: longNickname });
+      openButton.addEventListener("click", function () {
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        closeButton.focus();
+      });
+      function closeModal() {
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        openButton.focus();
+      }
+      closeButton.addEventListener("click", closeModal);
+      modal.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") closeModal();
+      });
+      document.getElementById("toggle-reduced").addEventListener("click", function () {
+        document.body.classList.toggle("reduce-motion");
+      });
+    })();
+  </script>
+</body>
+</html>
