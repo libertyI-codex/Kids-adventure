@@ -305,7 +305,7 @@
     },
     {
       id: "companion_ice_legend_bird",
-      name: "こおりの でんせつどり",
+      name: "でんせつのこおりのとり",
       displayOrder: 11,
       designVersion: 1,
       preferredWorldIds: ["world_sky_island", "world_castle", "world_sea"],

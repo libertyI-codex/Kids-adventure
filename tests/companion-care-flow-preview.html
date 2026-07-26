@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>試作27 仲間のお世話動線確認</title>
+  <link rel="stylesheet" href="../css/styles.css?v=10p27">
+  <style>
+    body { background:#eef7ed; }
+    .preview-shell { width:min(390px,100%); margin:0 auto; padding:12px 10px 40px; }
+    .preview-nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:12px 0; }
+    .preview-screen { display:none; gap:12px; }
+    .preview-screen.is-visible { display:grid; }
+    .preview-state-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .preview-state-card { min-width:0; padding:8px; border:1px solid #d9e8d6; border-radius:14px; background:#fff; text-align:center; }
+    .preview-state-card .companion-svg { width:88px; max-width:100%; }
+    .preview-state-card strong,.preview-state-card small { display:block; overflow-wrap:anywhere; }
+    .preview-flow-note { margin:0; padding:9px; border-radius:10px; background:#fffbee; font-weight:800; }
+    .preview-away { border-color:#b8dbeb; background:#f1fbff; }
+    @media (max-width:360px) { .preview-state-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="preview-shell">
+    <p class="eyebrow">Ver.1.0 試作27</p>
+    <h1>仲間のお世話動線</h1>
+    <p class="muted">本番localStorageは使いません。画面の責務・選択状態・長い名前を確認する専用ページです。</p>
+    <section class="panel panel-pad">
+      <h2>確認できる状態</h2>
+      <p class="muted">通常の取得済み鳥 / nickname設定済み / おきにいり / stage 1 / stage 2 / stage 3 / おでかけ中 / 帰宅済み / ごはんをあげられる状態 / 材料不足 / 鳥未選択</p>
+      <p class="muted">ホームから詳細 / なかまのようすから詳細 / 図鑑から詳細 / おうちから詳細 / 詳細からキッチン / 詳細からおでかけ / 詳細からニックネーム / 詳細からおきにいり / 食事後 / 食事による進化</p>
+      <p class="muted">長い正式名称 / 12文字ニックネーム / 390px / reduced-motion</p>
+    </section>
+    <div class="preview-nav" aria-label="確認画面">
+      <button class="btn btn-primary" data-show="home">ホーム・一覧</button>
+      <button class="btn btn-soft" data-show="detail">鳥の詳細</button>
+      <button class="btn btn-soft" data-show="kitchen">キッチン</button>
+      <button class="btn btn-soft" data-show="states">状態・進化</button>
+    </div>
+
+    <section class="preview-screen is-visible" data-screen="home">
+      <section class="home-hero">
+        <div class="home-hero-art" id="preview-home-bird"></div>
+        <div class="home-hero-copy"><p class="eyebrow">きょうの おすすめ</p><h2>きょうは ごはんが まだだよ</h2><p class="home-hero-message">ぺんちゃんの ようすをみよう</p><button class="btn btn-primary" data-show="detail">ごはんを あげよう</button></div>
+      </section>
+      <section class="panel panel-pad companion-status-card">
+        <div class="section-heading"><div><p class="eyebrow">くらべて みられるよ</p><h2>なかまのようす</h2></div><span class="badge">3わ</span></div>
+        <div class="companion-status-grid" id="preview-status-grid"></div>
+      </section>
+      <section class="panel panel-pad"><h2>なかまずかん</h2><p>取得済みカード全体を押して詳細へ進みます。未取得カードには操作を出しません。</p><div class="companion-grid" id="preview-dex-grid"></div></section>
+      <section class="panel panel-pad"><h2>とりのおうち</h2><p>鳥をタップすると、反応を伝えて鳥の詳細へ進みます。</p><button class="btn btn-soft" data-show="detail">12もじニックネームの ようすをみる</button></section>
+    </section>
+
+    <section class="preview-screen" data-screen="detail">
+      <div class="screen-header"><div><p class="eyebrow">このこの こと</p><h2>ぺんちゃん</h2></div><button class="btn btn-soft" data-show="home">もどる</button></div>
+      <section class="panel panel-pad companion-detail-hero">
+        <div class="companion-detail-art" id="preview-detail-bird"></div>
+        <div class="companion-detail-summary"><h2>ぺんちゃん</h2><p class="companion-species-name">しゅるい: ぺんぎん</p><div class="companion-detail-badges"><span class="badge star">なかよし 3</span><span class="badge">せいちょうしたすがた</span><span class="badge sun">おきにいり</span></div><p class="companion-detail-state"><strong>おうちにいるよ</strong><br>きょうは まだ ごはんを たべていないよ</p></div>
+      </section>
+      <section class="companion-action-grid">
+        <article class="panel panel-pad companion-action-group is-primary"><p class="eyebrow">おせわ</p><h3>ごはん</h3><p>料理をつくって ぺんちゃんに あげよう。</p><button class="btn btn-primary" data-show="kitchen">ごはんを あげる</button></article>
+        <article class="panel panel-pad companion-action-group"><p class="eyebrow">いっしょに</p><h3>おでかけ</h3><p>いっしょに いく じゅんびを しよう。</p><button class="btn btn-soft">おでかけする</button></article>
+        <article class="panel panel-pad companion-action-group"><p class="eyebrow">おうち</p><h3>とりのおうち</h3><p>おへやで このこを みつけよう。</p><button class="btn btn-soft">とりのおうちで みる</button></article>
+        <article class="panel panel-pad companion-action-group is-settings"><p class="eyebrow">このこのこと</p><h3>なまえと おきにいり</h3><div class="companion-setting-actions"><button class="btn btn-soft">ニックネームを かえる</button><button class="btn btn-sun">おきにいりから はずす</button></div></article>
+      </section>
+      <section class="panel panel-pad preview-away"><h3>おでかけ中の表示</h3><p>いまは おでかけちゅう。ごはんも とどけられるよ。</p><button class="btn btn-soft">おでかけの ようすをみる</button></section>
+    </section>
+
+    <section class="preview-screen" data-screen="kitchen">
+      <div class="screen-header"><div><h2>とりさんキッチン</h2><p class="muted">対象のcompanionIdを引き継ぎます。</p></div><button class="btn btn-soft" data-show="detail">もどる</button></div>
+      <section class="panel panel-pad kitchen-selected-companion"><div class="kitchen-selected-companion-art" id="preview-kitchen-bird"></div><div><p class="eyebrow">ごはんを あげるこ</p><h3>ぺんちゃん</h3><p class="muted">なかよし 3 / せいちょうしたすがた</p></div></section>
+      <section class="panel panel-pad"><h2>できあがり！</h2><p>カードを選び、主ボタン1個で食事を実行します。</p><div class="companion-grid kitchen-feed-grid" id="preview-feed-grid"></div><div class="kitchen-feed-action"><button class="btn btn-primary">ごはんを あげる</button><p class="muted">ぺんちゃんに あげるよ。</p></div></section>
+      <section class="panel panel-pad"><h3>鳥未選択</h3><button class="btn btn-soft" disabled aria-disabled="true">ごはんを あげる</button><p class="action-reason">ごはんを あげるこを えらんでね。</p></section>
+      <section class="panel panel-pad"><h3>材料不足</h3><button class="btn btn-soft" disabled aria-disabled="true">りょうりを はじめる</button><p class="action-reason">ざいりょうが たりないよ。</p></section>
+      <section class="panel panel-pad"><h3>食事後と進化</h3><p>ごはん完了 → 保存 → 結果表示 → 必要な時だけ進化演出 → 詳細へ戻る順です。</p></section>
+    </section>
+
+    <section class="preview-screen" data-screen="states">
+      <section class="panel panel-pad"><h2>stage 1～3</h2><div class="preview-state-grid" id="preview-stage-grid"></div></section>
+      <section class="panel panel-pad"><h2>帰宅済み</h2><p>かえってきたよ。おみやげを うけとれるよ。</p><button class="btn btn-primary">おでかけの ようすをみる</button></section>
+      <section class="panel panel-pad"><h2>長い正式名称</h2><p><strong>でんせつのこおりのとり</strong></p><div id="preview-ice-bird"></div></section>
+      <section class="panel panel-pad"><h2>12文字ニックネーム</h2><p><strong>ながいニックネーム１２号</strong></p></section>
+    </section>
+  </main>
+  <script src="../js/companions.js?v=10p27"></script>
+  <script>
+    (function () {
+      "use strict";
+      var companions = window.KodomoAdventure.companions;
+      function bird(id, stage) { return companions.renderCompanion(id, { stage: stage }); }
+      document.getElementById("preview-home-bird").innerHTML = bird("companion_penguin", 2);
+      document.getElementById("preview-detail-bird").innerHTML = bird("companion_penguin", 2);
+      document.getElementById("preview-kitchen-bird").innerHTML = bird("companion_penguin", 2);
+      document.getElementById("preview-ice-bird").innerHTML = bird("companion_ice_legend_bird", 3);
+      var items = [
+        { id:"companion_chick", name:"ひよこ", stage:1, state:"きょうは まだだよ" },
+        { id:"companion_penguin", name:"ぺんちゃん", stage:2, state:"おきにいり" },
+        { id:"companion_fire_legend_bird", name:"ほのおちゃん", stage:3, state:"おでかけちゅう" }
+      ];
+      document.getElementById("preview-status-grid").innerHTML = items.map(function (item) {
+        return '<button class="companion-status-item" data-show="detail"><span class="companion-status-art">' + bird(item.id, item.stage) + '</span><span class="companion-status-copy"><strong>' + item.name + '</strong><small>なかよし ' + ([1,3,5][item.stage - 1]) + '<br>stage ' + item.stage + '</small><small class="companion-status-state">' + item.state + '</small></span></button>';
+      }).join("");
+      document.getElementById("preview-dex-grid").innerHTML =
+        '<button class="companion-card companion-card-button is-owned" data-show="detail"><div class="companion-art">' + bird("companion_penguin", 2) + '</div><h3>ぺんちゃん</h3><p class="companion-species-name">しゅるい: ぺんぎん</p><span class="companion-card-open">このこの ようすをみる</span></button>' +
+        '<article class="companion-card is-locked"><div class="companion-art">' + companions.renderCompanion("companion_owl", { silhouette:true }) + '</div><h3>？？？</h3><p>まだ あっていないよ</p></article>';
+      document.getElementById("preview-feed-grid").innerHTML = items.map(function (item, index) {
+        return '<button class="companion-card kitchen-feed-choice is-owned ' + (index === 1 ? 'is-selected' : '') + '"><div class="companion-art">' + bird(item.id, item.stage) + '</div><h3>' + item.name + '</h3>' + (index === 1 ? '<span class="badge selected-label">えらんでいるよ</span>' : '<span class="companion-card-open">このこを えらぶ</span>') + '</button>';
+      }).join("");
+      document.getElementById("preview-stage-grid").innerHTML = [1,2,3].map(function (stage) {
+        return '<article class="preview-state-card">' + bird("companion_chick", stage) + '<strong>stage ' + stage + '</strong><small>' + ["ちいさなすがた","せいちょうしたすがた","とくべつなすがた"][stage - 1] + '</small></article>';
+      }).join("");
+      function bind() {
+        Array.prototype.forEach.call(document.querySelectorAll("[data-show]"), function (button) {
+          button.addEventListener("click", function () {
+            var target = button.getAttribute("data-show");
+            Array.prototype.forEach.call(document.querySelectorAll(".preview-screen"), function (screen) {
+              screen.classList.toggle("is-visible", screen.getAttribute("data-screen") === target);
+            });
+            Array.prototype.forEach.call(document.querySelectorAll(".preview-nav [data-show]"), function (nav) {
+              nav.className = "btn " + (nav.getAttribute("data-show") === target ? "btn-primary" : "btn-soft");
+            });
+            window.scrollTo(0, 0);
+          });
+        });
+      }
+      bind();
+    })();
+  </script>
+</body>
+</html>

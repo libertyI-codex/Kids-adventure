@@ -58,6 +58,11 @@
         if (ids.indexOf(uiState.selectedWorldId) < 0) uiState.selectedWorldId = KA.constants.WORLD_ID;
       }
       uiState.lastRoute = uiState.lastRoute || "home";
+      uiState.selectedCompanionId = typeof uiState.selectedCompanionId === "string" ? uiState.selectedCompanionId : null;
+      uiState.kitchenPreselectedCompanionId = typeof uiState.kitchenPreselectedCompanionId === "string" ? uiState.kitchenPreselectedCompanionId : null;
+      uiState.companionDetailReturnRoute = typeof uiState.companionDetailReturnRoute === "string" ? uiState.companionDetailReturnRoute : "home";
+      uiState.companionDetailReturnParams = uiState.companionDetailReturnParams && typeof uiState.companionDetailReturnParams === "object" && !Array.isArray(uiState.companionDetailReturnParams) ? uiState.companionDetailReturnParams : {};
+      uiState.companionDetailReturnScrollY = Math.max(0, Number(uiState.companionDetailReturnScrollY || 0));
       uiState.currentLocalDate = KA.date.localDateKey();
       saveUiState();
     }
@@ -176,6 +181,11 @@
     appData = ensured.data;
     uiState = nextUiState || KA.migrations.createDefaultUiState();
     uiState.activeProfileId = appData.profile.profileId || KA.constants.PROFILE_ID;
+    uiState.selectedCompanionId = typeof uiState.selectedCompanionId === "string" ? uiState.selectedCompanionId : null;
+    uiState.kitchenPreselectedCompanionId = typeof uiState.kitchenPreselectedCompanionId === "string" ? uiState.kitchenPreselectedCompanionId : null;
+    uiState.companionDetailReturnRoute = typeof uiState.companionDetailReturnRoute === "string" ? uiState.companionDetailReturnRoute : "home";
+    uiState.companionDetailReturnParams = uiState.companionDetailReturnParams && typeof uiState.companionDetailReturnParams === "object" && !Array.isArray(uiState.companionDetailReturnParams) ? uiState.companionDetailReturnParams : {};
+    uiState.companionDetailReturnScrollY = Math.max(0, Number(uiState.companionDetailReturnScrollY || 0));
     uiState.currentLocalDate = KA.date.localDateKey();
     ensureTodayRecord();
     saveAppData();

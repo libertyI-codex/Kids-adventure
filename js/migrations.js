@@ -183,6 +183,11 @@
       effectsEnabled: true,
       bgmEnabled: false,
       selectedWorldId: KA.constants.WORLD_ID,
+      selectedCompanionId: null,
+      kitchenPreselectedCompanionId: null,
+      companionDetailReturnRoute: "home",
+      companionDetailReturnParams: {},
+      companionDetailReturnScrollY: 0,
       dismissedMessages: []
     };
   }

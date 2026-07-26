@@ -18,6 +18,13 @@
       KA.state.saveUiState();
     }
     render();
+    global.setTimeout(function () {
+      var heading = document.querySelector("[data-screen-title]");
+      if (heading) {
+        try { heading.focus({ preventScroll: true }); } catch (error) { heading.focus(); }
+      }
+      if (typeof global.scrollTo === "function") global.scrollTo(0, 0);
+    }, 0);
   }
 
   function render() {
