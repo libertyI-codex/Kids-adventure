@@ -344,42 +344,43 @@
       id: "companion_thunder_legend_bird",
       name: "でんせつの かみなりのとり",
       displayOrder: 12,
-      designVersion: 1,
+      designVersion: 2,
       preferredWorldIds: ["world_sky_island", "world_secret_base", "world_castle"],
-      defaultColors: { body: "#4F83B3", chest: "#FFF7DD", wing: "#80C7E8", tail: "#5AA6D6", beak: "#F6D66A", leg: "#476A87" },
-      viewBox: "0 0 240 170",
+      defaultColors: { body: "#FFD21F", chest: "#FFF9E8", wing: "#FFE55C", tail: "#F5A900", beak: "#F28C28", leg: "#6B5618" },
+      viewBox: "0 0 240 180",
       transparentOuterBox: true,
-      outlineStroke: "#386B93",
-      outlineWidth: 2.6,
-      innerStroke: "#4F83B3",
-      innerWidth: 2,
+      outlineStroke: "#6B5618",
+      outlineWidth: 2.8,
+      innerStroke: "#7B6118",
+      innerWidth: 2.2,
       outer: [
-        "M92 69 C70 64 48 49 20 35 C15 55 23 73 39 84 C28 87 21 96 22 108 C48 111 70 103 91 90 Z",
-        "M148 69 C170 64 192 49 220 35 C225 55 217 73 201 84 C212 87 219 96 218 108 C192 111 170 103 149 90 Z",
-        "M94 54 C103 39 126 36 140 49 C156 64 157 103 142 126 C132 143 108 143 98 126 C83 103 80 74 94 54 Z",
-        "M98 43 C94 31 99 20 108 16 C111 25 114 31 119 35 C123 25 131 20 140 22 C135 32 134 39 137 47 Z",
-        "M98 122 C87 136 83 150 86 164 L113 143 L120 166 L128 143 L155 164 C157 149 151 135 141 122 Z"
+        "M99 72 L77 60 L64 42 L55 55 L27 34 L35 59 L11 57 L31 77 L16 91 L47 94 L34 113 L76 102 L99 91 Z",
+        "M141 72 L163 60 L176 42 L185 55 L213 34 L205 59 L229 57 L209 77 L224 91 L193 94 L206 113 L164 102 L141 91 Z",
+        "M90 65 Q99 42 120 42 Q142 42 151 65 L145 99 Q142 124 126 145 Q120 153 113 145 Q96 124 94 99 Z",
+        "M96 49 L93 31 L106 38 L112 16 L121 34 L134 12 L134 37 L149 27 L141 53 Z",
+        "M99 130 L78 171 L112 151 L120 177 L129 151 L164 170 L141 130 Z"
       ],
       regions: [
-        { id: "left_wing", d: "M91 69 C69 64 48 50 21 37 C18 54 25 70 42 82 C32 88 27 96 26 104 C49 107 70 99 90 88 Z", fill: "#80C7E8" },
-        { id: "right_wing", d: "M149 69 C171 64 192 50 219 37 C222 54 215 70 198 82 C208 88 213 96 214 104 C191 107 170 99 150 88 Z", fill: "#80C7E8" },
-        { id: "body", d: "M96 57 C106 43 127 42 138 54 C153 70 152 103 139 124 C129 140 110 140 100 124 C87 103 85 73 96 57 Z", fill: "#4F83B3" },
-        { id: "chest_cloud", d: "M100 82 C99 73 108 67 116 71 C121 63 133 66 134 76 C144 77 147 89 139 95 C142 109 133 126 120 129 C107 126 98 110 101 96 C91 91 92 80 100 82 Z", fill: "#FFF7DD" },
-        { id: "head", d: "M96 49 C105 36 126 34 139 47 C151 59 145 76 131 82 C116 88 96 81 90 67 C87 59 90 53 96 49 Z", fill: "#A8DDF0" },
-        { id: "crest", d: "M99 43 C96 32 100 22 108 18 C110 27 114 33 119 37 C123 28 130 23 138 24 C134 34 133 40 136 46 Z", fill: "#DDF4FA" },
-        { id: "tail", d: "M99 121 C89 136 86 149 88 160 L113 141 L120 164 L128 141 L153 160 C154 147 149 135 140 121 Z", fill: "#5AA6D6" },
-        { id: "lightning_marks", d: "M44 58 C52 60 58 63 65 67 L59 73 C66 76 72 80 78 86 C67 82 57 78 48 72 L55 67 C50 64 46 62 44 58 Z M196 58 C188 60 182 63 175 67 L181 73 C174 76 168 80 162 86 C173 82 183 78 192 72 L185 67 C190 64 194 62 196 58 Z", fill: "#F6D66A" },
-        { id: "beak", d: "M138 57 C153 58 159 65 153 74 C146 70 141 65 138 57 Z", fill: "#F6D66A" },
-        { id: "feet", d: "M107 135 L103 151 M132 135 L137 151", fill: "none" }
+        { id: "left_wing", d: "M98 73 L77 62 L64 46 L56 59 L31 40 L39 63 L18 62 L37 78 L23 88 L51 90 L41 106 L77 97 L98 88 Z", fill: "#FFE55C" },
+        { id: "right_wing", d: "M142 73 L163 62 L176 46 L184 59 L209 40 L201 63 L222 62 L203 78 L217 88 L189 90 L199 106 L163 97 L142 88 Z", fill: "#FFE55C" },
+        { id: "wing_bands", d: "M40 65 L57 68 L49 78 L70 80 L61 91 L84 88 L76 99 L96 88 L98 76 L78 70 L65 52 L57 64 Z M200 65 L183 68 L191 78 L170 80 L179 91 L156 88 L164 99 L144 88 L142 76 L162 70 L175 52 L183 64 Z", fill: "#3F3A2C" },
+        { id: "body", d: "M93 67 Q102 48 120 48 Q138 48 147 67 L142 101 Q139 123 125 140 Q120 147 115 140 Q100 123 97 101 Z", fill: "#FFD21F" },
+        { id: "chest_cloud", d: "M104 84 Q109 75 117 80 Q121 70 129 79 Q138 77 142 87 Q142 96 133 100 Q136 115 120 132 Q104 115 107 100 Q98 96 99 88 Q100 84 104 84 Z", fill: "#FFF9E8" },
+        { id: "head", d: "M93 59 Q101 42 120 42 Q139 42 147 60 Q143 75 128 83 Q109 88 96 75 Z", fill: "#FFE55C" },
+        { id: "crest", d: "M98 48 L96 34 L107 40 L112 21 L121 38 L132 18 L132 40 L143 33 L139 51 Z", fill: "#FFD21F" },
+        { id: "tail", d: "M100 129 L83 165 L113 147 L120 173 L128 147 L158 165 L140 129 Z", fill: "#F5A900" },
+        { id: "lightning_marks", d: "M55 51 L68 60 L62 68 L79 74 L70 82 L88 88 L77 92 L58 83 L65 75 L49 69 L56 62 L44 55 Z M185 51 L172 60 L178 68 L161 74 L170 82 L152 88 L163 92 L182 83 L175 75 L191 69 L184 62 L196 55 Z M109 104 L120 92 L117 104 L130 104 L117 121 L120 108 Z", fill: "#F28C28" },
+        { id: "beak", d: "M140 59 L161 67 L140 75 L145 67 Z", fill: "#F28C28" },
+        { id: "feet", d: "M107 141 L102 157 M132 141 L138 157", fill: "none" }
       ],
       inner: [
-        "M34 74 C48 78 63 84 78 91",
-        "M206 74 C192 78 177 84 162 91",
-        "M99 91 C109 98 130 99 140 91",
-        "M103 124 C111 132 129 132 137 124",
-        "M103 151 C96 155 90 155 84 152 M137 151 C144 155 150 155 156 152"
+        "M32 78 L52 80 L43 91 L73 91",
+        "M208 78 L188 80 L197 91 L167 91",
+        "M99 93 C109 101 130 101 140 93",
+        "M103 130 C112 138 128 138 137 130",
+        "M102 157 C95 161 89 161 83 158 M138 157 C145 161 151 161 157 158"
       ],
-      face: '<circle cx="115" cy="55" r="3.5" fill="#24445F"/><circle cx="116" cy="54" r="1.1" fill="#fff"/><path d="M100 65 C107 71 118 72 126 67" fill="none" stroke="#386B93" stroke-width="2" stroke-linecap="round"/>'
+      face: '<path d="M108 58 Q114 52 120 58 Q114 63 108 58Z" fill="#3F3A2C"/><circle cx="115" cy="57" r="1.2" fill="#fff"/><path d="M101 69 C108 75 119 76 127 70" fill="none" stroke="#7B6118" stroke-width="2" stroke-linecap="round"/>'
     },
     {
       id: "companion_fire_legend_bird",
@@ -422,6 +423,93 @@
         "M103 151 C96 155 90 155 84 152 M137 151 C144 155 150 155 156 152"
       ],
       face: '<circle cx="116" cy="54" r="3.5" fill="#6B3B32"/><circle cx="117" cy="53" r="1.1" fill="#fff"/><path d="M101 65 C108 71 119 71 127 66" fill="none" stroke="#9F5A4D" stroke-width="2" stroke-linecap="round"/>'
+    },
+    {
+      id: "companion_phoenix",
+      name: "ほうおう",
+      displayOrder: 14,
+      designVersion: 1,
+      preferredWorldIds: ["world_castle", "world_sky_island", "world_island"],
+      defaultColors: { body: "#D94A3D", chest: "#FFF1D2", wing: "#F06A3E", tail: "#C83E35", beak: "#F4C95D", leg: "#8B5142" },
+      viewBox: "0 0 240 190",
+      transparentOuterBox: true,
+      outlineStroke: "#8B5142",
+      outlineWidth: 2.7,
+      innerStroke: "#A45342",
+      innerWidth: 2.1,
+      outer: [
+        "M96 70 C72 62 47 48 19 25 C21 49 32 67 49 78 C34 84 25 96 24 111 C50 113 75 102 98 89 Z",
+        "M144 70 C168 62 193 48 221 25 C219 49 208 67 191 78 C206 84 215 96 216 111 C190 113 165 102 142 89 Z",
+        "M94 57 C105 40 132 40 143 57 C158 79 154 116 139 139 C129 155 111 155 101 139 C85 116 82 79 94 57 Z",
+        "M97 50 C96 35 103 24 113 18 L120 37 L131 13 L136 39 L148 29 L141 54 Z",
+        "M99 135 C73 145 55 162 43 183 L91 164 L120 186 L149 164 L197 183 C185 162 167 145 141 135 Z"
+      ],
+      regions: [
+        { id: "left_wing", d: "M96 71 C73 64 49 50 22 29 C24 50 35 65 52 76 C39 83 31 94 29 106 C53 108 76 99 97 87 Z", fill: "#F06A3E" },
+        { id: "right_wing", d: "M144 71 C167 64 191 50 218 29 C216 50 205 65 188 76 C201 83 209 94 211 106 C187 108 164 99 143 87 Z", fill: "#F06A3E" },
+        { id: "wing_gold", d: "M43 51 C57 59 72 67 91 74 L87 88 C69 82 53 73 40 63 Z M197 51 C183 59 168 67 149 74 L153 88 C171 82 187 73 200 63 Z", fill: "#F7B84B" },
+        { id: "body", d: "M96 60 C107 45 131 45 141 60 C154 80 151 113 137 136 C128 151 112 151 103 136 C89 113 86 80 96 60 Z", fill: "#D94A3D" },
+        { id: "chest_petal", d: "M120 75 C135 87 137 104 128 118 C123 126 116 126 111 118 C102 104 105 87 120 75 Z", fill: "#FFF1D2" },
+        { id: "head", d: "M96 53 C108 38 131 39 142 53 C153 67 145 83 130 88 C114 93 96 84 90 69 C87 61 90 56 96 53 Z", fill: "#F18A52" },
+        { id: "crest", d: "M99 50 C99 37 105 28 113 22 L120 41 L130 19 L134 42 L143 34 L139 52 Z", fill: "#F7B84B" },
+        { id: "tail", d: "M100 134 C76 144 59 158 49 177 L92 161 L120 182 L148 161 L191 177 C181 158 164 144 140 134 Z", fill: "#C83E35" },
+        { id: "tail_gold", d: "M92 161 L120 182 L148 161 L137 151 L120 168 L103 151 Z", fill: "#F7B84B" },
+        { id: "spark_marks", d: "M53 89 q7-11 14 0 q-7 10-14 0z M76 101 q6-9 12 0 q-6 9-12 0z M173 89 q7-11 14 0 q-7 10-14 0z M152 101 q6-9 12 0 q-6 9-12 0z", fill: "#FFF0A6" },
+        { id: "beak", d: "M141 61 C157 62 163 69 157 78 C150 74 145 69 141 61 Z", fill: "#F4C95D" },
+        { id: "feet", d: "M107 146 L103 162 M132 146 L137 162", fill: "none" }
+      ],
+      inner: [
+        "M31 53 C50 64 69 75 89 84",
+        "M209 53 C190 64 171 75 151 84",
+        "M44 52 C58 60 73 68 91 74",
+        "M196 52 C182 60 167 68 149 74",
+        "M103 136 C112 144 128 144 137 136",
+        "M103 162 C96 166 90 166 84 163 M137 162 C144 166 150 166 156 163"
+      ],
+      face: '<circle cx="116" cy="58" r="3.6" fill="#6D302B"/><circle cx="117" cy="57" r="1.1" fill="#fff"/><path d="M101 69 C108 75 119 75 127 70" fill="none" stroke="#8B5142" stroke-width="2" stroke-linecap="round"/>'
+    },
+    {
+      id: "companion_quetzal",
+      name: "ケツァール",
+      displayOrder: 15,
+      designVersion: 1,
+      preferredWorldIds: ["world_forest", "world_sky_island", "world_island"],
+      defaultColors: { body: "#159A72", chest: "#D94D4D", wing: "#2BBF8A", tail: "#087D62", beak: "#F2C15D", leg: "#7B5B3A" },
+      viewBox: "0 0 220 210",
+      transparentOuterBox: true,
+      outlineStroke: "#286B58",
+      outlineWidth: 2.6,
+      innerStroke: "#287A63",
+      innerWidth: 2,
+      outer: [
+        "M91 72 C72 67 49 55 27 42 C29 63 40 80 58 88 C45 96 40 108 42 121 C62 120 80 111 96 96 Z",
+        "M129 72 C148 67 171 55 193 42 C191 63 180 80 162 88 C175 96 180 108 178 121 C158 120 140 111 124 96 Z",
+        "M87 57 C98 40 124 39 136 56 C151 78 146 113 131 132 C121 145 101 145 91 132 C76 113 72 79 87 57 Z",
+        "M89 51 C91 35 101 25 113 24 C126 24 136 35 137 51 Z",
+        "M98 130 C91 153 88 180 91 205 C100 189 106 171 110 151 C114 172 121 190 130 205 C132 179 128 153 122 130 Z"
+      ],
+      regions: [
+        { id: "left_wing", d: "M92 73 C73 68 51 57 30 45 C32 63 42 77 60 86 C49 94 45 105 46 116 C65 115 82 107 96 94 Z", fill: "#2BBF8A" },
+        { id: "right_wing", d: "M128 73 C147 68 169 57 190 45 C188 63 178 77 160 86 C171 94 175 105 174 116 C155 115 138 107 124 94 Z", fill: "#2BBF8A" },
+        { id: "wing_pattern", d: "M48 65 C61 71 74 78 90 82 L87 95 C71 91 58 84 47 76 Z M172 65 C159 71 146 78 130 82 L133 95 C149 91 162 84 173 76 Z", fill: "#0B8264" },
+        { id: "body", d: "M89 60 C100 45 122 44 133 59 C146 79 142 109 129 129 C120 142 102 142 93 129 C80 109 76 80 89 60 Z", fill: "#159A72" },
+        { id: "chest", d: "M98 80 C106 72 119 72 127 80 C135 92 132 118 121 129 C115 135 106 134 101 127 C91 115 90 92 98 80 Z", fill: "#D94D4D" },
+        { id: "head", d: "M90 53 C101 38 124 38 136 52 C147 65 140 82 125 87 C110 92 91 84 85 70 C82 62 85 57 90 53 Z", fill: "#23AE7E" },
+        { id: "crest", d: "M92 51 C94 39 102 30 112 28 C123 29 131 37 134 50 C121 45 106 45 92 51 Z", fill: "#087D62" },
+        { id: "tail", d: "M99 129 C94 150 92 176 94 199 C101 184 106 166 110 147 C115 167 121 185 127 199 C129 176 126 151 121 129 Z", fill: "#087D62" },
+        { id: "tail_highlight", d: "M104 136 C101 156 100 174 101 189 C105 177 108 162 110 150 C113 164 117 178 121 189 C121 172 119 154 116 136 Z", fill: "#7BD8B5" },
+        { id: "beak", d: "M135 60 L154 66 L135 73 Z", fill: "#F2C15D" },
+        { id: "feet", d: "M101 137 L97 151 M123 137 L128 151", fill: "none" }
+      ],
+      inner: [
+        "M40 67 C56 75 72 84 88 91",
+        "M180 67 C164 75 148 84 132 91",
+        "M48 65 C62 72 75 79 90 82",
+        "M172 65 C158 72 145 79 130 82",
+        "M96 128 C104 136 118 136 126 128",
+        "M97 151 C91 155 85 155 80 152 M128 151 C134 155 140 155 145 152"
+      ],
+      face: '<circle cx="111" cy="58" r="3.5" fill="#174C40"/><circle cx="112" cy="57" r="1.1" fill="#fff"/><path d="M96 69 C103 75 114 75 122 70" fill="none" stroke="#286B58" stroke-width="2" stroke-linecap="round"/>'
     }
   ];
 
@@ -522,10 +610,10 @@
     },
     companion_thunder_legend_bird: {
       2: {
-        front: '<path d="M91 87 Q105 76 120 84 Q135 76 150 87 M53 70 l11 7-8 7 12 7 M187 70 l-11 7 8 7-12 7" fill="none" stroke="#F3D45F" stroke-width="3" stroke-linecap="round"/>'
+        front: '<path d="M93 91 Q106 79 120 87 Q134 79 147 91 M48 70 l12 7-8 8 14 8 M192 70 l-12 7 8 8-14 8" fill="none" stroke="#FFF2A3" stroke-width="3" stroke-linecap="round"/><path d="M111 36 L120 22 L123 38" fill="none" stroke="#F28C28" stroke-width="3" stroke-linecap="round"/>'
       },
       3: {
-        front: '<path d="M82 82 Q101 64 120 78 Q139 64 158 82 M43 62 l14 9-10 9 16 10 M197 62 l-14 9 10 9-16 10 M105 31 Q112 14 118 32 M121 31 Q130 15 135 36" fill="none" stroke="#F5DC72" stroke-width="3" stroke-linecap="round"/><g fill="#FFF0A1"><path d="M27 47 l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path d="M211 43 l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></g>'
+        front: '<path d="M84 87 Q102 68 120 82 Q138 68 156 87 M39 63 l16 10-11 10 18 11 M201 63 l-16 10 11 10-18 11 M106 36 L119 13 L125 37" fill="none" stroke="#FFF5B8" stroke-width="3" stroke-linecap="round"/><g fill="#F28C28"><path d="M25 43 l4 8 8 4-8 4-4 8-4-8-8-4 8-4z"/><path d="M215 43 l4 8 8 4-8 4-4 8-4-8-8-4 8-4z"/><path d="M118 156 l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"/></g>'
       }
     },
     companion_fire_legend_bird: {
@@ -534,6 +622,24 @@
       },
       3: {
         front: '<g fill="#F7D681"><path d="M35 74 q9-13 18 0-9 12-18 0z"/><path d="M187 74 q9-13 18 0-9 12-18 0z"/><path d="M71 139 q8-12 16 0-8 11-16 0z"/><path d="M153 139 q8-12 16 0-8 11-16 0z"/></g><path d="M88 113 Q120 138 152 113 M104 38 Q112 23 120 39 M120 39 Q129 23 136 43" fill="none" stroke="#D97852" stroke-width="3" stroke-linecap="round"/><g fill="#FFF0B0"><circle cx="26" cy="48" r="3"/><circle cx="214" cy="48" r="3"/></g>'
+      }
+    },
+    companion_phoenix: {
+      2: {
+        front: '<path d="M49 83 q8-12 16 0-8 11-16 0z M72 99 q7-10 14 0-7 9-14 0z M175 83 q8-12 16 0-8 11-16 0z M154 99 q7-10 14 0-7 9-14 0z" fill="#FFE4A0"/><path d="M96 128 Q120 145 144 128 M104 43 Q112 29 120 44 M121 43 Q130 28 137 47" fill="none" stroke="#F7B84B" stroke-width="3" stroke-linecap="round"/>'
+      },
+      3: {
+        back: '<path d="M31 54 Q120 -8 209 54" fill="none" stroke="#FFF0B0" stroke-width="5" stroke-linecap="round" opacity=".75"/>',
+        front: '<g fill="#FFD979"><path d="M31 73 q10-15 20 0-10 14-20 0z"/><path d="M189 73 q10-15 20 0-10 14-20 0z"/><path d="M67 154 q9-13 18 0-9 12-18 0z"/><path d="M155 154 q9-13 18 0-9 12-18 0z"/></g><path d="M87 125 Q120 151 153 125 M101 41 Q111 20 120 42 M120 42 Q131 19 139 48 M73 161 L93 151 M167 161 L147 151" fill="none" stroke="#FFF1BE" stroke-width="3" stroke-linecap="round"/><g fill="#FFF7D6"><circle cx="22" cy="47" r="3"/><circle cx="218" cy="47" r="3"/><circle cx="120" cy="13" r="3"/></g>'
+      }
+    },
+    companion_quetzal: {
+      2: {
+        front: '<path d="M47 78 Q65 65 84 73 M173 78 Q155 65 136 73 M99 115 Q110 126 121 115 M101 145 Q96 172 98 199 M119 145 Q124 172 122 199" fill="none" stroke="#8FE1BF" stroke-width="3" stroke-linecap="round"/><path d="M106 39 Q111 27 116 40" fill="none" stroke="#F2C15D" stroke-width="3" stroke-linecap="round"/>'
+      },
+      3: {
+        back: '<path d="M51 45 Q110 5 169 45" fill="none" stroke="#B9F0D8" stroke-width="4" stroke-linecap="round" opacity=".8"/>',
+        front: '<path d="M39 73 Q63 52 88 66 M181 73 Q157 52 132 66 M94 112 Q110 131 126 112 M99 139 Q91 172 94 205 M121 139 Q129 172 126 205" fill="none" stroke="#A7EBCF" stroke-width="3" stroke-linecap="round"/><g fill="#F2D573"><path d="M26 57 l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"/><path d="M194 57 l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"/></g><g fill="#D5F7E9"><circle cx="110" cy="18" r="3"/><circle cx="78" cy="30" r="2.5"/><circle cx="142" cy="30" r="2.5"/></g>'
       }
     }
   };

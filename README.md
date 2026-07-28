@@ -3,16 +3,31 @@
 ## 概要
 「こどもの冒険」は、毎日のおしごと、スター、ぬりえ、作品を置く世界、たまご育成をローカル保存で楽しむ子ども向けWebアプリです。
 
-Ver.1.0 試作27では、取得済みの鳥を選んで詳細を開き、同じ `companionId` を保ったままキッチンでごはんをあげられる動線へ整理しました。ホーム、なかまのようす、図鑑、おうちは状態確認と鳥選択を担い、鳥の詳細をお世話・おでかけ・おうち・設定操作の中心にしています。
+Ver.1.0 試作28では、でんせつの かみなりのとりを黄色主体の独自デザインへ全面更新し、新しい正式な仲間として「ほうおう」と「ケツァール」を追加しました。正式な孵化候補15種類は、図鑑、おうち、キッチン、おでかけ、ニックネーム、おきにいり、なかよし進化の共通経路へ対応します。
 
 既存のホーム画面アイコンは古いHTML設定を保持するため、一度削除してからSafariで最新版を開き、改めてホーム画面へ追加してください。
 
 ## バージョン
 - 表示名: 結羽ちゃんの冒険
-- バージョン: Ver.1.0 試作27
-- appVersion: `1.0.0-prototype.27`
+- バージョン: Ver.1.0 試作28
+- appVersion: `1.0.0-prototype.28`
 - schemaVersion: `1`
-- キャッシュ対策: `?v=10p27`
+- キャッシュ対策: `?v=10p28`
+
+## 試作28の鳥の仲間
+
+- `companion_thunder_legend_bird` のIDと表示名を維持し、黄色を主役にした角張った翼・稲妻模様・扇状の尾羽へ全面再設計
+- 雷鳥の `designVersion` を2へ更新し、nickname、favorite、bondLevel、hatchCount、plannedSpeciesId、lastSeenEvolutionStageを維持
+- `companion_phoenix`（ほうおう、`designVersion: 1`）を追加
+- `companion_quetzal`（ケツァール、`designVersion: 1`）を追加
+- 正式な孵化候補を15種類へ拡張し、fixed seed、plannedSpeciesId、未取得種優先、再孵化の既存ルールを維持
+- ほうおうとケツァールはstage 1本体にstage 2・3の装飾を重ねる共通のなかよし進化へ対応
+- 図鑑、ホーム、詳細、おうち、キッチン、食事、おでかけへ既存の共通レンダラーから反映
+- とりのおうちへ14羽・15羽用の固定配置を追加
+- 雷鳥以外の既存12種類の本体定義は試作27とSHA-256一致
+- `tests/bird-companion-review.html` で旧・新雷鳥、ほうおう、ケツァール、80px、120px、黒一色、全15候補を確認可能
+- 外部画像・外部SVG・CDN・fetch・外部APIは不使用
+- 保存キー4種と `schemaVersion: 1` は変更なし
 
 ## 試作27の仲間動線
 
@@ -415,7 +430,7 @@ birdHouseデータは `appData.birdHouse` に保存します。
 初めて孵化させるたまごは `isFirstHatchEgg: true` として保存し、`targetGrowthPoints: 4` でreadyになります。2個目以降のたまごは `targetGrowthPoints: 6` です。ready後も自動孵化はせず、「うまれる！」ボタンを押した時だけ孵化します。
 
 ## 鳥の仲間
-たまごから生まれる正式な仲間は鳥類13種類です。
+たまごから生まれる正式な仲間は鳥類15種類です。
 
 | 仲間 | speciesId | designVersion |
 | --- | --- | ---: |
@@ -430,8 +445,10 @@ birdHouseデータは `appData.birdHouse` に保存します。
 | いんこ | `companion_parakeet` | 1 |
 | ぶんちょう | `companion_java_sparrow` | 1 |
 | でんせつのこおりのとり | `companion_ice_legend_bird` | 1 |
-| でんせつの かみなりのとり | `companion_thunder_legend_bird` | 1 |
+| でんせつの かみなりのとり | `companion_thunder_legend_bird` | 2 |
 | でんせつの ほのおのとり | `companion_fire_legend_bird` | 1 |
+| ほうおう | `companion_phoenix` | 1 |
+| ケツァール | `companion_quetzal` | 1 |
 
 鳥はぬりえ作品とは独立した `companions` データとして管理します。`templateId`、`regionColors`、作品ID、作品配置、親コメント、作品のおきにいり状態は共有しません。
 
@@ -447,7 +464,7 @@ birdHouseデータは `appData.birdHouse` に保存します。
 ## スタート画面
 アプリ起動時に、採用済みの `apple-touch-icon.png` をそのまま表示するスタート画面を追加しました。
 
-- 画像パス: `./apple-touch-icon.png?v=10p27`
+- 画像パス: `./apple-touch-icon.png?v=10p28`
 - 最低表示時間: 1.2秒
 - 通常終了目安: 初期化完了後
 - フェイルセーフ: 約4秒
@@ -461,7 +478,7 @@ iPhoneのホーム画面から独立Webアプリとして起動できるよう�
 
 - `apple-mobile-web-app-capable`: `yes`
 - `apple-mobile-web-app-title`: `こどもの冒険`
-- manifest: `./manifest.webmanifest?v=10p27`
+- manifest: `./manifest.webmanifest?v=10p28`
 - manifest `display`: `standalone`
 - manifest `start_url`: `./`
 - manifest `scope`: `./`

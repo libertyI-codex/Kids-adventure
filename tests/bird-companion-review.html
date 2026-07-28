@@ -3,121 +3,105 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>鳥の仲間レビュー - こどもの冒険</title>
+  <title>試作28 鳥の仲間レビュー</title>
   <style>
     :root {
       color-scheme: light;
-      --ink: #25312d;
-      --muted: #65736d;
-      --line: #d9e4dc;
+      --ink: #24312d;
+      --muted: #61716a;
+      --line: #d9e6dd;
       --paper: #fffdf6;
-      --panel: #ffffff;
-      --accent: #4f9f72;
+      --panel: #fff;
+      --accent: #3f8e66;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
-      background: linear-gradient(180deg, #e7f6ff 0%, #fff8df 42%, #f5fbef 100%);
+      background: linear-gradient(180deg, #e9f7ff 0%, #fff8df 45%, #f2faee 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     main {
       width: min(1120px, calc(100% - 28px));
       margin: 0 auto;
-      padding: 24px 0 40px;
+      padding: 24px 0 48px;
     }
     header {
       display: flex;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
-      align-items: flex-start;
       margin-bottom: 18px;
     }
-    h1 { margin: 0 0 6px; font-size: clamp(1.5rem, 3vw, 2.2rem); }
-    p { line-height: 1.7; }
+    h1, h2, h3, p { overflow-wrap: anywhere; }
+    h1 { margin: 0 0 6px; font-size: clamp(1.5rem, 3vw, 2.15rem); }
+    h2 { margin: 0 0 10px; font-size: 1.2rem; }
+    h3 { margin: 0 0 8px; font-size: 1rem; }
+    p { margin: 0; line-height: 1.65; }
     button {
-      border: 1px solid #b9d8c2;
-      background: #fff;
+      min-height: 48px;
+      border: 1px solid #b8d7c2;
+      border-radius: 14px;
+      padding: 10px 16px;
       color: var(--ink);
-      border-radius: 12px;
-      padding: 10px 14px;
+      background: #fff;
+      font: inherit;
       font-weight: 800;
       cursor: pointer;
       box-shadow: 0 2px 0 rgba(37, 49, 45, 0.08);
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 14px;
-    }
-    .card {
-      background: var(--panel);
+    button:focus-visible { outline: 3px solid #f3c85b; outline-offset: 2px; }
+    .section {
+      margin-top: 16px;
+      padding: 16px;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
-      box-shadow: 0 8px 20px rgba(76, 101, 88, 0.12);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 8px 22px rgba(76, 101, 88, 0.11);
     }
-    .card h2 {
-      margin: 0 0 8px;
-      font-size: 1.2rem;
-    }
-    .hide-names .bird-name { visibility: hidden; }
-    .meta {
+    .section-note { margin: -3px 0 12px; color: var(--muted); }
+    .compare-grid,
+    .feature-grid,
+    .candidate-grid {
       display: grid;
-      grid-template-columns: max-content 1fr;
-      gap: 6px 10px;
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-top: 10px;
+      gap: 12px;
     }
-    .meta b { color: var(--ink); }
+    .compare-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .feature-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .candidate-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    .panel,
+    .feature-card,
+    .candidate-card {
+      min-width: 0;
+      border: 1px solid #dce8df;
+      border-radius: 15px;
+      background: var(--panel);
+    }
+    .panel, .feature-card { padding: 12px; }
     .views {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      gap: 9px;
     }
     .view {
-      min-height: 132px;
+      min-width: 0;
+      min-height: 142px;
       display: grid;
       place-items: center;
       padding: 8px;
-      border: 1px solid #e7eee8;
-      border-radius: 14px;
+      border: 1px solid #e5ede7;
+      border-radius: 13px;
       background: var(--paper);
     }
     .view span {
       align-self: end;
       color: var(--muted);
       font-size: 0.78rem;
-      font-weight: 700;
+      font-weight: 800;
     }
-    .view svg { width: min(100%, 150px); height: auto; display: block; }
-    .view-small svg { width: 120px; }
-    .view-tiny svg { width: 80px; }
-    .view-card svg { width: 96px; }
-    .view-home svg { width: 64px; }
-    .view-hatch svg { width: 132px; }
-    .view-colored { background: #dff4ff; }
-    .compare-card {
-      grid-column: 1 / -1;
-      border-color: #b7d7c2;
-      background: #fffefa;
-    }
-    .compare-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 12px;
-    }
-    .compare-panel {
-      border: 1px solid #dce8df;
-      border-radius: 14px;
-      padding: 12px;
-      background: #fff;
-    }
-    .compare-panel h3 {
-      margin: 0 0 8px;
-      font-size: 1rem;
-    }
+    .view svg { width: min(100%, 150px); height: 118px; display: block; }
+    .view-size-120 svg { width: 120px; }
+    .view-size-80 svg { width: 80px; }
     .view-silhouette svg path,
     .view-silhouette svg circle,
     .view-silhouette svg ellipse,
@@ -125,14 +109,44 @@
       fill: #111827 !important;
       stroke: none !important;
     }
-    code {
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-      overflow-wrap: anywhere;
+    .meta {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 5px 9px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.86rem;
     }
-    @media (max-width: 520px) {
+    .meta b { color: var(--ink); }
+    code { overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .candidate-card {
+      padding: 10px;
+      text-align: center;
+    }
+    .candidate-art {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: center;
+      min-height: 92px;
+    }
+    .candidate-art svg { width: 72px; max-width: 100%; height: 78px; }
+    .candidate-card h3 { min-height: 2.5em; }
+    .hide-names .bird-name { visibility: hidden; }
+    .badge {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #fff2a8;
+      color: #684e00;
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+    @media (max-width: 560px) {
       header { display: block; }
       header button { width: 100%; margin-top: 10px; }
-      .views { grid-template-columns: 1fr; }
+      .compare-grid, .views { grid-template-columns: 1fr; }
+      .candidate-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
   </style>
 </head>
@@ -141,58 +155,75 @@
     <header>
       <div>
         <h1>鳥の仲間レビュー</h1>
-        <p>本番採用SVGから、たまごで生まれる11種類の鳥をシルエット、通常配色、120px、80pxで確認します。ひよこは旧外周ありと試作22を背景別に比較できます。</p>
+        <p>試作28の雷鳥リデザイン、ほうおう、ケツァールと、正式候補15種類を確認します。本番localStorageは使いません。</p>
       </div>
-      <button id="toggle-names" type="button" aria-pressed="false">名前を隠す</button>
+      <button id="toggle-names" type="button" aria-pressed="true">鳥名を かくす</button>
     </header>
-    <section id="review-root" class="grid" aria-live="polite"></section>
+
+    <section class="section" aria-labelledby="thunder-title">
+      <span class="badge">旧・新 比較</span>
+      <h2 id="thunder-title">でんせつの かみなりのとり</h2>
+      <p class="section-note">試作27の旧デザインと、黄色を主役に1から再設計した試作28を同じ条件で比較します。</p>
+      <div id="thunder-comparison" class="compare-grid"></div>
+    </section>
+
+    <section class="section" aria-labelledby="new-birds-title">
+      <span class="badge">新しい正式候補</span>
+      <h2 id="new-birds-title">ほうおう・ケツァール</h2>
+      <p class="section-note">stage 1の通常表示、120px、80px、黒一色シルエットを確認します。</p>
+      <div id="new-birds" class="feature-grid"></div>
+    </section>
+
+    <section class="section" aria-labelledby="candidates-title">
+      <h2 id="candidates-title">正式な孵化候補 15種類</h2>
+      <p class="section-note">各カードの左がstage 1通常表示、右が黒一色シルエットです。</p>
+      <div id="candidate-list" class="candidate-grid"></div>
+    </section>
   </main>
 
-  <script src="../js/date-utils.js"></script>
-  <script src="../js/companions.js"></script>
+  <script src="../js/date-utils.js?v=10p28"></script>
+  <script src="../js/companions.js?v=10p28"></script>
   <script>
     (function () {
       "use strict";
       var KA = window.KodomoAdventure;
-      var root = document.getElementById("review-root");
-      var toggle = document.getElementById("toggle-names");
-      var PEACOCK_V15 = {
-        id: "companion_peacock_v15",
-        name: "くじゃく 試作15相当",
-        designVersion: 2,
-        viewBox: "0 0 210 170",
-        preferredWorldIds: ["world_castle", "world_sky_island", "world_island"],
-        defaultColors: { body: "#2563EB", neck: "#38BDF8", tail: "#22C55E", eye: "#FACC15" },
+      var oldThunder = {
+        id: "companion_thunder_legend_bird_p27",
+        name: "試作27の旧雷鳥",
+        designVersion: 1,
+        viewBox: "0 0 240 170",
+        outlineStroke: "#386B93",
+        outlineWidth: 2.6,
+        innerStroke: "#4F83B3",
+        innerWidth: 2,
         outer: [
-          "M6 124 C8 48 59 4 105 32 C151 4 202 49 204 124 C165 88 129 90 111 119 C92 90 45 88 6 124 Z",
-          "M96 47 C110 38 126 48 128 64 C130 82 119 96 105 96 C90 96 80 83 83 67 C84 58 88 51 96 47 Z"
+          "M92 69 C70 64 48 49 20 35 C15 55 23 73 39 84 C28 87 21 96 22 108 C48 111 70 103 91 90 Z",
+          "M148 69 C170 64 192 49 220 35 C225 55 217 73 201 84 C212 87 219 96 218 108 C192 111 170 103 149 90 Z",
+          "M94 54 C103 39 126 36 140 49 C156 64 157 103 142 126 C132 143 108 143 98 126 C83 103 80 74 94 54 Z",
+          "M98 43 C94 31 99 20 108 16 C111 25 114 31 119 35 C123 25 131 20 140 22 C135 32 134 39 137 47 Z",
+          "M98 122 C87 136 83 150 86 164 L113 143 L120 166 L128 143 L155 164 C157 149 151 135 141 122 Z"
         ],
         regions: [
-          { id: "tail", d: "M6 124 C8 48 59 4 105 32 C151 4 202 49 204 124 C165 88 129 90 111 119 C92 90 45 88 6 124 Z", fill: "#22C55E" },
-          { id: "body", d: "M86 76 C100 62 124 68 132 88 C143 114 122 135 101 131 C78 127 68 102 78 85 C80 81 83 78 86 76 Z", fill: "#2563EB" },
-          { id: "neck", d: "M96 47 C108 40 122 49 123 64 C124 80 113 92 101 91 C88 90 83 77 87 64 C89 56 92 51 96 47 Z", fill: "#38BDF8" },
-          { id: "crest", d: "M99 45 C94 34 96 28 103 22 M108 45 C111 34 116 29 123 27 M103 45 C103 33 108 27 112 21", fill: "none" },
-          { id: "tail_eyes", d: "M36 92 C43 82 57 83 62 94 C56 104 43 104 36 92 Z M68 49 C76 38 91 40 97 52 C90 63 76 62 68 49 Z M103 34 C112 22 128 25 134 38 C127 50 112 48 103 34 Z M139 50 C148 39 163 41 169 54 C162 66 147 64 139 50 Z M169 93 C177 83 191 84 196 96 C190 106 176 105 169 93 Z", fill: "#FACC15" }
+          { d: "M91 69 C69 64 48 50 21 37 C18 54 25 70 42 82 C32 88 27 96 26 104 C49 107 70 99 90 88 Z", fill: "#80C7E8" },
+          { d: "M149 69 C171 64 192 50 219 37 C222 54 215 70 198 82 C208 88 213 96 214 104 C191 107 170 99 150 88 Z", fill: "#80C7E8" },
+          { d: "M96 57 C106 43 127 42 138 54 C153 70 152 103 139 124 C129 140 110 140 100 124 C87 103 85 73 96 57 Z", fill: "#4F83B3" },
+          { d: "M100 82 C99 73 108 67 116 71 C121 63 133 66 134 76 C144 77 147 89 139 95 C142 109 133 126 120 129 C107 126 98 110 101 96 C91 91 92 80 100 82 Z", fill: "#FFF7DD" },
+          { d: "M96 49 C105 36 126 34 139 47 C151 59 145 76 131 82 C116 88 96 81 90 67 C87 59 90 53 96 49 Z", fill: "#A8DDF0" },
+          { d: "M99 43 C96 32 100 22 108 18 C110 27 114 33 119 37 C123 28 130 23 138 24 C134 34 133 40 136 46 Z", fill: "#DDF4FA" },
+          { d: "M99 121 C89 136 86 149 88 160 L113 141 L120 164 L128 141 L153 160 C154 147 149 135 140 121 Z", fill: "#5AA6D6" },
+          { d: "M44 58 C52 60 58 63 65 67 L59 73 C66 76 72 80 78 86 C67 82 57 78 48 72 L55 67 C50 64 46 62 44 58 Z M196 58 C188 60 182 63 175 67 L181 73 C174 76 168 80 162 86 C173 82 183 78 192 72 L185 67 C190 64 194 62 196 58 Z", fill: "#F6D66A" },
+          { d: "M138 57 C153 58 159 65 153 74 C146 70 141 65 138 57 Z", fill: "#F6D66A" },
+          { d: "M107 135 L103 151 M132 135 L137 151", fill: "none" }
         ],
         inner: [
-          "M105 32 C101 58 101 88 111 119",
-          "M56 28 C78 60 92 88 104 116",
-          "M154 30 C132 61 119 89 111 119",
-          "M26 92 C56 96 82 103 104 116",
-          "M184 94 C153 97 130 104 113 116",
-          "M82 88 C95 98 116 100 131 90"
+          "M34 74 C48 78 63 84 78 91",
+          "M206 74 C192 78 177 84 162 91",
+          "M99 91 C109 98 130 99 140 91",
+          "M103 124 C111 132 129 132 137 124",
+          "M103 151 C96 155 90 155 84 152 M137 151 C144 155 150 155 156 152"
         ],
-        face: '<circle cx="111" cy="61" r="3.5" fill="#1f2937"/><path d="M121 68 L134 72 L121 77 Z" fill="#FACC15"/>'
+        face: '<circle cx="115" cy="55" r="3.5" fill="#24445F"/><circle cx="116" cy="54" r="1.1" fill="#fff"/><path d="M100 65 C107 71 118 72 126 67" fill="none" stroke="#386B93" stroke-width="2" stroke-linecap="round"/>'
       };
-      var PEACOCK_V16 = JSON.parse(JSON.stringify(PEACOCK_V15));
-      PEACOCK_V16.id = "companion_peacock_v16";
-      PEACOCK_V16.name = "くじゃく 試作16相当";
-      PEACOCK_V16.designVersion = 3;
-      PEACOCK_V16.viewBox = "-105 -100 420 260";
-      PEACOCK_V16.peacockTailTransform = "translate(-105 -100) scale(2)";
-      PEACOCK_V16.peacockBodyTransform = "translate(52.5 45) scale(0.5)";
-      PEACOCK_V16.peacockTailScale = 2;
-      PEACOCK_V16.peacockBodyScale = 0.5;
 
       function escapeHtml(value) {
         return String(value == null ? "" : value)
@@ -202,191 +233,101 @@
           .replace(/"/g, "&quot;");
       }
 
-      function countOutline(species) {
-        return (species.outer || []).length;
-      }
-
-      function countInner(species) {
-        return (species.inner || []).length;
-      }
-
-      function renderLegacyPeacock(species, silhouette) {
+      function renderLegacy(species, silhouette) {
         if (silhouette) {
-          return '<svg class="companion-svg companion-silhouette" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">' + species.outer.map(function (d) {
-            return '<path d="' + d + '" fill="#1f2937"/>';
-          }).join("") + '</svg>';
+          return '<svg class="companion-svg companion-silhouette" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">' +
+            species.outer.map(function (d) { return '<path d="' + d + '" fill="#111827"/>'; }).join("") +
+            '</svg>';
         }
         return [
-          '<svg class="companion-svg companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
-          '<g class="body-regions">',
+          '<svg class="companion-svg" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+          '<g>',
           species.regions.map(function (region) {
             if (region.fill === "none") {
-              return '<path d="' + region.d + '" fill="none" stroke="#92400E" stroke-width="4" stroke-linecap="round"/>';
+              return '<path d="' + region.d + '" fill="none" stroke="' + species.innerStroke + '" stroke-width="' + species.innerWidth + '" stroke-linecap="round"/>';
             }
             return '<path d="' + region.d + '" fill="' + region.fill + '"/>';
           }).join(""),
           '</g>',
-          '<g class="outer-outline" fill="none" stroke="#28312d" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">',
+          '<g fill="none" stroke="' + species.outlineStroke + '" stroke-width="' + species.outlineWidth + '" stroke-linejoin="round" stroke-linecap="round">',
           species.outer.map(function (d) { return '<path d="' + d + '"/>'; }).join(""),
           '</g>',
-          '<g class="inner-lines" fill="none" stroke="#5b4631" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">',
+          '<g fill="none" stroke="' + species.innerStroke + '" stroke-width="' + species.innerWidth + '" stroke-linejoin="round" stroke-linecap="round">',
           species.inner.map(function (d) { return '<path d="' + d + '"/>'; }).join(""),
           '</g>',
-          '<g class="face-details">',
           species.face,
-          '</g>',
           '</svg>'
         ].join("");
       }
 
-      function renderGroupedPeacock(species, silhouette) {
-        var tailRegions = species.regions.filter(function (region) {
-          return region.id === "tail" || region.id === "tail_eyes";
-        });
-        var bodyRegions = species.regions.filter(function (region) {
-          return region.id !== "tail" && region.id !== "tail_eyes";
-        });
-        var tailInner = species.inner.slice(0, 5);
-        var bodyInner = species.inner.slice(5);
-        if (silhouette) {
-          return [
-            '<svg class="companion-svg companion-silhouette companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
-            '<g class="peacock-tail-group" transform="' + species.peacockTailTransform + '"><path d="' + species.outer[0] + '" fill="#1f2937"/></g>',
-            '<g class="peacock-body-group" transform="' + species.peacockBodyTransform + '"><path d="' + species.outer[1] + '" fill="#1f2937"/><path d="' + species.regions[1].d + '" fill="#1f2937"/><path d="' + species.regions[2].d + '" fill="#1f2937"/></g>',
-            '</svg>'
-          ].join("");
-        }
-        return [
-          '<svg class="companion-svg companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
-          '<g class="body-regions">',
-          '<g class="peacock-tail-group" transform="' + species.peacockTailTransform + '">' + tailRegions.map(function (region) { return '<path d="' + region.d + '" fill="' + region.fill + '"/>'; }).join("") + '</g>',
-          '<g class="peacock-body-group" transform="' + species.peacockBodyTransform + '">' + bodyRegions.map(function (region) { return region.fill === "none" ? '<path d="' + region.d + '" fill="none" stroke="#92400E" stroke-width="4" stroke-linecap="round"/>' : '<path d="' + region.d + '" fill="' + region.fill + '"/>'; }).join("") + '</g>',
-          '</g>',
-          '<g class="outer-outline" fill="none" stroke="#28312d" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round"><g class="peacock-tail-group" transform="' + species.peacockTailTransform + '"><path d="' + species.outer[0] + '"/></g><g class="peacock-body-group" transform="' + species.peacockBodyTransform + '"><path d="' + species.outer[1] + '"/></g></g>',
-          '<g class="inner-lines" fill="none" stroke="#5b4631" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g class="peacock-tail-group" transform="' + species.peacockTailTransform + '">' + tailInner.map(function (d) { return '<path d="' + d + '"/>'; }).join("") + '</g><g class="peacock-body-group" transform="' + species.peacockBodyTransform + '">' + bodyInner.map(function (d) { return '<path d="' + d + '"/>'; }).join("") + '</g></g>',
-          '<g class="face-details peacock-body-group" transform="' + species.peacockBodyTransform + '">' + species.face + '</g>',
-          '</svg>'
-        ].join("");
+      function view(markup, label, className) {
+        return '<div class="view ' + (className || "") + '">' + markup + '<span>' + escapeHtml(label) + '</span></div>';
       }
 
-      function card(species) {
-        if (species.id === "companion_chick") return chickCompareCard(species);
-        if (species.id === "companion_peacock") return peacockCompareCard(species);
+      function comparisonPanel(title, normal, silhouette, version) {
         return [
-          '<article class="card">',
-          '<h2 class="bird-name">' + escapeHtml(species.name) + '</h2>',
+          '<article class="panel">',
+          '<h3 class="bird-name">' + escapeHtml(title) + '</h3>',
           '<div class="views">',
-          '<div class="view view-silhouette">' + KA.companions.renderCompanion(species.id, { silhouette: true }) + '<span>黒一色</span></div>',
-          '<div class="view">' + KA.companions.renderCompanion(species.id) + '<span>通常配色</span></div>',
-          '<div class="view view-small">' + KA.companions.renderCompanion(species.id) + '<span>120px</span></div>',
-          '<div class="view view-tiny">' + KA.companions.renderCompanion(species.id) + '<span>80px</span></div>',
+          view(normal, "stage 1"),
+          view(normal, "120px", "view-size-120"),
+          view(normal, "80px", "view-size-80"),
+          view(silhouette, "黒一色", "view-silhouette"),
           '</div>',
-          '<div class="meta">',
-          '<b>speciesId</b><code>' + escapeHtml(species.id) + '</code>',
-          '<b>designVersion</b><span>' + Number(species.designVersion || 0) + '</span>',
-          '<b>viewBox</b><code>' + escapeHtml(species.viewBox) + '</code>',
-          '<b>outer-outline</b><span>' + countOutline(species) + ' path</span>',
-          '<b>inner-lines</b><span>' + countInner(species) + '</span>',
-          '<b>preferredWorldIds</b><code>' + escapeHtml(species.preferredWorldIds.join(", ")) + '</code>',
-          '</div>',
+          '<div class="meta"><b>designVersion</b><span>' + version + '</span></div>',
           '</article>'
         ].join("");
       }
 
-      function renderLegacyChick(species) {
-        return KA.companions.renderCompanion(species.id).replace(
-          '<g class="outer-outline" fill="none" stroke="none"',
-          '<g class="outer-outline" fill="none" stroke="#28312d"'
-        );
-      }
-
-      function chickCompareCard(species) {
-        var current = KA.companions.renderCompanion(species.id);
-        var legacy = renderLegacyChick(species);
+      function featureCard(speciesId) {
+        var species = KA.companions.getSpecies(speciesId);
+        var normal = KA.companions.renderCompanion(speciesId, { stage: 1 });
+        var silhouette = KA.companions.renderCompanion(speciesId, { silhouette: true, stage: 1 });
         return [
-          '<article class="card compare-card">',
-          '<h2 class="bird-name">ひよこ</h2>',
-          '<p>黄色い体、表情、くちばし、足、冠羽、内部線はそのままに、全身を包んでいた黒い外周ストロークだけを無効化しています。</p>',
-          '<div class="compare-grid">',
-          '<div class="compare-panel"><h3>修正前相当</h3><div class="views">',
-          '<div class="view">' + legacy + '<span>白系背景</span></div>',
-          '<div class="view view-colored">' + legacy + '<span>色付き背景</span></div>',
-          '<div class="view view-small">' + legacy + '<span>120px</span></div>',
-          '<div class="view view-tiny">' + legacy + '<span>80px</span></div>',
-          '</div></div>',
-          '<div class="compare-panel"><h3>試作22</h3><div class="views">',
-          '<div class="view">' + current + '<span>白系背景</span></div>',
-          '<div class="view view-colored">' + current + '<span>色付き背景</span></div>',
-          '<div class="view view-small">' + current + '<span>120px</span></div>',
-          '<div class="view view-tiny">' + current + '<span>80px</span></div>',
-          '<div class="view view-silhouette">' + KA.companions.renderCompanion(species.id, { silhouette: true }) + '<span>黒一色</span></div>',
-          '</div></div>',
-          '</div>',
-          '<div class="meta">',
-          '<b>speciesId</b><code>' + escapeHtml(species.id) + '</code>',
-          '<b>designVersion</b><span>' + Number(species.designVersion || 0) + '</span>',
-          '<b>viewBox</b><code>' + escapeHtml(species.viewBox) + '</code>',
-          '<b>外周stroke</b><code>' + escapeHtml(species.outlineStroke) + '</code>',
-          '<b>維持</b><span>表情・体・くちばし・足・冠羽・内部線</span>',
-          '</div>',
-          '</article>'
-        ].join("");
-      }
-
-      function peacockViews(label, species, legacy) {
-        var render = legacy ? function (silhouette) { return renderLegacyPeacock(species, silhouette); } : function (silhouette) {
-          if (species.id === "companion_peacock_v16") return renderGroupedPeacock(species, silhouette);
-          return KA.companions.renderCompanion(species.id, silhouette ? { silhouette: true } : {});
-        };
-        return [
-          '<div class="compare-panel">',
-          '<h3>' + escapeHtml(label) + '</h3>',
+          '<article class="feature-card" data-species-id="' + escapeHtml(speciesId) + '">',
+          '<h3 class="bird-name">' + escapeHtml(species.name) + '</h3>',
           '<div class="views">',
-          '<div class="view view-silhouette">' + render(true) + '<span>黒一色</span></div>',
-          '<div class="view">' + render(false) + '<span>通常カラー</span></div>',
-          '<div class="view view-small">' + render(false) + '<span>120px</span></div>',
-          '<div class="view view-tiny">' + render(false) + '<span>80px</span></div>',
-          '<div class="view view-card">' + render(false) + '<span>図鑑カード相当</span></div>',
-          '<div class="view view-home">' + render(false) + '<span>ホームおきにいり相当</span></div>',
-          '<div class="view view-hatch">' + render(false) + '<span>孵化表示相当</span></div>',
+          view(normal, "stage 1"),
+          view(normal, "120px", "view-size-120"),
+          view(normal, "80px", "view-size-80"),
+          view(silhouette, "黒一色", "view-silhouette"),
           '</div>',
           '<div class="meta">',
-          '<b>designVersion</b><span>' + Number(species.designVersion || 0) + '</span>',
+          '<b>companion ID</b><code>' + escapeHtml(species.id) + '</code>',
+          '<b>designVersion</b><span>' + Number(species.designVersion) + '</span>',
           '<b>viewBox</b><code>' + escapeHtml(species.viewBox) + '</code>',
-          '<b>尾羽拡大率</b><span>' + (species.peacockTailScale || 1) + 'x</span>',
-          '<b>本体縮小率</b><span>' + (species.peacockBodyScale || 1) + 'x</span>',
-          '</div>',
-          '</div>'
-        ].join("");
-      }
-
-      function peacockCompareCard(species) {
-        return [
-          '<article class="card compare-card">',
-          '<h2 class="bird-name">くじゃく</h2>',
-          '<p>試作15相当、試作16相当、試作17以降の本番版を比較します。試作22では孔雀SVGを変更していません。</p>',
-          '<div class="compare-grid">',
-          peacockViews("試作15相当", PEACOCK_V15, true),
-          peacockViews("試作16相当", PEACOCK_V16, false),
-          peacockViews("試作17以降", species, false),
-          '</div>',
-          '<div class="meta">',
-          '<b>speciesId</b><code>' + escapeHtml(species.id) + '</code>',
-          '<b>outer-outline</b><span>' + countOutline(species) + ' path</span>',
-          '<b>inner-lines</b><span>' + countInner(species) + '</span>',
-          '<b>グループ</b><code>peacock-tail-group / peacock-body-group</code>',
-          '<b>確認</b><span>尾羽約2倍、本体約0.75倍、目玉模様維持、表示切れなし</span>',
           '</div>',
           '</article>'
         ].join("");
       }
 
-      root.innerHTML = KA.companions.allSpecies().map(card).join("");
-      toggle.addEventListener("click", function () {
-        var pressed = toggle.getAttribute("aria-pressed") === "true";
-        toggle.setAttribute("aria-pressed", String(!pressed));
-        document.body.classList.toggle("hide-names", !pressed);
-        toggle.textContent = pressed ? "名前を隠す" : "名前を表示する";
+      var newThunder = KA.companions.getSpecies("companion_thunder_legend_bird");
+      document.getElementById("thunder-comparison").innerHTML =
+        comparisonPanel("試作27 旧デザイン", renderLegacy(oldThunder, false), renderLegacy(oldThunder, true), 1) +
+        comparisonPanel("試作28 新デザイン", KA.companions.renderCompanion(newThunder.id, { stage: 1 }), KA.companions.renderCompanion(newThunder.id, { silhouette: true, stage: 1 }), newThunder.designVersion);
+
+      document.getElementById("new-birds").innerHTML =
+        featureCard("companion_phoenix") +
+        featureCard("companion_quetzal");
+
+      document.getElementById("candidate-list").innerHTML = KA.companions.allSpecies().map(function (species) {
+        return [
+          '<article class="candidate-card" data-species-id="' + escapeHtml(species.id) + '">',
+          '<h3 class="bird-name">' + escapeHtml(species.name) + '</h3>',
+          '<div class="candidate-art">',
+          KA.companions.renderCompanion(species.id, { stage: 1 }),
+          '<div class="view-silhouette">' + KA.companions.renderCompanion(species.id, { silhouette: true, stage: 1 }) + '</div>',
+          '</div>',
+          '<small>designVersion ' + Number(species.designVersion) + '</small>',
+          '</article>'
+        ].join("");
+      }).join("");
+
+      document.getElementById("toggle-names").addEventListener("click", function () {
+        var showing = this.getAttribute("aria-pressed") === "true";
+        document.body.classList.toggle("hide-names", showing);
+        this.setAttribute("aria-pressed", String(!showing));
+        this.textContent = showing ? "鳥名を みせる" : "鳥名を かくす";
       });
     })();
   </script>

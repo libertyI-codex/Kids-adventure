@@ -115,8 +115,9 @@ const nicknamePreview = read(path.join("tests", "companion-nickname-preview.html
 const legendPreview = read(path.join("tests", "legend-companions-coloring-preview.html"));
 const evolutionPreview = read(path.join("tests", "companion-evolution-preview.html"));
 const careFlowPreview = read(path.join("tests", "companion-care-flow-preview.html"));
-const cacheQuery = "10p27";
-const scriptOrder = Array.from(indexHtml.matchAll(/<script\s+defer\s+src="js\/([^"?]+)\?v=10p27"><\/script>/g)).map((match) => match[1]);
+const birdCompanionReview = read(path.join("tests", "bird-companion-review.html"));
+const cacheQuery = "10p28";
+const scriptOrder = Array.from(indexHtml.matchAll(/<script\s+defer\s+src="js\/([^"?]+)\?v=10p28"><\/script>/g)).map((match) => match[1]);
 assert(scriptOrder[0] === "boot.js", "boot.js should load before app scripts");
 assert(scriptOrder.indexOf("constants.js") > scriptOrder.indexOf("boot.js"), "constants should load after boot.js");
 assert(scriptOrder.indexOf("companions.js") > scriptOrder.indexOf("eggs.js"), "companions.js should load after eggs.js");
@@ -144,18 +145,18 @@ assert(indexHtml.indexOf("10p24") < 0 && bootJs.indexOf("10p24") < 0 && appJs.in
 assert(indexHtml.indexOf("10p25") < 0 && bootJs.indexOf("10p25") < 0 && appJs.indexOf("10p25") < 0 && JSON.stringify(manifestJson).indexOf("10p25") < 0, "old v=10p25 query should not remain in production code");
 assert(indexHtml.indexOf('name="apple-mobile-web-app-capable" content="yes"') >= 0, "apple mobile web app capable meta missing");
 assert(indexHtml.indexOf('name="apple-mobile-web-app-title" content="こどもの冒険"') >= 0, "apple mobile web app title meta missing");
-assert(indexHtml.indexOf('rel="manifest" href="./manifest.webmanifest?v=10p27"') >= 0, "manifest link missing");
+assert(indexHtml.indexOf('rel="manifest" href="./manifest.webmanifest?v=10p28"') >= 0, "manifest link missing");
 assert(manifestJson.display === "standalone", "manifest display should be standalone");
 assert(manifestJson.start_url === "./", "manifest start_url should match deployed directory");
 assert(manifestJson.scope === "./", "manifest scope should match deployed directory");
 assert(Array.isArray(manifestJson.icons) && manifestJson.icons.length >= 1, "manifest should include icons");
-assert(manifestJson.icons[0].src === "./apple-touch-icon.png?v=10p27", "manifest icon should use apple touch icon");
+assert(manifestJson.icons[0].src === "./apple-touch-icon.png?v=10p28", "manifest icon should use apple touch icon");
 assert(indexHtml.indexOf("serviceWorker") < 0 && bootJs.indexOf("serviceWorker") < 0 && appJs.indexOf("serviceWorker") < 0, "service worker should not be added for standalone support");
-assert(indexHtml.indexOf('src="./apple-touch-icon.png?v=10p27"') >= 0, "startup splash should use apple-touch-icon v=10p27");
-assert(indexHtml.indexOf('rel="preload" as="image" href="./apple-touch-icon.png?v=10p27"') >= 0, "startup preload missing");
+assert(indexHtml.indexOf('src="./apple-touch-icon.png?v=10p28"') >= 0, "startup splash should use apple-touch-icon v=10p28");
+assert(indexHtml.indexOf('rel="preload" as="image" href="./apple-touch-icon.png?v=10p28"') >= 0, "startup preload missing");
 const appleTouchLinks = Array.from(indexHtml.matchAll(/<link\s+[^>]*rel=["']apple-touch-icon["'][^>]*>/g));
 assert(appleTouchLinks.length === 1, "apple-touch-icon should exist exactly once");
-assert(appleTouchLinks[0][0].indexOf('href="./apple-touch-icon.png?v=10p27"') >= 0, "apple-touch-icon href should use v=10p27");
+assert(appleTouchLinks[0][0].indexOf('href="./apple-touch-icon.png?v=10p28"') >= 0, "apple-touch-icon href should use v=10p28");
 assert((indexHtml.match(/data-startup-splash/g) || []).length === 1, "startup splash DOM should exist once");
 assert((indexHtml.match(/id="boot-recovery-root"/g) || []).length === 1, "boot recovery root should exist once");
 assert(indexHtml.indexOf('data-min-ms="1200"') >= 0, "startup splash should have minimum display time");
@@ -313,8 +314,8 @@ function runStartupCase(name, storedAppData, storedUiState, options) {
     webkitAudioContext: function () {},
     navigator: { userAgent: "SmokeTest Safari", clipboard: null },
     location: {
-      href: opts.safeStart ? "file:///kodomo/index.html?safeStart=1&v=10p27" : "file:///kodomo/index.html?v=10p27",
-      search: opts.safeStart ? "?safeStart=1&v=10p27" : "?v=10p27",
+      href: opts.safeStart ? "file:///kodomo/index.html?safeStart=1&v=10p28" : "file:///kodomo/index.html?v=10p28",
+      search: opts.safeStart ? "?safeStart=1&v=10p28" : "?v=10p28",
       reload() { caseContext.__reloaded = true; }
     },
     addEventListener(name, handler) {
@@ -423,8 +424,8 @@ if (fs.existsSync(adoptedIconPath)) {
 
 const appData = KA.state.getAppData();
 assert(appData.schemaVersion === 1, "schemaVersion should stay 1");
-assert(appData.appVersion === "1.0.0-prototype.27", "appVersion should be prototype 27");
-assert(KA.constants.VERSION_LABEL === "Ver.1.0 試作27", "version label mismatch");
+assert(appData.appVersion === "1.0.0-prototype.28", "appVersion should be prototype 28");
+assert(KA.constants.VERSION_LABEL === "Ver.1.0 試作28", "version label mismatch");
 assert(KA.constants.STORAGE_KEYS.appData === "kodomoAdventure.appData.v1", "app data key changed");
 assert(KA.constants.STORAGE_KEYS.uiState === "kodomoAdventure.uiState.v1", "ui state key changed");
 assert(KA.constants.STORAGE_KEYS.backup === "kodomoAdventure.backup.v1", "backup key changed");
@@ -457,24 +458,29 @@ assert(stylesCss.indexOf(".bird-house-room.is-decorating") >= 0, "bird-house dec
 assert(stylesCss.indexOf("@media (prefers-reduced-motion: reduce)") >= 0, "reduced-motion support should remain");
 assert(uiPolishPreview.indexOf("きょうの ぼうけん") >= 0 && uiPolishPreview.indexOf("data-route=") < 0, "UI polish preview should include today's adventure without linking to production navigation");
 assert(uiPolishPreview.indexOf("localStorage.") < 0, "UI polish preview should not access production localStorage");
-assert(uiPolishPreview.indexOf("../css/styles.css?v=10p27") >= 0, "UI polish preview should use prototype 27 styles");
+assert(uiPolishPreview.indexOf("../css/styles.css?v=10p28") >= 0, "UI polish preview should use prototype 28 styles");
 assert(nicknamePreview.indexOf("本番localStorageを使用しません") >= 0, "nickname preview should not use production localStorage");
-assert(nicknamePreview.indexOf("../js/companions.js?v=10p27") >= 0, "nickname preview should use prototype 27 companion renderer");
+assert(nicknamePreview.indexOf("../js/companions.js?v=10p28") >= 0, "nickname preview should use prototype 28 companion renderer");
 assert(legendPreview.indexOf("本番localStorageを使用しません") >= 0 && legendPreview.indexOf("localStorage.") < 0, "legend preview should avoid production localStorage");
 ["でんせつの かみなりのとり", "でんせつの ほのおのとり", "びりびり ねずみ", "取得前カード", "取得後カード", "とりのおうち表示", "キッチンの鳥選択", "おでかけの鳥選択", "孵化ダイアログ", "作品サムネイル", "390px", "reduced-motion"].forEach((label) => {
   assert(legendPreview.indexOf(label) >= 0, "legend preview should include " + label);
 });
-assert(legendPreview.indexOf("../js/coloring.js?v=10p27") >= 0, "legend preview should use prototype 27 coloring renderer");
+assert(legendPreview.indexOf("../js/coloring.js?v=10p28") >= 0, "legend preview should use prototype 28 coloring renderer");
 assert(evolutionPreview.indexOf("本番localStorageは使いません") >= 0 && evolutionPreview.indexOf("localStorage.") < 0, "evolution preview should avoid production localStorage");
-assert(evolutionPreview.indexOf("../js/companions.js?v=10p27") >= 0, "evolution preview should use prototype 27 companion renderer");
+assert(evolutionPreview.indexOf("../js/companions.js?v=10p28") >= 0, "evolution preview should use prototype 28 companion renderer");
 assert(careFlowPreview.indexOf("本番localStorageは使いません") >= 0 && careFlowPreview.indexOf("localStorage.") < 0, "care flow preview should avoid production localStorage");
-assert(careFlowPreview.indexOf("../js/companions.js?v=10p27") >= 0, "care flow preview should use prototype 27 companion renderer");
+assert(careFlowPreview.indexOf("../js/companions.js?v=10p28") >= 0, "care flow preview should use prototype 28 companion renderer");
 ["ホームから詳細", "なかまのようすから詳細", "図鑑から詳細", "おうちから詳細", "ごはんを あげる", "材料不足", "鳥未選択", "食事による進化", "390px"].forEach((label) => {
   assert(careFlowPreview.indexOf(label) >= 0, "care flow preview should include " + label);
 });
-["13種類 × 3段階", "stage 1", "stage 2", "stage 3", "進化演出", "とりのおうち 13羽"].forEach((label) => {
+["15種類 × 3段階", "stage 1", "stage 2", "stage 3", "進化演出", "とりのおうち 15羽"].forEach((label) => {
   assert(evolutionPreview.indexOf(label) >= 0, "evolution preview should include " + label);
 });
+["旧デザイン", "新デザイン", "ほうおう", "ケツァール", "80px", "120px", "黒一色", "正式な孵化候補 15種類"].forEach((label) => {
+  assert(birdCompanionReview.indexOf(label) >= 0, "bird review should include " + label);
+});
+assert(birdCompanionReview.indexOf("../js/companions.js?v=10p28") >= 0, "bird review should use the prototype 28 renderer");
+assert(birdCompanionReview.indexOf("localStorage.") < 0, "bird review should not access production localStorage");
 assert(appJs.indexOf("お気に入り") < 0, "old user-facing favorite spelling should not remain in app UI");
 assert(appJs.indexOf("おきにいり") >= 0, "hiragana favorite spelling should exist in app UI");
 assert(appJs.indexOf("isFavorite") >= 0 && read("js/companions.js").indexOf("favoriteCompanion") >= 0, "internal favorite identifiers should remain unchanged");
@@ -508,7 +514,7 @@ assert(stylesCss.indexOf(".companion-evolution-decoration") >= 0 && /\.companion
 const defaultUiState = KA.migrations.createDefaultUiState();
 assert(defaultUiState.selectedCompanionId === null && defaultUiState.kitchenPreselectedCompanionId === null, "selection state should default safely");
 assert(defaultUiState.companionDetailReturnRoute === "home" && defaultUiState.companionDetailReturnScrollY === 0, "detail return state should default safely");
-assert(KA.companions.getSpecies("companion_ice_legend_bird").name === "でんせつのこおりのとり", "ice legend bird should use the prototype 27 display name");
+assert(KA.companions.getSpecies("companion_ice_legend_bird").name === "でんせつのこおりのとり", "ice legend bird should use the prototype 28 display name");
 assert(read("js/companions.js").indexOf("こおりのでんせつどり") < 0 && read("js/companions.js").indexOf("こおりの でんせつどり") < 0, "old ice legend bird display names should not remain in production");
 assert(KA.companions.getSpecies("companion_ice_legend_bird").id === "companion_ice_legend_bird", "ice legend bird internal ID should remain unchanged");
 assert(homeSource.indexOf("なかまのようす") < 0 && appJs.indexOf("function renderCompanionStatus") >= 0, "companion status should be rendered through the inline status function");
@@ -927,8 +933,8 @@ const houseLayoutData = KA.birdHouse.companionLayout(houseConditionData, "compan
 assert(houseLayoutData.length === 6, "house should render acquired birds only");
 assert(houseLayoutData.filter((entry) => entry.species.id === "companion_peacock")[0].isFocus === true, "focused or favorite bird should be central");
 assert(new Set(houseLayoutData.map((entry) => entry.species.id)).size === houseLayoutData.length, "house should not duplicate species");
-const thirteenBirdHouseData = KA.migrations.createDefaultAppData();
-thirteenBirdHouseData.companions = KA.companions.allSpecies().map((item, index) => ({
+const fifteenBirdHouseData = KA.migrations.createDefaultAppData();
+fifteenBirdHouseData.companions = KA.companions.allSpecies().map((item, index) => ({
   id: item.id,
   speciesId: item.id,
   firstHatchedAt: "2026-07-01T09:00:00+09:00",
@@ -938,13 +944,13 @@ thirteenBirdHouseData.companions = KA.companions.allSpecies().map((item, index) 
   mealCount: 0,
   isFavorite: index === 6
 }));
-const thirteenBirdLayout = KA.birdHouse.companionLayout(thirteenBirdHouseData);
-assert(thirteenBirdLayout.length === 13, "bird house should render all thirteen acquired species");
-assert(new Set(thirteenBirdLayout.map((entry) => entry.x + ":" + entry.y)).size === 13, "thirteen-bird house positions should not overlap exactly");
-thirteenBirdLayout.forEach((entry) => {
-  assert(entry.x >= 8 && entry.x <= 92 && entry.y >= 44 && entry.y <= 82, entry.species.id + " should stay inside the fixed house layout");
+const fifteenBirdLayout = KA.birdHouse.companionLayout(fifteenBirdHouseData);
+assert(fifteenBirdLayout.length === 15, "bird house should render all fifteen acquired species");
+assert(new Set(fifteenBirdLayout.map((entry) => entry.x + ":" + entry.y)).size === 15, "fifteen-bird house positions should not overlap exactly");
+fifteenBirdLayout.forEach((entry) => {
+  assert(entry.x >= 7 && entry.x <= 93 && entry.y >= 42 && entry.y <= 82, entry.species.id + " should stay inside the fixed house layout");
 });
-assert(thirteenBirdLayout[0].species.id === "companion_penguin" && thirteenBirdLayout[0].isFocus, "favorite new species should receive the focus position");
+assert(fifteenBirdLayout[0].species.id === "companion_penguin" && fifteenBirdLayout[0].isFocus, "favorite species should receive the focus position");
 KA.birdHouse.recordInteraction("companion_chick", houseConditionData);
 assert(houseConditionData.birdHouse.lastInteractedCompanionId === "companion_chick", "house interaction should save only the last interacted companion");
 KA.birdHouse.clearUnseen(houseConditionData);
@@ -1002,7 +1008,7 @@ assert(clickBoot(recoveryCase.document, "data-boot-reload"), "reload button shou
 assert(recoveryCase.context.__reloaded === true, "reload button should call location.reload");
 assert(clickBoot(recoveryCase.document, "data-boot-safe-start"), "safeStart button should be handled by boot");
 assert(recoveryCase.context.location.href.indexOf("safeStart=1") >= 0, "safeStart button should navigate with safeStart=1");
-assert(recoveryCase.context.location.href.indexOf("v=10p27") >= 0, "safeStart button should keep prototype 27 cache query");
+assert(recoveryCase.context.location.href.indexOf("v=10p28") >= 0, "safeStart button should keep prototype 28 cache query");
 assert(clickBoot(recoveryCase.document, "data-boot-copy"), "copy button should be handled by boot");
 const diagnostics = JSON.parse(recoveryCase.storage["kodomoAdventure.bootDiagnostic.v1"]);
 assert(Array.isArray(diagnostics) && diagnostics.length >= 1, "diagnostics should be saved");
@@ -1104,16 +1110,14 @@ assert(restoredElectricArtworkData.artworks[0].regionColors.left_cheek_star === 
 
 const species = KA.companions.allSpecies();
 const speciesIds = species.map((item) => item.id);
-assert(species.length === 13, "formal companion species should be 13");
-assert(sha256Json(species) === "AFEB8B3D7D941ADE5BF75C3CFF91A3160B2B1385E7BA7EC32C7D6836EED0F4AF", "all thirteen species definitions should only include the prototype 27 display-name update");
-const stageOneVisualDefinitions = species.map((item) => {
-  const visual = {};
-  Object.keys(item).filter((key) => key !== "name").forEach((key) => {
-    visual[key] = item[key];
-  });
-  return visual;
-});
-assert(sha256Json(stageOneVisualDefinitions) === "05D2893FC478FD9972807EFAD47AC39F1256EDB471C36E6C330E03F548044676", "all thirteen stage 1 visual definitions should remain SHA-256 compatible with prototype 26");
+assert(species.length === 15, "formal companion species should be 15");
+const unchangedPrototype27Species = species.filter((item) => [
+  "companion_thunder_legend_bird",
+  "companion_phoenix",
+  "companion_quetzal"
+].indexOf(item.id) < 0);
+assert(unchangedPrototype27Species.length === 12, "twelve non-thunder prototype 27 species should remain");
+assert(sha256Json(unchangedPrototype27Species) === "068C8B88CB92176F1AE7444219783C562CB70FD4F69FEA301938EA809340F361", "the twelve existing non-thunder species definitions should remain SHA-256 compatible with prototype 27");
 [
   "companion_chick",
   "companion_duck",
@@ -1127,12 +1131,14 @@ assert(sha256Json(stageOneVisualDefinitions) === "05D2893FC478FD9972807EFAD47AC3
   "companion_java_sparrow",
   "companion_ice_legend_bird",
   "companion_thunder_legend_bird",
-  "companion_fire_legend_bird"
+  "companion_fire_legend_bird",
+  "companion_phoenix",
+  "companion_quetzal"
 ].forEach((speciesId, index) => {
   const item = KA.companions.getSpecies(speciesId);
   assert(item, speciesId + " should exist");
   assert(item.displayOrder === index + 1, speciesId + " displayOrder mismatch");
-  const expectedDesignVersion = speciesId === "companion_peacock" ? 4 : (index < 6 ? 2 : 1);
+  const expectedDesignVersion = speciesId === "companion_peacock" ? 4 : (speciesId === "companion_thunder_legend_bird" || index < 6 ? 2 : 1);
   assert(item.designVersion === expectedDesignVersion, speciesId + " designVersion mismatch");
   assert(Array.isArray(item.preferredWorldIds) && item.preferredWorldIds.length >= 2, speciesId + " preferred worlds missing");
   item.preferredWorldIds.forEach((worldId) => {
@@ -1193,17 +1199,27 @@ assert(sparrow.regions.filter((region) => region.id === "beak")[0].d.indexOf("L3
   { id: "companion_parakeet", name: "いんこ", regions: ["body", "head", "wing", "tail", "beak"] },
   { id: "companion_java_sparrow", name: "ぶんちょう", regions: ["body", "head", "wing", "tail", "beak"] },
   { id: "companion_ice_legend_bird", name: "でんせつのこおりのとり", regions: ["left_wing", "right_wing", "body", "crest", "tail"] },
-  { id: "companion_thunder_legend_bird", name: "でんせつの かみなりのとり", regions: ["left_wing", "right_wing", "body", "chest_cloud", "lightning_marks", "crest", "tail"] },
-  { id: "companion_fire_legend_bird", name: "でんせつの ほのおのとり", regions: ["left_wing", "right_wing", "left_wing_layer", "right_wing_layer", "body", "chest_petal", "spark_marks", "tail"] }
+  { id: "companion_thunder_legend_bird", name: "でんせつの かみなりのとり", designVersion: 2, regions: ["left_wing", "right_wing", "wing_bands", "body", "chest_cloud", "lightning_marks", "crest", "tail"] },
+  { id: "companion_fire_legend_bird", name: "でんせつの ほのおのとり", regions: ["left_wing", "right_wing", "left_wing_layer", "right_wing_layer", "body", "chest_petal", "spark_marks", "tail"] },
+  { id: "companion_phoenix", name: "ほうおう", regions: ["left_wing", "right_wing", "wing_gold", "body", "chest_petal", "tail", "tail_gold", "spark_marks"] },
+  { id: "companion_quetzal", name: "ケツァール", regions: ["left_wing", "right_wing", "wing_pattern", "body", "chest", "tail", "tail_highlight"] }
 ].forEach((expected) => {
   const item = KA.companions.getSpecies(expected.id);
-  assert(item && item.name === expected.name && item.designVersion === 1, expected.id + " should be a formal version 1 species");
+  assert(item && item.name === expected.name && item.designVersion === (expected.designVersion || 1), expected.id + " should have the expected formal definition");
   const regionIds = item.regions.map((region) => region.id);
   expected.regions.forEach((regionId) => assert(regionIds.indexOf(regionId) >= 0, expected.id + " should include " + regionId));
   const normal = KA.companions.renderCompanion(expected.id);
   const silhouette = KA.companions.renderCompanion(expected.id, { silhouette: true });
   assert(normal.indexOf("<svg") >= 0 && silhouette.indexOf("companion-silhouette") >= 0, expected.id + " should render normal and silhouette SVG");
   assert(normal.indexOf("<rect") < 0 && normal.indexOf("<img") < 0 && normal.indexOf("http") < 0, expected.id + " should have a transparent inline SVG");
+});
+const thunderSpecies = KA.companions.getSpecies("companion_thunder_legend_bird");
+assert(thunderSpecies.defaultColors.body === "#FFD21F" && thunderSpecies.defaultColors.wing === "#FFE55C", "redesigned thunder bird should use vivid yellow as its main color");
+assert(thunderSpecies.defaultColors.body !== "#4F83B3" && thunderSpecies.viewBox === "0 0 240 180", "redesigned thunder bird should not reuse the prototype 27 blue body");
+assert(thunderSpecies.outer.join(" ").indexOf("L77 60 L64 42") >= 0 && thunderSpecies.regions.some((region) => region.id === "wing_bands" && region.fill === "#3F3A2C"), "redesigned thunder bird should have an original angular lightning silhouette and dark wing accents");
+["companion_phoenix", "companion_quetzal"].forEach((speciesId) => {
+  assert(speciesIds.indexOf(speciesId) >= 0, speciesId + " should be in the formal hatch pool");
+  assert(KA.companions.renderCompanion(speciesId, { stage: 1 }).indexOf("companion-evolution-decoration") < 0, speciesId + " stage 1 should be the undecorated body");
 });
 assert(new Set(speciesIds).size === speciesIds.length, "species IDs should be unique");
 const oldOwnedData = KA.migrations.createDefaultAppData();
@@ -1219,7 +1235,7 @@ oldOwnedData.companions = species.slice(0, 6).map((item, index) => ({
 const newSpeciesIds = species.slice(6).map((item) => item.id);
 for (let candidateIndex = 0; candidateIndex < 20; candidateIndex += 1) {
   const candidateId = KA.companions.pickSpeciesForEgg({ id: "egg_new_candidate_" + candidateIndex }, oldOwnedData);
-  assert(newSpeciesIds.indexOf(candidateId) >= 0, "unowned-priority hatch pool should select one of the seven species added after the original six");
+  assert(newSpeciesIds.indexOf(candidateId) >= 0, "unowned-priority hatch pool should select one of the nine species added after the original six");
 }
 assert(
   KA.companions.pickSpeciesForEgg({ id: "egg_planned", plannedSpeciesId: "companion_java_sparrow" }, oldOwnedData) === "companion_java_sparrow",
@@ -1235,17 +1251,39 @@ prototype24OwnedData.companions = species.slice(0, 11).map((item) => ({
   bondLevel: 1,
   isFavorite: false
 }));
-const prototype25SpeciesIds = species.slice(11).map((item) => item.id);
+const postPrototype24SpeciesIds = species.slice(11).map((item) => item.id);
 for (let candidateIndex = 0; candidateIndex < 20; candidateIndex += 1) {
   const egg = { id: "egg_p25_candidate_" + candidateIndex };
   const firstPick = KA.companions.pickSpeciesForEgg(egg, prototype24OwnedData);
   const secondPick = KA.companions.pickSpeciesForEgg(egg, prototype24OwnedData);
-  assert(prototype25SpeciesIds.indexOf(firstPick) >= 0, "prototype 24 data should prioritize one of the two newly unowned species");
+  assert(postPrototype24SpeciesIds.indexOf(firstPick) >= 0, "prototype 24 data should prioritize one of the four later unowned species");
   assert(firstPick === secondPick, "fixed seed should return the same newly added species for the same egg");
 }
 assert(
   KA.companions.pickSpeciesForEgg({ id: "egg_p25_planned", plannedSpeciesId: "companion_thunder_legend_bird" }, prototype24OwnedData) === "companion_thunder_legend_bird",
   "plannedSpeciesId should preserve the new thunder species"
+);
+const prototype27OwnedData = KA.migrations.createDefaultAppData();
+prototype27OwnedData.companions = species.slice(0, 13).map((item) => ({
+  id: item.id,
+  speciesId: item.id,
+  firstHatchedAt: "2026-07-01T09:00:00+09:00",
+  lastHatchedAt: "2026-07-01T09:00:00+09:00",
+  hatchCount: 1,
+  bondLevel: 1,
+  isFavorite: false
+}));
+const prototype28SpeciesIds = ["companion_phoenix", "companion_quetzal"];
+for (let candidateIndex = 0; candidateIndex < 20; candidateIndex += 1) {
+  const egg = { id: "egg_p28_candidate_" + candidateIndex };
+  const firstPick = KA.companions.pickSpeciesForEgg(egg, prototype27OwnedData);
+  const secondPick = KA.companions.pickSpeciesForEgg(egg, prototype27OwnedData);
+  assert(prototype28SpeciesIds.indexOf(firstPick) >= 0, "prototype 27 data should prioritize phoenix or quetzal");
+  assert(firstPick === secondPick, "prototype 28 fixed seed should remain stable for the same egg");
+}
+assert(
+  KA.companions.pickSpeciesForEgg({ id: "egg_p28_planned", plannedSpeciesId: "companion_phoenix" }, prototype27OwnedData) === "companion_phoenix",
+  "plannedSpeciesId should preserve phoenix"
 );
 const rehatchData = KA.migrations.createDefaultAppData();
 const firstThunderHatch = KA.companions.recordHatch(rehatchData, "companion_thunder_legend_bird", "2026-07-20T09:00:00+09:00");
@@ -1256,6 +1294,13 @@ assert(rehatchData.companions.length === 1, "rehatching a new legend bird should
 assert(secondThunderHatch.hatchCount === 2 && secondThunderHatch.bondLevel === 2, "rehatching should increase hatchCount and bondLevel once");
 assert(secondThunderHatch.nickname === "らいと" && secondThunderHatch.isFavorite === true, "rehatching should preserve nickname and favorite state");
 assert(KA.companions.getCompanionDisplayName(secondThunderHatch) === "らいと", "new legend birds should use the shared nickname display function");
+const phoenixHatchData = KA.migrations.createDefaultAppData();
+const firstPhoenixHatch = KA.companions.recordHatch(phoenixHatchData, "companion_phoenix", "2026-07-22T09:00:00+09:00");
+firstPhoenixHatch.nickname = "ひかり";
+firstPhoenixHatch.isFavorite = true;
+const secondPhoenixHatch = KA.companions.recordHatch(phoenixHatchData, "companion_phoenix", "2026-07-23T09:00:00+09:00");
+assert(phoenixHatchData.companions.length === 1 && secondPhoenixHatch.hatchCount === 2 && secondPhoenixHatch.bondLevel === 2, "rehatching phoenix should reuse its companion card and increment existing progress");
+assert(secondPhoenixHatch.nickname === "ひかり" && secondPhoenixHatch.isFavorite === true, "rehatching phoenix should preserve nickname and favorite");
 ["coloring_rabbit_001", "coloring_cat_001", "coloring_lion", "coloring_panda", "coloring_grasshopper", "coloring_flower_001"].forEach((notSpecies) => {
   assert(speciesIds.indexOf(notSpecies) === -1, notSpecies + " must not be a companion species");
 });
@@ -1272,7 +1317,7 @@ assert(KA.companions.getCompanionEvolutionStage({ bondLevel: 99 }) === 3, "bondL
 assert(KA.companions.getEvolutionStageLabel(1) === "ちいさなすがた", "stage 1 label mismatch");
 assert(KA.companions.getEvolutionStageLabel(2) === "せいちょうしたすがた", "stage 2 label mismatch");
 assert(KA.companions.getEvolutionStageLabel(3) === "とくべつなすがた", "stage 3 label mismatch");
-assert(Object.keys(KA.companions.evolutionDecorations).length === 13, "all thirteen species should define evolution decorations");
+assert(Object.keys(KA.companions.evolutionDecorations).length === 15, "all fifteen species should define evolution decorations");
 speciesIds.forEach((speciesId) => {
   const stage1 = KA.companions.renderCompanion(speciesId, { stage: 1 });
   const stage2 = KA.companions.renderCompanion(speciesId, { stage: 2 });
@@ -1283,6 +1328,10 @@ speciesIds.forEach((speciesId) => {
   assert(stage2.indexOf("role=\"img\"") >= 0 && stage2.indexOf("せいちょうしたすがた") >= 0, speciesId + " stage 2 should expose an accessible SVG label");
   assert(stage3.indexOf("とくべつなすがた") >= 0, speciesId + " stage 3 should expose its stage in the SVG label");
 });
+assert(KA.companions.renderCompanion("companion_phoenix", { stage: 2 }).indexOf("#FFE4A0") >= 0, "phoenix stage 2 should add flame-feather decorations");
+assert(KA.companions.renderCompanion("companion_phoenix", { stage: 3 }).indexOf("#FFF0B0") >= 0, "phoenix stage 3 should add a gentle sacred glow");
+assert(KA.companions.renderCompanion("companion_quetzal", { stage: 2 }).indexOf("#8FE1BF") >= 0, "quetzal stage 2 should add wing and tail decorations");
+assert(KA.companions.renderCompanion("companion_quetzal", { stage: 3 }).indexOf("#B9F0D8") >= 0, "quetzal stage 3 should add a light arc and long-tail decorations");
 assert(appJs.indexOf("KA.companions.renderCompanion") >= 0 && appJs.indexOf("getCompanionEvolutionStage") < 0, "screens should use the shared renderer instead of duplicating stage thresholds");
 assert(appJs.indexOf("data-show-evolution") >= 0 && appJs.indexOf("data-close-companion-evolution") >= 0, "home and dialog should expose evolution controls");
 assert(appJs.indexOf('role="dialog" aria-modal="true" aria-labelledby="companion-evolution-title"') >= 0, "evolution dialog should have dialog semantics");
@@ -1482,7 +1531,8 @@ assert(KA.companions.getCompanionDisplayName(repeated) === hatch1.species.name, 
 const nicknameSet = KA.companions.setCompanionNickname(hatch1.species.id, " ぴよ\nちゃん ");
 assert(nicknameSet.ok && repeated.nickname === "ぴよちゃん", "nickname should trim outer spaces and remove line breaks");
 assert(KA.companions.getCompanionDisplayName(repeated) === "ぴよちゃん", "display name should prefer the nickname");
-assert(!KA.companions.setCompanionNickname("companion_penguin", "ぺんちゃん").ok, "an unowned companion should not accept a nickname");
+const unownedNicknameSpeciesId = speciesIds.filter((speciesId) => !KA.companions.getCompanion(data, speciesId))[0];
+assert(unownedNicknameSpeciesId && !KA.companions.setCompanionNickname(unownedNicknameSpeciesId, "まだだよ").ok, "an unowned companion should not accept a nickname");
 assert(!KA.companions.setCompanionNickname(hatch1.species.id, "　　　　　　").ok, "spaces-only nickname should be rejected");
 assert(!KA.companions.setCompanionNickname(hatch1.species.id, "1234567890123").ok, "nickname longer than twelve characters should be rejected");
 assert(repeated.nickname === "ぴよちゃん", "invalid nickname input should not replace the saved nickname");
