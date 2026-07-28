@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>伝説の鳥 表示確認 - 試作29</title>
+  <link rel="stylesheet" href="../css/styles.css?v=10p29">
+  <style>
+    body { margin: 0; background: #f7fbff; color: #273449; font-family: sans-serif; }
+    main { width: min(100% - 24px, 760px); margin: auto; padding: 20px 0 48px; }
+    .preview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .preview-card { min-width: 0; padding: 12px; border: 1px solid #dce5ec; border-radius: 14px; background: #fff; text-align: center; }
+    .preview-card.is-legendary { border-color: #d6ad3d; background: linear-gradient(145deg, #fffdf1, #f7fbff); }
+    .bird-view { position: relative; display: grid; place-items: center; width: 120px; height: 120px; margin: 4px auto; }
+    .bird-view.is-80 { width: 80px; height: 80px; }
+    .bird-view svg { width: 100%; height: 100%; }
+    .preview-badge { display: inline-block; padding: 4px 9px; border: 1px solid #c79325; border-radius: 999px; background: #fff8d5; color: #694b0d; font-weight: 800; }
+    .silhouette svg * { fill: #1f2937 !important; stroke: #1f2937 !important; }
+    .comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .mock-dialog { position: relative; overflow: hidden; padding: 18px; border: 2px solid #d6ad3d; border-radius: 16px; background: radial-gradient(circle at top, #fffbdc, #fff); text-align: center; }
+    @media (max-width: 420px) {
+      .preview-grid, .comparison { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .preview-card { padding: 8px 5px; }
+      h3 { font-size: 0.95rem; overflow-wrap: anywhere; }
+    }
+  </style>
+  <script defer src="../js/companions.js?v=10p29"></script>
+</head>
+<body>
+  <main>
+    <h1>伝説の鳥 表示確認</h1>
+    <p>本番localStorageは使用しません。通常鳥と伝説4種、ケツァールを比較します。</p>
+    <section class="panel panel-pad">
+      <h2>通常鳥と伝説鳥</h2>
+      <div id="legend-grid" class="preview-grid"></div>
+    </section>
+    <section class="panel panel-pad">
+      <h2>ほうおう stage 1〜3</h2>
+      <div id="phoenix-stages" class="preview-grid"></div>
+    </section>
+    <section class="panel panel-pad">
+      <h2>炎鳥とほうおう</h2>
+      <div id="fire-phoenix-comparison" class="comparison"></div>
+    </section>
+    <section class="panel panel-pad">
+      <h2>80pxとシルエット</h2>
+      <div id="size-silhouette" class="preview-grid"></div>
+    </section>
+    <section class="panel panel-pad">
+      <h2>孵化・進化表示</h2>
+      <div class="comparison">
+        <article class="mock-dialog"><strong>なかまが うまれたよ！</strong><p>通常の孵化結果</p></article>
+        <article class="mock-dialog"><span class="preview-badge">でんせつ</span><strong><br>でんせつの なかまが<br>うまれた！</strong><p>金色と白の静的な光</p></article>
+        <article class="mock-dialog"><strong>なかよし進化</strong><p>通常の進化結果</p></article>
+        <article class="mock-dialog"><span class="preview-badge">でんせつ</span><strong><br>なかよし進化</strong><p>伝説専用の光輪</p></article>
+      </div>
+    </section>
+  </main>
+  <script>
+    window.addEventListener("DOMContentLoaded", function () {
+      var KA = window.KodomoAdventure;
+      var ids = ["companion_chick", "companion_ice_legend_bird", "companion_thunder_legend_bird", "companion_fire_legend_bird", "companion_phoenix", "companion_quetzal"];
+      function card(id, stage, extraClass) {
+        var species = KA.companions.getSpecies(id);
+        var legendary = KA.companions.isLegendaryCompanionSpecies(species);
+        return '<article class="preview-card ' + (legendary ? 'is-legendary ' : '') + (extraClass || '') + '">' +
+          (legendary ? '<span class="preview-badge">でんせつ</span>' : '') +
+          '<div class="bird-view">' + KA.companions.renderCompanion(id, { stage: stage || 1 }) + '</div>' +
+          '<h3>' + species.name + '</h3><small>' + species.rarity + ' / stage ' + (stage || 1) + '</small></article>';
+      }
+      document.getElementById("legend-grid").innerHTML = ids.map(function (id) { return card(id, 1); }).join("");
+      document.getElementById("phoenix-stages").innerHTML = [1, 2, 3].map(function (stage) { return card("companion_phoenix", stage); }).join("");
+      document.getElementById("fire-phoenix-comparison").innerHTML = card("companion_fire_legend_bird", 1) + card("companion_phoenix", 1);
+      document.getElementById("size-silhouette").innerHTML =
+        '<article class="preview-card"><div class="bird-view is-80">' + KA.companions.renderCompanion("companion_fire_legend_bird", { stage: 1 }) + '</div><h3>炎鳥 80px</h3></article>' +
+        '<article class="preview-card"><div class="bird-view is-80">' + KA.companions.renderCompanion("companion_phoenix", { stage: 1 }) + '</div><h3>ほうおう 80px</h3></article>' +
+        '<article class="preview-card silhouette"><div class="bird-view">' + KA.companions.renderCompanion("companion_fire_legend_bird", { stage: 1 }) + '</div><h3>炎鳥 シルエット</h3></article>' +
+        '<article class="preview-card silhouette"><div class="bird-view">' + KA.companions.renderCompanion("companion_phoenix", { stage: 1 }) + '</div><h3>ほうおう シルエット</h3></article>';
+    });
+  </script>
+</body>
+</html>

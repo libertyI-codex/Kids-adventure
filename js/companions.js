@@ -308,6 +308,7 @@
       name: "でんせつのこおりのとり",
       displayOrder: 11,
       designVersion: 1,
+      rarity: "legendary",
       preferredWorldIds: ["world_sky_island", "world_castle", "world_sea"],
       defaultColors: { body: "#60A5FA", chest: "#F8FAFC", wing: "#93C5FD", tail: "#38BDF8", beak: "#D9F4FF", leg: "#2563EB" },
       viewBox: "0 0 230 170",
@@ -345,6 +346,7 @@
       name: "でんせつの かみなりのとり",
       displayOrder: 12,
       designVersion: 2,
+      rarity: "legendary",
       preferredWorldIds: ["world_sky_island", "world_secret_base", "world_castle"],
       defaultColors: { body: "#FFD21F", chest: "#FFF9E8", wing: "#FFE55C", tail: "#F5A900", beak: "#F28C28", leg: "#6B5618" },
       viewBox: "0 0 240 180",
@@ -387,6 +389,7 @@
       name: "でんせつの ほのおのとり",
       displayOrder: 13,
       designVersion: 1,
+      rarity: "legendary",
       preferredWorldIds: ["world_castle", "world_sky_island", "world_island"],
       defaultColors: { body: "#E56F61", chest: "#FFF0D6", wing: "#F39A67", tail: "#D95D52", beak: "#F6CF72", leg: "#9B5A46" },
       viewBox: "0 0 240 170",
@@ -428,45 +431,46 @@
       id: "companion_phoenix",
       name: "ほうおう",
       displayOrder: 14,
-      designVersion: 1,
+      designVersion: 2,
+      rarity: "legendary",
       preferredWorldIds: ["world_castle", "world_sky_island", "world_island"],
-      defaultColors: { body: "#D94A3D", chest: "#FFF1D2", wing: "#F06A3E", tail: "#C83E35", beak: "#F4C95D", leg: "#8B5142" },
+      defaultColors: { body: "#F5C84C", chest: "#FFF9DE", wing: "#FFE88A", tail: "#E8B83E", beak: "#E89A3D", leg: "#9A7132" },
       viewBox: "0 0 240 190",
       transparentOuterBox: true,
-      outlineStroke: "#8B5142",
-      outlineWidth: 2.7,
-      innerStroke: "#A45342",
+      outlineStroke: "#9A7132",
+      outlineWidth: 2.5,
+      innerStroke: "#B78B32",
       innerWidth: 2.1,
       outer: [
-        "M96 70 C72 62 47 48 19 25 C21 49 32 67 49 78 C34 84 25 96 24 111 C50 113 75 102 98 89 Z",
-        "M144 70 C168 62 193 48 221 25 C219 49 208 67 191 78 C206 84 215 96 216 111 C190 113 165 102 142 89 Z",
-        "M94 57 C105 40 132 40 143 57 C158 79 154 116 139 139 C129 155 111 155 101 139 C85 116 82 79 94 57 Z",
-        "M97 50 C96 35 103 24 113 18 L120 37 L131 13 L136 39 L148 29 L141 54 Z",
-        "M99 135 C73 145 55 162 43 183 L91 164 L120 186 L149 164 L197 183 C185 162 167 145 141 135 Z"
+        "M99 72 C77 68 56 56 35 36 L42 63 L17 59 L43 80 L24 91 L58 96 L43 114 C64 113 83 105 100 91 Z",
+        "M141 72 C163 68 184 56 205 36 L198 63 L223 59 L197 80 L216 91 L182 96 L197 114 C176 113 157 105 140 91 Z",
+        "M95 58 C106 42 132 42 143 58 C157 79 153 115 139 137 C129 153 111 153 101 137 C87 115 82 79 95 58 Z",
+        "M96 53 L101 28 L111 39 L120 14 L129 39 L139 28 L144 53 Z",
+        "M99 132 C74 137 52 149 33 171 C56 168 77 167 96 171 C104 179 112 184 120 188 C128 184 136 179 144 171 C163 167 184 168 207 171 C188 149 166 137 141 132 Z"
       ],
       regions: [
-        { id: "left_wing", d: "M96 71 C73 64 49 50 22 29 C24 50 35 65 52 76 C39 83 31 94 29 106 C53 108 76 99 97 87 Z", fill: "#F06A3E" },
-        { id: "right_wing", d: "M144 71 C167 64 191 50 218 29 C216 50 205 65 188 76 C201 83 209 94 211 106 C187 108 164 99 143 87 Z", fill: "#F06A3E" },
-        { id: "wing_gold", d: "M43 51 C57 59 72 67 91 74 L87 88 C69 82 53 73 40 63 Z M197 51 C183 59 168 67 149 74 L153 88 C171 82 187 73 200 63 Z", fill: "#F7B84B" },
-        { id: "body", d: "M96 60 C107 45 131 45 141 60 C154 80 151 113 137 136 C128 151 112 151 103 136 C89 113 86 80 96 60 Z", fill: "#D94A3D" },
-        { id: "chest_petal", d: "M120 75 C135 87 137 104 128 118 C123 126 116 126 111 118 C102 104 105 87 120 75 Z", fill: "#FFF1D2" },
-        { id: "head", d: "M96 53 C108 38 131 39 142 53 C153 67 145 83 130 88 C114 93 96 84 90 69 C87 61 90 56 96 53 Z", fill: "#F18A52" },
-        { id: "crest", d: "M99 50 C99 37 105 28 113 22 L120 41 L130 19 L134 42 L143 34 L139 52 Z", fill: "#F7B84B" },
-        { id: "tail", d: "M100 134 C76 144 59 158 49 177 L92 161 L120 182 L148 161 L191 177 C181 158 164 144 140 134 Z", fill: "#C83E35" },
-        { id: "tail_gold", d: "M92 161 L120 182 L148 161 L137 151 L120 168 L103 151 Z", fill: "#F7B84B" },
-        { id: "spark_marks", d: "M53 89 q7-11 14 0 q-7 10-14 0z M76 101 q6-9 12 0 q-6 9-12 0z M173 89 q7-11 14 0 q-7 10-14 0z M152 101 q6-9 12 0 q-6 9-12 0z", fill: "#FFF0A6" },
-        { id: "beak", d: "M141 61 C157 62 163 69 157 78 C150 74 145 69 141 61 Z", fill: "#F4C95D" },
+        { id: "left_wing", d: "M98 73 C78 69 58 58 39 41 L46 66 L24 63 L48 80 L31 89 L62 92 L50 108 C69 107 85 100 99 89 Z", fill: "#FFE88A" },
+        { id: "right_wing", d: "M142 73 C162 69 182 58 201 41 L194 66 L216 63 L192 80 L209 89 L178 92 L190 108 C171 107 155 100 141 89 Z", fill: "#FFE88A" },
+        { id: "wing_sun_rays", d: "M47 62 L69 71 L58 80 L84 82 L73 93 L98 87 L98 75 L77 68 L60 52 Z M193 62 L171 71 L182 80 L156 82 L167 93 L142 87 L142 75 L163 68 L180 52 Z", fill: "#E8B83E" },
+        { id: "body", d: "M97 61 C108 47 131 47 141 61 C153 81 150 111 137 134 C128 149 112 149 103 134 C90 111 86 81 97 61 Z", fill: "#F5C84C" },
+        { id: "chest_sun", d: "M120 75 C130 83 134 96 129 109 C126 118 114 118 110 109 C105 96 109 83 120 75 Z M120 86 L124 96 L120 106 L116 96 Z", fill: "#FFF9DE" },
+        { id: "head", d: "M97 54 C108 40 131 41 142 54 C152 68 145 82 130 87 C115 92 97 84 91 70 C88 62 91 57 97 54 Z", fill: "#F9D96B" },
+        { id: "crest", d: "M99 52 L103 33 L112 43 L120 21 L128 43 L137 33 L141 52 Z", fill: "#FFF0A3" },
+        { id: "tail_fan", d: "M101 133 C78 138 58 149 41 165 C61 162 79 163 96 168 C104 176 112 181 120 185 C128 181 136 176 144 168 C161 163 179 162 199 165 C182 149 162 138 139 133 Z", fill: "#E8B83E" },
+        { id: "tail_plumes", d: "M59 157 C72 148 87 144 102 143 L96 168 C83 163 71 160 59 157 Z M181 157 C168 148 153 144 138 143 L144 168 C157 163 169 160 181 157 Z M103 142 C110 139 114 138 120 138 C126 138 130 139 137 142 L120 181 Z", fill: "#FFF0A3" },
+        { id: "tail_gems", d: "M78 155 q7-9 14 0 q-7 10-14 0z M148 155 q7-9 14 0 q-7 10-14 0z M113 153 q7-10 14 0 q-7 11-14 0z", fill: "#F1A64A" },
+        { id: "beak", d: "M140 61 C155 62 161 68 155 77 C148 73 144 68 140 61 Z", fill: "#E89A3D" },
         { id: "feet", d: "M107 146 L103 162 M132 146 L137 162", fill: "none" }
       ],
       inner: [
-        "M31 53 C50 64 69 75 89 84",
-        "M209 53 C190 64 171 75 151 84",
-        "M44 52 C58 60 73 68 91 74",
-        "M196 52 C182 60 167 68 149 74",
-        "M103 136 C112 144 128 144 137 136",
+        "M31 69 C51 76 70 83 91 88",
+        "M209 69 C189 76 170 83 149 88",
+        "M47 62 C62 69 76 76 94 80",
+        "M193 62 C178 69 164 76 146 80",
+        "M103 134 C112 142 128 142 137 134",
         "M103 162 C96 166 90 166 84 163 M137 162 C144 166 150 166 156 163"
       ],
-      face: '<circle cx="116" cy="58" r="3.6" fill="#6D302B"/><circle cx="117" cy="57" r="1.1" fill="#fff"/><path d="M101 69 C108 75 119 75 127 70" fill="none" stroke="#8B5142" stroke-width="2" stroke-linecap="round"/>'
+      face: '<circle cx="116" cy="58" r="3.6" fill="#6F5627"/><circle cx="117" cy="57" r="1.1" fill="#fff"/><path d="M101 69 C108 75 119 75 127 70" fill="none" stroke="#9A7132" stroke-width="2" stroke-linecap="round"/>'
     },
     {
       id: "companion_quetzal",
@@ -626,11 +630,11 @@
     },
     companion_phoenix: {
       2: {
-        front: '<path d="M49 83 q8-12 16 0-8 11-16 0z M72 99 q7-10 14 0-7 9-14 0z M175 83 q8-12 16 0-8 11-16 0z M154 99 q7-10 14 0-7 9-14 0z" fill="#FFE4A0"/><path d="M96 128 Q120 145 144 128 M104 43 Q112 29 120 44 M121 43 Q130 28 137 47" fill="none" stroke="#F7B84B" stroke-width="3" stroke-linecap="round"/>'
+        front: '<path d="M48 77 Q70 60 94 72 M192 77 Q170 60 146 72 M104 105 L120 116 L136 105 M104 45 L112 31 L120 45 L129 30 L137 46" fill="none" stroke="#FFF4BC" stroke-width="3" stroke-linecap="round"/><g fill="#F3B94F"><path d="M70 151 q7-10 14 0 q-7 10-14 0z"/><path d="M156 151 q7-10 14 0 q-7 10-14 0z"/><circle cx="120" cy="96" r="4"/></g>'
       },
       3: {
-        back: '<path d="M31 54 Q120 -8 209 54" fill="none" stroke="#FFF0B0" stroke-width="5" stroke-linecap="round" opacity=".75"/>',
-        front: '<g fill="#FFD979"><path d="M31 73 q10-15 20 0-10 14-20 0z"/><path d="M189 73 q10-15 20 0-10 14-20 0z"/><path d="M67 154 q9-13 18 0-9 12-18 0z"/><path d="M155 154 q9-13 18 0-9 12-18 0z"/></g><path d="M87 125 Q120 151 153 125 M101 41 Q111 20 120 42 M120 42 Q131 19 139 48 M73 161 L93 151 M167 161 L147 151" fill="none" stroke="#FFF1BE" stroke-width="3" stroke-linecap="round"/><g fill="#FFF7D6"><circle cx="22" cy="47" r="3"/><circle cx="218" cy="47" r="3"/><circle cx="120" cy="13" r="3"/></g>'
+        back: '<circle cx="120" cy="85" r="72" fill="none" stroke="#FFF6C9" stroke-width="6" opacity=".78"/><path d="M35 59 Q120 -6 205 59 M51 43 L29 24 M189 43 L211 24 M120 18 V2" fill="none" stroke="#F7D86B" stroke-width="4" stroke-linecap="round" opacity=".8"/>',
+        front: '<path d="M40 72 Q68 47 98 66 M200 72 Q172 47 142 66 M96 107 Q120 128 144 107 M99 45 L111 22 L120 43 L131 21 L141 48" fill="none" stroke="#FFF9DF" stroke-width="3" stroke-linecap="round"/><g fill="#F5C84C"><path d="M22 55 l4 8 8 4-8 4-4 8-4-8-8-4 8-4z"/><path d="M218 55 l4 8 8 4-8 4-4 8-4-8-8-4 8-4z"/><path d="M120 154 q9-13 18 0 q-9 13-18 0z"/></g><g fill="#FFF6C9"><circle cx="61" cy="28" r="3"/><circle cx="179" cy="28" r="3"/><circle cx="120" cy="7" r="3"/></g>'
       }
     },
     companion_quetzal: {
@@ -741,7 +745,10 @@
   }
 
   function allSpecies() {
-    return cloneSpeciesData(SPECIES).sort(function (a, b) {
+    return cloneSpeciesData(SPECIES).map(function (species) {
+      species.rarity = species.rarity === "legendary" ? "legendary" : "normal";
+      return species;
+    }).sort(function (a, b) {
       return Number(a.displayOrder || 0) - Number(b.displayOrder || 0);
     });
   }
@@ -754,6 +761,18 @@
 
   function isValidSpeciesId(speciesId) {
     return Boolean(getSpecies(speciesId));
+  }
+
+  function isLegendaryCompanionSpecies(speciesId) {
+    var species = typeof speciesId === "object" && speciesId ? speciesId : getSpecies(speciesId);
+    return Boolean(species && species.rarity === "legendary");
+  }
+
+  function isLegendaryCompanion(companion) {
+    var speciesId = typeof companion === "string"
+      ? companion
+      : companion && (companion.speciesId || companion.id);
+    return isLegendaryCompanionSpecies(speciesId);
   }
 
   function companionHashString(value) {
@@ -957,7 +976,7 @@
       companion: companion,
       stage: stage,
       label: getEvolutionStageLabel(stage),
-      ariaLabel: opts.ariaLabel || (displayName + "、" + getEvolutionStageLabel(stage))
+      ariaLabel: opts.ariaLabel || ((isLegendaryCompanionSpecies(species) ? "でんせつのなかま、" : "") + displayName + "、" + getEvolutionStageLabel(stage))
     };
   }
 
@@ -977,7 +996,7 @@
     var evolution = renderEvolutionContext(species, opts);
     if (opts.silhouette) {
       return [
-        '<svg class="companion-svg companion-silhouette companion-peacock" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+        '<svg class="companion-svg companion-silhouette companion-peacock' + (isLegendaryCompanionSpecies(species) ? ' companion-legendary' : '') + '" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
         '<g class="peacock-tail-group" transform="' + tailTransform + '">',
         '<path d="' + species.outer[0] + '" fill="#1f2937"/>',
         '</g>',
@@ -990,7 +1009,7 @@
       ].join("");
     }
     return [
-      '<svg class="companion-svg companion-peacock evolution-stage-' + evolution.stage + '" viewBox="' + species.viewBox + '" role="img" aria-label="' + escapeSvgAttribute(evolution.ariaLabel) + '" focusable="false">',
+      '<svg class="companion-svg companion-peacock evolution-stage-' + evolution.stage + (isLegendaryCompanionSpecies(species) ? ' companion-legendary' : '') + '" viewBox="' + species.viewBox + '" role="img" aria-label="' + escapeSvgAttribute(evolution.ariaLabel) + '" focusable="false">',
       evolutionDecorationMarkup(species.id, evolution.stage, "back"),
       '<g class="body-regions">',
       '<g class="peacock-tail-group" transform="' + tailTransform + '">',
@@ -1037,13 +1056,13 @@
     }
     if (opts.silhouette) {
       return [
-        '<svg class="companion-svg companion-silhouette' + transparentBoxClass + '" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+        '<svg class="companion-svg companion-silhouette' + transparentBoxClass + (isLegendaryCompanionSpecies(species) ? ' companion-legendary' : '') + '" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
         pathList(species.outer, "#1f2937", "none"),
         '</svg>'
       ].join("");
     }
     return [
-      '<svg class="companion-svg companion-' + species.id.replace("companion_", "") + transparentBoxClass + ' evolution-stage-' + evolution.stage + '" viewBox="' + species.viewBox + '" role="img" aria-label="' + escapeSvgAttribute(evolution.ariaLabel) + '" focusable="false">',
+      '<svg class="companion-svg companion-' + species.id.replace("companion_", "") + transparentBoxClass + ' evolution-stage-' + evolution.stage + (isLegendaryCompanionSpecies(species) ? ' companion-legendary' : '') + '" viewBox="' + species.viewBox + '" role="img" aria-label="' + escapeSvgAttribute(evolution.ariaLabel) + '" focusable="false">',
       evolutionDecorationMarkup(species.id, evolution.stage, "back"),
       '<g class="body-regions">',
       species.regions.map(function (region) {
@@ -1071,6 +1090,8 @@
     allSpecies: allSpecies,
     getSpecies: getSpecies,
     isValidSpeciesId: isValidSpeciesId,
+    isLegendaryCompanionSpecies: isLegendaryCompanionSpecies,
+    isLegendaryCompanion: isLegendaryCompanion,
     ensureCompanions: ensureCompanions,
     getCompanion: getCompanion,
     getCompanionSpeciesName: getCompanionSpeciesName,

@@ -108,6 +108,7 @@
       },
       dailyRecords: {},
       starLedger: [],
+      specialRewards: [],
       eggInventory: [],
       eggSystem: {
         activeEggId: null,
@@ -509,6 +510,30 @@
     appData.profile.starTotals.spendableStars = Math.max(0, Number(appData.profile.starTotals.spendableStars || 0));
   }
 
+  function normalizeSpecialRewards(value) {
+    var seenIds = {};
+    return ensureArray(value).filter(function (item) {
+      var amount;
+      if (!item || typeof item !== "object" || Array.isArray(item)) return false;
+      item.id = typeof item.id === "string" ? item.id.trim() : "";
+      amount = Number(item.amount);
+      if (!item.id || seenIds[item.id] || !Number.isSafeInteger(amount) || amount < 1) return false;
+      seenIds[item.id] = true;
+      item.type = "special_reward";
+      item.amount = amount;
+      if (typeof item.note === "string") {
+        item.note = item.note.replace(/[\u0000-\u001f\u007f-\u009f]/g, " ").replace(/\s+/g, " ").trim();
+        item.note = Array.from ? Array.from(item.note).slice(0, 30).join("") : item.note.slice(0, 30);
+      } else {
+        item.note = "";
+      }
+      item.createdAt = typeof item.createdAt === "string" && item.createdAt ? item.createdAt : KA.date.localIsoString();
+      item.ledgerId = typeof item.ledgerId === "string" && item.ledgerId ? item.ledgerId : null;
+      item.seenAt = typeof item.seenAt === "string" && item.seenAt ? item.seenAt : null;
+      return true;
+    });
+  }
+
   function normalizeDailyRecords(appData) {
     appData.dailyRecords = ensureObject(appData.dailyRecords);
     Object.keys(appData.dailyRecords).forEach(function (dateKey) {
@@ -558,6 +583,7 @@
     appData.dailyRecords = ensureObject(appData.dailyRecords);
     normalizeDailyRecords(appData);
     appData.starLedger = ensureArray(appData.starLedger);
+    appData.specialRewards = normalizeSpecialRewards(appData.specialRewards);
     appData.eggInventory = ensureArray(appData.eggInventory);
     appData.eggSystem = ensureObject(appData.eggSystem);
     mergeMissing(appData.eggSystem, defaults.eggSystem);

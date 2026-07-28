@@ -2,6 +2,20 @@
   "use strict";
 
   var KA = global.KodomoAdventure = global.KodomoAdventure || {};
+  var sessionAuthorized = false;
+
+  function authorizeSession() {
+    sessionAuthorized = true;
+    return true;
+  }
+
+  function revokeSession() {
+    sessionAuthorized = false;
+  }
+
+  function isAuthorized() {
+    return sessionAuthorized === true;
+  }
 
   function bindParentGate(button, onReady) {
     var timer = null;
@@ -84,6 +98,9 @@
 
   KA.parentMode = {
     bindParentGate: bindParentGate,
+    authorizeSession: authorizeSession,
+    revokeSession: revokeSession,
+    isAuthorized: isAuthorized,
     updateProfileName: updateProfileName,
     saveParentNote: saveParentNote,
     toggleFavorite: toggleFavorite

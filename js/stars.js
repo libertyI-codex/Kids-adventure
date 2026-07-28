@@ -89,12 +89,121 @@
     });
   }
 
+  function toHalfWidthDigits(value) {
+    return String(value == null ? "" : value).replace(/[０-９]/g, function (char) {
+      return String.fromCharCode(char.charCodeAt(0) - 65248);
+    });
+  }
+
+  function normalizeSpecialRewardNote(value) {
+    var cleaned;
+    if (typeof value !== "string") return "";
+    cleaned = value
+      .replace(/[\u0000-\u001f\u007f-\u009f]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return Array.from ? Array.from(cleaned).slice(0, 30).join("") : cleaned.slice(0, 30);
+  }
+
+  function validateSpecialRewardAmount(value) {
+    var raw = toHalfWidthDigits(value).trim();
+    var amount;
+    var current = Number(totals().spendableStars || 0);
+    var lifetime = Number(totals().lifetimeStars || 0);
+    if (!raw) return { ok: false, reason: "required", message: "スターのかずを いれてください" };
+    if (!/^\d+$/.test(raw)) return { ok: false, reason: "integer", message: "せいすうで いれてください" };
+    amount = Number(raw);
+    if (!Number.isSafeInteger(amount) || amount < 1) {
+      return { ok: false, reason: amount < 1 ? "minimum" : "too_large", message: amount < 1 ? "1いじょうの かずを いれてください" : "おおきすぎる かずです" };
+    }
+    if (!Number.isSafeInteger(current) || !Number.isSafeInteger(lifetime) ||
+        !Number.isSafeInteger(current + amount) || !Number.isSafeInteger(lifetime + amount)) {
+      return { ok: false, reason: "overflow", message: "おおきすぎる かずです" };
+    }
+    return {
+      ok: true,
+      amount: amount,
+      current: current,
+      lifetime: lifetime,
+      after: current + amount,
+      lifetimeAfter: lifetime + amount
+    };
+  }
+
+  function grantSpecialRewardStars(value, note) {
+    var validation;
+    var data;
+    var ledger;
+    var reward;
+    if (!KA.parentMode || !KA.parentMode.isAuthorized || !KA.parentMode.isAuthorized()) {
+      return { ok: false, reason: "unauthorized", message: "おとなモードで つかってください" };
+    }
+    validation = validateSpecialRewardAmount(value);
+    if (!validation.ok) return validation;
+    data = KA.state.getAppData();
+    data.specialRewards = Array.isArray(data.specialRewards) ? data.specialRewards : [];
+    ledger = addLedgerEntry({
+      type: "earn_special_reward",
+      reason: normalizeSpecialRewardNote(note) || "とくべつな ごほうび",
+      totalDelta: validation.amount,
+      spendableDelta: validation.amount
+    });
+    reward = {
+      id: makeId("special_reward"),
+      type: "special_reward",
+      amount: validation.amount,
+      note: normalizeSpecialRewardNote(note),
+      createdAt: KA.date.localIsoString(),
+      ledgerId: ledger.id,
+      seenAt: null
+    };
+    data.specialRewards.push(reward);
+    KA.state.saveAppData();
+    return { ok: true, reward: reward, ledger: ledger, before: validation.current, after: validation.after };
+  }
+
+  function specialRewards() {
+    var data = KA.state.getAppData();
+    data.specialRewards = Array.isArray(data.specialRewards) ? data.specialRewards : [];
+    return data.specialRewards;
+  }
+
+  function pendingSpecialRewards() {
+    return specialRewards().filter(function (reward) {
+      return reward && reward.type === "special_reward" && !reward.seenAt;
+    }).sort(function (a, b) {
+      return String(a.createdAt || "").localeCompare(String(b.createdAt || ""));
+    });
+  }
+
+  function recentSpecialRewards(limit) {
+    return specialRewards().slice().sort(function (a, b) {
+      return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
+    }).slice(0, Math.max(1, Number(limit || 5)));
+  }
+
+  function markSpecialRewardSeen(rewardId) {
+    var reward = specialRewards().filter(function (item) { return item && item.id === rewardId; })[0];
+    if (!reward) return false;
+    if (!reward.seenAt) {
+      reward.seenAt = KA.date.localIsoString();
+      KA.state.saveAppData();
+    }
+    return true;
+  }
+
   KA.stars = {
     makeId: makeId,
     totals: totals,
     addLedgerEntry: addLedgerEntry,
     earnTask: earnTask,
     spendForColoring: spendForColoring,
-    adjustUndoTask: adjustUndoTask
+    adjustUndoTask: adjustUndoTask,
+    normalizeSpecialRewardNote: normalizeSpecialRewardNote,
+    validateSpecialRewardAmount: validateSpecialRewardAmount,
+    grantSpecialRewardStars: grantSpecialRewardStars,
+    pendingSpecialRewards: pendingSpecialRewards,
+    recentSpecialRewards: recentSpecialRewards,
+    markSpecialRewardSeen: markSpecialRewardSeen
   };
 })(window);

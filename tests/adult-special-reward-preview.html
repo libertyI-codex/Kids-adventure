@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>とくべつな ごほうび確認 - 試作29</title>
+  <link rel="stylesheet" href="../css/styles.css?v=10p29">
+  <style>
+    body { margin: 0; background: #f7fbff; color: #273449; font-family: sans-serif; }
+    main { width: min(100% - 24px, 680px); margin: auto; padding: 20px 0 48px; }
+    .state-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .state-grid article { padding: 10px; border: 1px solid #dde6ec; border-radius: 12px; background: #fff; overflow-wrap: anywhere; }
+    .mock-modal { padding: 16px; border: 2px solid #d7ad37; border-radius: 16px; background: #fff9dc; }
+    @media (max-width: 420px) { .state-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>とくべつな ごほうび確認</h1>
+    <p>専用メモリだけを使い、本番localStorageは使用しません。</p>
+    <section class="panel panel-pad parent-special-reward">
+      <h2>とくべつな ごほうび</h2>
+      <p>いま：<strong id="balance">250</strong>スター</p>
+      <label class="field"><span>わたす スターのかず</span><input id="amount" type="text" inputmode="numeric" value="１００"></label>
+      <label class="field"><span>ひとこと（30もじまで）</span><textarea id="note" maxlength="30">おてつだい がんばったね</textarea></label>
+      <p id="error" class="field-error" aria-live="assertive"></p>
+      <button id="confirm" class="btn btn-primary">かくにんする</button>
+    </section>
+    <section class="panel panel-pad">
+      <h2>入力状態</h2>
+      <div class="state-grid">
+        <article>正常：100</article><article>全角：１００</article><article>0：拒否</article>
+        <article>負数：拒否</article><article>小数：拒否</article><article>空欄：拒否</article>
+        <article>大きすぎる数：拒否</article><article>ひとことなし：許可</article>
+        <article>30文字：許可</article><article>二重実行：disabledで防止</article>
+      </div>
+    </section>
+    <section id="dialog" class="panel panel-pad" hidden></section>
+    <section class="panel panel-pad">
+      <h2>最近の履歴</h2>
+      <div id="history"><p class="muted">まだありません。</p></div>
+    </section>
+    <section class="panel panel-pad">
+      <h2>子ども側の受取</h2>
+      <div class="mock-modal"><strong>おとなから<br>とくべつな ごほうび！</strong><p>100スター もらったよ！</p><p>おてつだい がんばったね</p><button class="btn btn-primary">うけとったよ</button></div>
+      <p>未読2件は個別に順番表示し、既読後は再表示しません。</p>
+    </section>
+  </main>
+  <script>
+    (function () {
+      var balance = 250;
+      var history = [];
+      var inProgress = false;
+      var amount = document.getElementById("amount");
+      var note = document.getElementById("note");
+      var error = document.getElementById("error");
+      var dialog = document.getElementById("dialog");
+      function half(value) {
+        return String(value).replace(/[０-９]/g, function (char) { return String.fromCharCode(char.charCodeAt(0) - 65248); });
+      }
+      function parse(value) {
+        var raw = half(value).trim();
+        if (!raw) return { ok: false, message: "スターのかずを いれてください" };
+        if (!/^\d+$/.test(raw)) return { ok: false, message: "せいすうで いれてください" };
+        var number = Number(raw);
+        if (!Number.isSafeInteger(number) || number < 1 || !Number.isSafeInteger(balance + number)) return { ok: false, message: number < 1 ? "1いじょうの かずを いれてください" : "おおきすぎる かずです" };
+        return { ok: true, amount: number };
+      }
+      function renderHistory() {
+        document.getElementById("history").innerHTML = history.length ? history.map(function (item) {
+          return "<article><strong>" + item.amount + "スター</strong><p></p><small>まだ みていません</small></article>";
+        }).join("") : '<p class="muted">まだありません。</p>';
+        Array.prototype.forEach.call(document.querySelectorAll("#history article p"), function (p, index) { p.textContent = history[index].note || "ひとことなし"; });
+      }
+      document.getElementById("confirm").addEventListener("click", function () {
+        var result = parse(amount.value);
+        if (!result.ok) { error.textContent = result.message; amount.focus(); return; }
+        error.textContent = "";
+        dialog.hidden = false;
+        dialog.innerHTML = '<div class="mock-modal" role="dialog" aria-modal="true"><h2>' + result.amount.toLocaleString("ja-JP") + 'スターを<br>プレゼントしますか？</h2><p>いま：' + balance + '</p><p>プレゼント：+' + result.amount + '</p><p>あと：' + (balance + result.amount) + '</p><div class="quick-actions"><button class="btn btn-soft" data-back>もどる</button><button class="btn btn-primary" data-run>スターを プレゼントする</button></div></div>';
+        dialog.querySelector("[data-back]").onclick = function () { dialog.hidden = true; };
+        dialog.querySelector("[data-run]").onclick = function (event) {
+          if (inProgress) return;
+          inProgress = true;
+          event.currentTarget.disabled = true;
+          balance += result.amount;
+          history.unshift({ amount: result.amount, note: note.value.slice(0, 30), unread: true });
+          document.getElementById("balance").textContent = balance;
+          renderHistory();
+          dialog.innerHTML = '<div class="mock-modal"><h2>' + result.amount + 'スターを<br>プレゼントしました</h2></div>';
+          inProgress = false;
+        };
+      });
+      renderHistory();
+    })();
+  </script>
+</body>
+</html>

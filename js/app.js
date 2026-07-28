@@ -17,6 +17,9 @@
   var nicknameDialogReturnFocus = null;
   var evolutionDialogReturnFocus = null;
   var mealFeedInProgress = false;
+  var specialRewardInProgress = false;
+  var specialRewardStatusMessage = "";
+  var specialRewardDialogReturnFocus = null;
   var outingSelection = { companionId: null, destinationId: null, confirming: false };
   var startupState = {
     startupStarted: false,
@@ -224,6 +227,10 @@
       parentColoringLeaveDialog(route, params);
       return;
     }
+    if ((KA.router.getCurrent().name === "parent" || KA.router.getCurrent().name === "data") &&
+        route !== "parent" && route !== "data" && KA.parentMode && KA.parentMode.revokeSession) {
+      KA.parentMode.revokeSession();
+    }
     KA.router.navigate(route, params);
   }
 
@@ -259,6 +266,7 @@
     if (gate) {
       KA.parentMode.bindParentGate(gate, function () {
         confirmDialog("おとながつかいます", "親モードに進みます。おとなのひとといっしょに使ってください。", "すすむ", function () {
+          if (KA.parentMode && KA.parentMode.authorizeSession) KA.parentMode.authorizeSession();
           navigateWithForestGuard("parent");
         });
       });
@@ -422,6 +430,102 @@
     return KA.companions.getEvolutionProgress(companion);
   }
 
+  function isLegendarySpecies(species) {
+    return Boolean(KA.companions && KA.companions.isLegendaryCompanionSpecies &&
+      KA.companions.isLegendaryCompanionSpecies(species));
+  }
+
+  function legendaryBadgeHtml(species) {
+    return isLegendarySpecies(species)
+      ? '<span class="badge legendary-badge">でんせつ</span>'
+      : "";
+  }
+
+  function legendaryCardClass(species) {
+    return isLegendarySpecies(species) ? " is-legendary-companion" : "";
+  }
+
+  function legendaryAriaPrefix(species) {
+    return isLegendarySpecies(species) ? "でんせつのなかま、" : "";
+  }
+
+  function companionPresentation(speciesOrId, companion, options) {
+    var species = typeof speciesOrId === "string" ? KA.companions.getSpecies(speciesOrId) : speciesOrId;
+    var opts = options || {};
+    if (!species) return "";
+    return [
+      '<span class="companion-presentation' + legendaryCardClass(species) + '">',
+      KA.companions.renderCompanion(species.id, {
+        companion: companion || null,
+        silhouette: Boolean(opts.silhouette),
+        stage: opts.stage,
+        displayName: opts.displayName
+      }),
+      legendaryBadgeHtml(species),
+      '</span>'
+    ].join("");
+  }
+
+  function bindDialogFocusTrap(dialog) {
+    if (!dialog) return;
+    dialog.addEventListener("keydown", function (event) {
+      var focusable;
+      var first;
+      var last;
+      if (event.key !== "Tab") return;
+      focusable = Array.prototype.slice.call(dialog.querySelectorAll('button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+      if (!focusable.length) return;
+      first = focusable[0];
+      last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+
+  function showNextSpecialRewardNotification() {
+    var rewards;
+    var reward;
+    var dialog;
+    var closeButton;
+    if (!modalRoot || modalRoot.children.length || KA.router.getCurrent().name !== "home" ||
+        !KA.stars || !KA.stars.pendingSpecialRewards) return false;
+    rewards = KA.stars.pendingSpecialRewards();
+    if (!rewards.length) return false;
+    reward = rewards[0];
+    modalRoot.innerHTML = [
+      '<div class="modal special-reward-receive-modal" role="dialog" aria-modal="true" aria-labelledby="special-reward-receive-title">',
+      '<div class="special-reward-stars" aria-hidden="true"><span>★</span><span>✦</span><span>★</span></div>',
+      '<p class="eyebrow">おとなから</p>',
+      '<h2 id="special-reward-receive-title">とくべつな ごほうび！</h2>',
+      '<p class="special-reward-amount" aria-live="polite"><strong>' + Number(reward.amount).toLocaleString("ja-JP") + '</strong>スター<br>もらったよ！</p>',
+      reward.note ? '<p class="special-reward-note">' + escapeHtml(reward.note) + '</p>' : '',
+      '<div class="modal-actions">' + button("うけとったよ", "btn-primary", 'data-close-special-reward') + '</div>',
+      '</div>'
+    ].join("");
+    dialog = modalRoot.querySelector(".special-reward-receive-modal");
+    closeButton = modalRoot.querySelector("[data-close-special-reward]");
+    function finish() {
+      KA.stars.markSpecialRewardSeen(reward.id);
+      closeDialog();
+      global.setTimeout(showNextSpecialRewardNotification, 0);
+    }
+    closeButton.addEventListener("click", finish);
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        finish();
+      }
+    });
+    bindDialogFocusTrap(dialog);
+    global.setTimeout(function () { closeButton.focus(); }, 0);
+    return true;
+  }
+
   function evolutionProgressHtml(companion, compact) {
     var progress = companionEvolutionProgress(companion);
     if (compact) {
@@ -460,13 +564,16 @@
       return companion && KA.companions.isValidSpeciesId(companion.speciesId) && Number(companion.hatchCount || 0) > 0;
     });
     if (!list.length) return false;
+    var hasLegendary = list.some(function (companion) {
+      return isLegendarySpecies(KA.companions.getSpecies(companion.speciesId));
+    });
     evolutionDialogReturnFocus = returnFocus || document.activeElement;
     list.forEach(function (companion) {
       KA.companions.markEvolutionStageSeen(companion);
     });
     KA.state.saveAppData();
     modalRoot.innerHTML = [
-      '<div class="modal companion-evolution-modal" role="dialog" aria-modal="true" aria-labelledby="companion-evolution-title">',
+      '<div class="modal companion-evolution-modal' + (hasLegendary ? ' has-legendary-evolution' : '') + '" role="dialog" aria-modal="true" aria-labelledby="companion-evolution-title">',
       '<div class="companion-evolution-announcement" aria-live="polite">',
       '<p class="eyebrow">もっと すてきなすがたに なったよ！</p>',
       '<h2 id="companion-evolution-title">なかよし進化</h2>',
@@ -475,10 +582,11 @@
         var species = KA.companions.getSpecies(companion.speciesId);
         var progress = companionEvolutionProgress(companion);
         var displayName = companionDisplayName(companion);
+        var legendary = isLegendarySpecies(species);
         return [
-          '<article class="companion-evolution-result">',
+          '<article class="companion-evolution-result' + legendaryCardClass(species) + '">',
           '<div class="companion-evolution-glow" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div>',
-          '<div class="companion-evolution-art">' + KA.companions.renderCompanion(species.id, { companion: companion }) + '</div>',
+          '<div class="companion-evolution-art">' + companionPresentation(species, companion) + '</div>',
           '<h3 class="companion-display-name">' + escapeHtml(displayName) + 'が<br>なかよし進化したよ！</h3>',
           '<p><strong>' + escapeHtml(progress.label) + '</strong>に なったよ！</p>',
           '</article>'
@@ -544,7 +652,7 @@
     var displayName = companionDisplayName(companion);
     return [
       '<div class="panel panel-pad companion-home-card">',
-      '<div class="companion-home-art">' + KA.companions.renderCompanion(species.id, { companion: companion }) + '</div>',
+      '<div class="companion-home-art">' + companionPresentation(species, companion) + '</div>',
       '<div><p class="eyebrow">いっしょに ぼうけん</p><h3 class="companion-display-name">' + escapeHtml(displayName) + '</h3>',
       '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span> ' + evolutionProgressHtml(companion, true) + '</p>',
       '<div class="quick-actions">' + button("このこの ようすをみる", "btn-primary btn-small", 'data-companion-detail="' + escapeHtml(companion.speciesId) + '" aria-label="' + escapeHtml(displayName) + 'の ようすをみる"') + '</div></div>',
@@ -576,8 +684,8 @@
         var displayName = companionDisplayName(companion);
         var traveling = companionIsTraveling(data, companion.speciesId);
         return [
-          '<button class="companion-status-item" data-companion-detail="' + escapeHtml(companion.speciesId) + '" aria-label="' + escapeHtml(displayName) + 'の ようすをみる">',
-          '<span class="companion-status-art">' + KA.companions.renderCompanion(species.id, { companion: companion }) + '</span>',
+          '<button class="companion-status-item' + legendaryCardClass(species) + '" data-companion-detail="' + escapeHtml(companion.speciesId) + '" aria-label="' + escapeHtml(legendaryAriaPrefix(species) + displayName) + 'の ようすをみる">',
+          '<span class="companion-status-art">' + companionPresentation(species, companion) + '</span>',
           '<span class="companion-status-copy"><strong class="companion-display-name">' + escapeHtml(displayName) + '</strong>',
           '<small>なかよし ' + Number(companion.bondLevel || 1) + '<br>' + escapeHtml(companionEvolutionProgress(companion).label) + '</small>',
           '<small class="companion-status-state">' + (traveling ? "おでかけちゅう" : (companionFedToday(companion) ? "きょう ごはん済み" : "きょうは まだだよ")) + '</small></span>',
@@ -672,7 +780,7 @@
     var featuredCompanion = tripCompanion || companion;
     var egg = KA.eggs && KA.eggs.activeEgg ? KA.eggs.activeEgg(data) : null;
     var art = species && KA.companions
-      ? KA.companions.renderCompanion(species.id, { companion: featuredCompanion })
+      ? companionPresentation(species, featuredCompanion)
       : (egg && KA.eggs.renderEggSvg ? KA.eggs.renderEggSvg(egg) : '<span class="home-hero-placeholder" aria-hidden="true">★</span>');
     var artLabel = featuredCompanion ? companionDisplayName(featuredCompanion) : (species ? species.name : (egg ? "たまご" : "これからの なかま"));
     var message;
@@ -736,7 +844,7 @@
     }
 
     return [
-      '<section class="home-hero" aria-labelledby="home-hero-title">',
+      '<section class="home-hero' + legendaryCardClass(species) + '" aria-labelledby="home-hero-title">',
       '<div class="home-hero-art" role="img" aria-label="' + escapeHtml(artLabel) + '">' + art + '</div>',
       '<div class="home-hero-copy">',
       '<p class="eyebrow">きょうの おすすめ</p>',
@@ -808,6 +916,7 @@
       });
     }
     bindCompanionDetailEntries(appEl);
+    global.setTimeout(showNextSpecialRewardNotification, 0);
   }
 
   function renderTasks() {
@@ -1614,7 +1723,7 @@
       var displayName = owned ? companionDisplayName(companion) : species.name;
       var hasNickname = owned && Boolean(companion.nickname);
       var content = [
-        '<div class="companion-art">' + KA.companions.renderCompanion(species.id, { silhouette: !owned, companion: companion }) + '</div>',
+        '<div class="companion-art">' + companionPresentation(species, companion, { silhouette: !owned }) + '</div>',
         '<h3 class="companion-display-name">' + escapeHtml(displayName) + '</h3>',
         hasNickname ? '<p class="companion-species-name">しゅるい: ' + escapeHtml(species.name) + '</p>' : '',
         owned ? '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span> <span class="badge">' + Number(companion.hatchCount || 1) + 'かい</span></p>' : '<p class="muted">まだ あっていないよ</p>',
@@ -1624,8 +1733,8 @@
         owned ? '<span class="companion-card-open">このこの ようすをみる</span>' : ''
       ].join("");
       return owned
-        ? '<button class="companion-card companion-card-button is-owned" data-companion-detail="' + escapeHtml(species.id) + '" aria-label="' + escapeHtml(displayName) + 'の ようすをみる">' + content + '</button>'
-        : '<article class="companion-card is-locked">' + content + '</article>';
+        ? '<button class="companion-card companion-card-button is-owned' + legendaryCardClass(species) + '" data-companion-detail="' + escapeHtml(species.id) + '" aria-label="' + escapeHtml(legendaryAriaPrefix(species) + displayName) + 'の ようすをみる">' + content + '</button>'
+        : '<article class="companion-card is-locked' + legendaryCardClass(species) + '">' + content + '</article>';
     }).join("") + '</section>';
   }
 
@@ -1659,7 +1768,7 @@
       '<div class="modal companion-nickname-modal" role="dialog" aria-modal="true" aria-labelledby="companion-nickname-title" aria-describedby="companion-nickname-help">',
       '<h2 id="companion-nickname-title">このこの ニックネームを<br>つけてあげよう！</h2>',
       '<div class="companion-nickname-target">',
-      '<div class="companion-nickname-art">' + KA.companions.renderCompanion(species.id, { companion: companion }) + '</div>',
+      '<div class="companion-nickname-art">' + companionPresentation(species, companion) + '</div>',
       '<p><span class="muted">しゅるい</span><br><strong>' + escapeHtml(species.name) + '</strong></p>',
       '</div>',
       '<label class="field" for="' + inputId + '"><span>ニックネーム</span><input id="' + inputId + '" data-companion-nickname-input maxlength="12" autocomplete="off" value="' + escapeHtml(companion.nickname || "") + '" aria-describedby="companion-nickname-help companion-nickname-error"></label>',
@@ -1771,8 +1880,8 @@
       '<div class="screen-header companion-detail-header"><div>',
       '<p class="eyebrow">このこの こと</p><h2 class="companion-display-name">' + escapeHtml(displayName) + '</h2>',
       '</div>' + button("もどる", "btn-soft btn-small", 'data-companion-detail-back') + '</div>',
-      '<section class="panel panel-pad companion-detail-hero" aria-labelledby="companion-detail-name">',
-      '<div class="companion-detail-art">' + KA.companions.renderCompanion(species.id, { companion: companion }) + '</div>',
+      '<section class="panel panel-pad companion-detail-hero' + legendaryCardClass(species) + '" aria-labelledby="companion-detail-name">',
+      '<div class="companion-detail-art">' + companionPresentation(species, companion) + '</div>',
       '<div class="companion-detail-summary">',
       '<h2 id="companion-detail-name" class="companion-display-name">' + escapeHtml(displayName) + '</h2>',
       hasNickname ? '<p class="companion-species-name">しゅるい: ' + escapeHtml(species.name) + '</p>' : '<p class="companion-species-name">' + escapeHtml(species.name) + '</p>',
@@ -1898,8 +2007,9 @@
           return companion.speciesId === result.companion.speciesId;
         });
         if (!showCompanionEvolutionDialog(evolved, hatchButton)) {
-          var html = '<div class="hatch-result"><div class="egg-hatch-pop">' + KA.companions.renderCompanion(result.species.id, { companion: result.companion }) + '</div><h3>なかまが うまれたよ！</h3><p>' + escapeHtml(result.species.name) + 'が なかまになったよ。</p><p><span class="badge star">なかよし ' + Number(result.companion.bondLevel || 1) + '</span></p></div>';
-          infoDialog("たまごが かえったよ", html);
+          var firstLegendaryHatch = isLegendarySpecies(result.species) && Number(result.companion.hatchCount || 0) === 1;
+          var html = '<div class="hatch-result' + (firstLegendaryHatch ? ' is-legendary-hatch' : '') + '"><div class="legendary-hatch-glow" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span></div><div class="egg-hatch-pop">' + companionPresentation(result.species, result.companion) + '</div><h3>' + (firstLegendaryHatch ? 'でんせつの なかまが<br>うまれた！' : 'なかまが うまれたよ！') + '</h3><p>' + escapeHtml(result.species.name) + 'が なかまになったよ。</p><p><span class="badge star">なかよし ' + Number(result.companion.bondLevel || 1) + '</span></p></div>';
+          infoDialog(firstLegendaryHatch ? "きらきらの たまご" : "たまごが かえったよ", html);
         }
       });
     }
@@ -1930,8 +2040,8 @@
     var species = KA.companions.getSpecies(companion.speciesId);
     var displayName = companionDisplayName(companion);
     return [
-      '<section class="panel panel-pad kitchen-selected-companion" aria-live="polite">',
-      '<div class="kitchen-selected-companion-art">' + KA.companions.renderCompanion(species.id, { companion: companion }) + '</div>',
+      '<section class="panel panel-pad kitchen-selected-companion' + legendaryCardClass(species) + '" aria-live="polite">',
+      '<div class="kitchen-selected-companion-art">' + companionPresentation(species, companion) + '</div>',
       '<div><p class="eyebrow">ごはんを あげるこ</p><h3 class="companion-display-name">' + escapeHtml(displayName) + '</h3>',
       '<p class="muted">なかよし ' + Number(companion.bondLevel || 1) + ' / ' + escapeHtml(companionEvolutionProgress(companion).label) + '</p>',
       companionIsTraveling(data, companion.speciesId) ? '<p class="action-reason">おでかけちゅうでも ごはんを とどけられるよ。</p>' : '',
@@ -2060,8 +2170,8 @@
         var displayName = companionDisplayName(companion);
         var selected = companion.speciesId === selectedId;
         return [
-          '<button class="companion-card kitchen-feed-choice is-owned ' + (selected ? "is-selected" : "") + '" data-select-kitchen-companion="' + escapeHtml(species.id) + '" aria-label="' + escapeHtml(displayName) + 'を ごはんのあいてに えらぶ" aria-pressed="' + (selected ? "true" : "false") + '">',
-          '<div class="companion-art">' + KA.companions.renderCompanion(species.id, { companion: companion }) + '</div>',
+          '<button class="companion-card kitchen-feed-choice is-owned ' + (selected ? "is-selected" : "") + legendaryCardClass(species) + '" data-select-kitchen-companion="' + escapeHtml(species.id) + '" aria-label="' + escapeHtml(legendaryAriaPrefix(species) + displayName) + 'を ごはんのあいてに えらぶ" aria-pressed="' + (selected ? "true" : "false") + '">',
+          '<div class="companion-art">' + companionPresentation(species, companion) + '</div>',
           '<h3 class="companion-display-name">' + escapeHtml(displayName) + '</h3>',
           companion.nickname ? '<p class="companion-species-name">しゅるい: ' + escapeHtml(species.name) + '</p>' : '',
           '<p><span class="badge star">なかよし ' + Number(companion.bondLevel || 1) + '</span></p>',
@@ -2151,6 +2261,7 @@
 
   function showMealResultDialog(result) {
     var companion = result.companion;
+    var species = KA.companions.getSpecies(companion.speciesId);
     var displayName = companionDisplayName(companion);
     var evolved = result.levelUp ? KA.companions.pendingEvolutionCompanions(KA.state.getAppData()).filter(function (item) {
       return item.speciesId === companion.speciesId;
@@ -2159,7 +2270,7 @@
       '<div class="modal kitchen-meal-result-modal" role="dialog" aria-modal="true" aria-labelledby="kitchen-meal-result-title">',
       '<h2 id="kitchen-meal-result-title">おいしい！</h2>',
       '<div class="kitchen-fed-result">',
-      '<div class="kitchen-fed-art">' + KA.companions.renderCompanion(companion.speciesId, { companion: companion }) + '</div>',
+      '<div class="kitchen-fed-art">' + companionPresentation(species, companion) + '</div>',
       '<div class="kitchen-fed-dish">' + KA.kitchen.renderRecipeDish(result.recipe.id) + '</div>',
       '<h3 class="companion-display-name">' + escapeHtml(displayName) + 'が ごちそうさま！</h3>',
       '<p>' + escapeHtml(result.recipe.name) + 'を よろこんで たべたよ。</p>',
@@ -2384,11 +2495,11 @@
     var destination = KA.outings.getDestination(trip.destinationId);
     var returned = trip.status === "returned";
     return [
-      '<section class="panel panel-pad outing-active ' + (returned ? "is-returned" : "is-traveling") + '">',
+      '<section class="panel panel-pad outing-active ' + (returned ? "is-returned" : "is-traveling") + legendaryCardClass(species) + '">',
       '<p class="eyebrow">' + (returned ? "おかえり！" : "おでかけちゅう") + '</p>',
       '<div class="outing-active-scene">',
       '<div class="outing-destination-art">' + KA.outings.renderDestinationIcon(destination ? destination.id : "") + '</div>',
-      '<div class="outing-companion-art">' + (species ? KA.companions.renderCompanion(species.id, { companion: companion }) : "") + '</div>',
+      '<div class="outing-companion-art">' + (species ? companionPresentation(species, companion) : "") + '</div>',
       '</div>',
       '<h2 class="companion-display-name">' + escapeHtml(displayName) + (returned ? 'が かえってきたよ！' : 'は ' + escapeHtml(destination ? destination.name : "おでかけさき") + 'へ<br>おでかけしているよ！') + '</h2>',
       returned ? '<p>' + escapeHtml(KA.outings.returnMessage(trip)) + '</p><p><strong>おみやげ: ' + escapeHtml(KA.outings.rewardLabel(trip.rewardPlan)) + '</strong></p>' + outingRewardArt(trip.rewardPlan) + '<div class="quick-actions">' + button("おみやげを うけとる", "btn-primary", 'data-claim-outing="' + escapeHtml(trip.tripId) + '"') + '</div>' : '<p>' + escapeHtml(destination ? destination.departureMessage : "たのしんでいるよ！") + '</p><p class="muted">' + escapeHtml(KA.date.formatDisplayDate(trip.departedDateKey)) + 'に しゅっぱつ<br>つぎの ひに また あおうね！</p>',
@@ -2413,7 +2524,7 @@
       return [
         '<section class="panel panel-pad outing-confirm">',
         '<p class="eyebrow">しゅっぱつの かくにん</p>',
-        '<div class="outing-confirm-grid"><div>' + KA.companions.renderCompanion(selectedSpecies.id, { companion: selectedCompanion }) + '</div><div>' + KA.outings.renderDestinationIcon(selectedDestination.id) + '</div></div>',
+        '<div class="outing-confirm-grid"><div>' + companionPresentation(selectedSpecies, selectedCompanion) + '</div><div>' + KA.outings.renderDestinationIcon(selectedDestination.id) + '</div></div>',
         '<h2 class="companion-display-name">' + escapeHtml(selectedName) + 'と ' + escapeHtml(selectedDestination.name) + 'へ<br>おでかけする？</h2>',
         '<p>主なおみやげ: ' + escapeHtml(selectedDestination.rewardType === "stars" ? "スター" : selectedDestination.rewardType === "houseItem" ? "おへやの かざり" : "りょうりの そざい") + '</p>',
         '<p class="muted">つぎの ひに かえってくるよ！</p>',
@@ -2429,7 +2540,7 @@
         var species = KA.companions.getSpecies(companion.speciesId);
         var selected = companion.speciesId === outingSelection.companionId;
         var displayName = companionDisplayName(companion);
-        return '<button class="outing-companion-choice ' + (selected ? "is-selected" : "") + '" data-outing-companion="' + escapeHtml(companion.speciesId) + '" aria-label="' + escapeHtml(displayName) + 'と出かける、' + escapeHtml(companionEvolutionProgress(companion).label) + '" aria-pressed="' + (selected ? "true" : "false") + '"><span>' + KA.companions.renderCompanion(species.id, { companion: companion }) + '</span><strong class="companion-display-name">' + escapeHtml(displayName) + '</strong><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ' + escapeHtml(companionEvolutionProgress(companion).label) + '<br>ごはん済み' + (companion.isFavorite ? ' / おきにいり' : '') + '</small></button>';
+        return '<button class="outing-companion-choice ' + (selected ? "is-selected" : "") + legendaryCardClass(species) + '" data-outing-companion="' + escapeHtml(companion.speciesId) + '" aria-label="' + escapeHtml(legendaryAriaPrefix(species) + displayName) + 'と出かける、' + escapeHtml(companionEvolutionProgress(companion).label) + '" aria-pressed="' + (selected ? "true" : "false") + '"><span>' + companionPresentation(species, companion) + '</span><strong class="companion-display-name">' + escapeHtml(displayName) + '</strong><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ' + escapeHtml(companionEvolutionProgress(companion).label) + '<br>ごはん済み' + (companion.isFavorite ? ' / おきにいり' : '') + '</small></button>';
       }).join(""),
       '</div></section>',
       '<section class="panel panel-pad"><h2>どこへ いく？</h2><div class="outing-destination-grid">',
@@ -2493,7 +2604,7 @@
       var species = KA.companions.getSpecies(result.trip.speciesId);
       var companion = KA.companions.getCompanion(KA.state.getAppData(), result.trip.speciesId);
       var displayName = companion ? companionDisplayName(companion) : (species ? species.name : "なかま");
-      infoDialog("やったね！", '<div class="outing-claim-result"><div>' + (species ? KA.companions.renderCompanion(species.id, { companion: companion }) : "") + '</div>' + outingRewardArt(result.reward) + '<h3 class="companion-display-name">' + escapeHtml(displayName) + 'が かえってきたよ！</h3><p>' + escapeHtml(KA.outings.returnMessage(result.trip)) + '</p><p><strong>' + escapeHtml(KA.outings.rewardLabel(result.reward)) + 'を うけとったよ！</strong></p><p>また いっしょに いこうね！</p></div>');
+      infoDialog("やったね！", '<div class="outing-claim-result' + legendaryCardClass(species) + '"><div>' + (species ? companionPresentation(species, companion) : "") + '</div>' + outingRewardArt(result.reward) + '<h3 class="companion-display-name">' + escapeHtml(displayName) + 'が かえってきたよ！</h3><p>' + escapeHtml(KA.outings.returnMessage(result.trip)) + '</p><p><strong>' + escapeHtml(KA.outings.rewardLabel(result.reward)) + 'を うけとったよ！</strong></p><p>また いっしょに いこうね！</p></div>');
       KA.router.render();
     });
   }
@@ -2555,8 +2666,8 @@
       var active = birdHouseReaction && birdHouseReaction.speciesId === species.id;
       var reactionClass = active ? " is-reacting reaction-" + birdHouseReaction.type : "";
       return [
-        '<button class="bird-house-bird ' + (entry.isFocus ? "is-focus" : "") + reactionClass + '" data-house-bird="' + escapeHtml(species.id) + '" style="left:' + entry.x + '%;top:' + entry.y + '%;--bird-scale:' + entry.scale + '" aria-label="' + escapeHtml(displayName) + 'の ようすをみる、' + escapeHtml(companionEvolutionProgress(companion).label) + '">',
-        '<span class="bird-house-bird-art">' + KA.companions.renderCompanion(species.id, { companion: companion }) + '</span>',
+        '<button class="bird-house-bird ' + (entry.isFocus ? "is-focus" : "") + reactionClass + legendaryCardClass(species) + '" data-house-bird="' + escapeHtml(species.id) + '" style="left:' + entry.x + '%;top:' + entry.y + '%;--bird-scale:' + entry.scale + '" aria-label="' + escapeHtml(legendaryAriaPrefix(species) + displayName) + 'の ようすをみる、' + escapeHtml(companionEvolutionProgress(companion).label) + '">',
+        '<span class="bird-house-bird-art">' + companionPresentation(species, companion) + '</span>',
         '<span class="bird-house-bird-label companion-display-name">' + escapeHtml(displayName) + '<br><small>なかよし ' + Number(companion.bondLevel || 1) + ' / ' + escapeHtml(companionEvolutionProgress(companion).label) + '<br>ごはん ' + Number(companion.mealCount || 0) + 'かい</small></span>',
         active ? '<span class="bird-house-heart" aria-hidden="true">♥</span>' : '',
         '</button>'
@@ -3275,7 +3386,137 @@
     if (reset) reset.addEventListener('click', jobSettingsResetDialog);
   }
 
+  function renderSpecialRewardPanel(data) {
+    var totals = data.profile.starTotals || {};
+    var recent = KA.stars.recentSpecialRewards(5);
+    return [
+      '<section class="panel panel-pad parent-special-reward" data-special-reward-form aria-labelledby="parent-special-reward-title">',
+      '<div class="section-heading"><div><p class="eyebrow">スターを プレゼント</p><h2 id="parent-special-reward-title">とくべつな ごほうび</h2></div>',
+      '<span class="badge star">つかえるほし ' + Number(totals.spendableStars || 0).toLocaleString("ja-JP") + '</span></div>',
+      '<p class="muted">がんばったときや<br>とくべつな日に<br>スターをプレゼントできます。</p>',
+      '<label class="field" for="special-reward-amount"><span>わたす スターのかず</span><input id="special-reward-amount" data-special-reward-amount type="text" inputmode="numeric" pattern="[0-9０-９]*" autocomplete="off" aria-describedby="special-reward-error"></label>',
+      '<label class="field" for="special-reward-note"><span>ひとこと（30もじまで・なくてもOK）</span><textarea id="special-reward-note" data-special-reward-note maxlength="30"></textarea></label>',
+      '<p class="field-error" id="special-reward-error" data-special-reward-error aria-live="assertive"></p>',
+      '<p class="parent-special-reward-status" data-special-reward-status aria-live="polite">' + escapeHtml(specialRewardStatusMessage) + '</p>',
+      button("かくにんする", "btn-primary", 'data-confirm-special-reward'),
+      '<div class="special-reward-history"><h3>さいきんの ごほうび</h3>',
+      recent.length ? recent.map(function (reward) {
+        return '<article><strong>' + escapeHtml(KA.date.formatDisplayDate(String(reward.createdAt || "").slice(0, 10))) + '　' + Number(reward.amount).toLocaleString("ja-JP") + 'スター</strong>' + (reward.note ? '<p>' + escapeHtml(reward.note) + '</p>' : '<p class="muted">ひとことなし</p>') + '<small>' + (reward.seenAt ? "うけとり表示ずみ" : "まだ みていません") + '</small></article>';
+      }).join("") : '<p class="muted">まだ ごほうびの きろくはありません。</p>',
+      '</div>',
+      '</section>'
+    ].join("");
+  }
+
+  function closeSpecialRewardDialog() {
+    var returnFocus = specialRewardDialogReturnFocus;
+    specialRewardDialogReturnFocus = null;
+    specialRewardInProgress = false;
+    closeDialog();
+    if (returnFocus && document.body.contains(returnFocus)) returnFocus.focus();
+    else {
+      var input = appEl && appEl.querySelector("[data-special-reward-amount]");
+      if (input) input.focus();
+    }
+  }
+
+  function openSpecialRewardConfirmation(validation, note, returnFocus) {
+    var dialog;
+    var executeButton;
+    var error;
+    var submitted = false;
+    specialRewardDialogReturnFocus = returnFocus || document.activeElement;
+    modalRoot.innerHTML = [
+      '<div class="modal special-reward-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="special-reward-confirm-title">',
+      '<h2 id="special-reward-confirm-title">' + validation.amount.toLocaleString("ja-JP") + 'スターを<br>プレゼントしますか？</h2>',
+      '<dl class="special-reward-summary">',
+      '<div><dt>いま</dt><dd>' + validation.current.toLocaleString("ja-JP") + 'スター</dd></div>',
+      '<div><dt>プレゼント</dt><dd>+' + validation.amount.toLocaleString("ja-JP") + 'スター</dd></div>',
+      '<div><dt>プレゼントしたあと</dt><dd>' + validation.after.toLocaleString("ja-JP") + 'スター</dd></div>',
+      '</dl>',
+      note ? '<div class="special-reward-confirm-note"><span>ひとこと</span><p>' + escapeHtml(note) + '</p></div>' : '',
+      '<p class="field-error" data-special-reward-confirm-error aria-live="assertive"></p>',
+      '<div class="modal-actions">',
+      button("もどる", "btn-soft", 'data-cancel-special-reward'),
+      button("スターを プレゼントする", "btn-primary", 'data-grant-special-reward aria-label="' + validation.amount + 'スターを とくべつなごほうびとして プレゼントする"'),
+      '</div>',
+      '</div>'
+    ].join("");
+    dialog = modalRoot.querySelector(".special-reward-confirm-modal");
+    executeButton = modalRoot.querySelector("[data-grant-special-reward]");
+    error = modalRoot.querySelector("[data-special-reward-confirm-error]");
+    modalRoot.querySelector("[data-cancel-special-reward]").addEventListener("click", closeSpecialRewardDialog);
+    executeButton.addEventListener("click", function () {
+      var result;
+      if (specialRewardInProgress || submitted) return;
+      submitted = true;
+      specialRewardInProgress = true;
+      executeButton.disabled = true;
+      executeButton.textContent = "プレゼントしています…";
+      result = KA.stars.grantSpecialRewardStars(validation.amount, note);
+      if (!result.ok) {
+        submitted = false;
+        specialRewardInProgress = false;
+        executeButton.disabled = false;
+        executeButton.textContent = "スターを プレゼントする";
+        error.textContent = result.message || "もういちど やりなおしてください";
+        executeButton.focus();
+        return;
+      }
+      specialRewardStatusMessage = result.reward.amount.toLocaleString("ja-JP") + "スターを プレゼントしました";
+      specialRewardInProgress = false;
+      specialRewardDialogReturnFocus = null;
+      closeDialog();
+      toast(specialRewardStatusMessage);
+      KA.router.render();
+    });
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && !specialRewardInProgress) {
+        event.preventDefault();
+        closeSpecialRewardDialog();
+      }
+    });
+    bindDialogFocusTrap(dialog);
+    global.setTimeout(function () { executeButton.focus(); }, 0);
+  }
+
+  function bindSpecialRewardPanel() {
+    var amount = appEl.querySelector("[data-special-reward-amount]");
+    var note = appEl.querySelector("[data-special-reward-note]");
+    var error = appEl.querySelector("[data-special-reward-error]");
+    var confirm = appEl.querySelector("[data-confirm-special-reward]");
+    if (!amount || !note || !error || !confirm) return;
+    amount.addEventListener("input", function () {
+      amount.value = toHalfWidthDigits(amount.value);
+      error.textContent = "";
+      specialRewardStatusMessage = "";
+    });
+    note.addEventListener("input", function () {
+      error.textContent = "";
+      specialRewardStatusMessage = "";
+    });
+    confirm.addEventListener("click", function () {
+      var validation = KA.stars.validateSpecialRewardAmount(amount.value);
+      var safeNote = KA.stars.normalizeSpecialRewardNote(note.value);
+      if (!validation.ok) {
+        error.textContent = validation.message;
+        amount.focus();
+        return;
+      }
+      openSpecialRewardConfirmation(validation, safeNote, confirm);
+    });
+  }
+
+  function renderParentAccessRequired() {
+    var body = '<section class="panel panel-pad"><h2>おとなのひとと ひらいてね</h2><p>画面右上の「おとな」を長押しして、確認してから使えます。</p></section>';
+    layout("おとなモード", body);
+  }
+
   function renderParent() {
+    if (!KA.parentMode || !KA.parentMode.isAuthorized || !KA.parentMode.isAuthorized()) {
+      renderParentAccessRequired();
+      return;
+    }
     var data = KA.state.getAppData();
     var record = KA.state.getDailyRecord();
     var todayArt = record.artworkIds.map(KA.coloring.getArtwork).filter(Boolean);
@@ -3289,6 +3530,7 @@
       '<div class="panel panel-pad"><h2>親モード</h2><p class="muted">通常タップでは入れない保護者用の画面です。</p>',
       '<p><span class="badge">現在のたまご ' + KA.eggs.eggCount() + 'こ</span></p>',
       '<label class="field"><span>子どもの名前</span><input id="profile-name" value="' + escapeHtml(data.profile.displayName) + '"></label>' + button("名前を保存", "btn-primary", 'data-save-profile') + '</div>',
+      renderSpecialRewardPanel(data),
       renderStandaloneDiagnostics(),
       renderParentColoringSettings(),
       renderParentJobSettings(),
@@ -3309,6 +3551,7 @@
     });
     bindParentColoringSettings();
     bindParentJobSettings();
+    bindSpecialRewardPanel();
     Array.prototype.forEach.call(appEl.querySelectorAll("[data-parent-task-reward]"), function (el) {
       el.addEventListener("change", function () {
         KA.tasks.updateTask(el.getAttribute("data-parent-task-reward"), { rewardStars: el.value });
@@ -3357,6 +3600,10 @@
   }
 
   function renderData() {
+    if (!KA.parentMode || !KA.parentMode.isAuthorized || !KA.parentMode.isAuthorized()) {
+      renderParentAccessRequired();
+      return;
+    }
     var data = KA.state.getAppData();
     var bytes = KA.storage.estimateBytes(data);
     var body = [
