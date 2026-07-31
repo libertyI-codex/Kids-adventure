@@ -913,11 +913,20 @@
   }
 
   function layeredDefinition(templateId) {
+    var refreshed = KA.coloringArtV30 && KA.coloringArtV30.definitions
+      ? KA.coloringArtV30.definitions[templateId]
+      : null;
+    if (refreshed) return refreshed;
     return LAYERED_ANIMAL_SVG[templateId] || null;
   }
 
   function getLayeredDefinition(templateId) {
     var definition = layeredDefinition(templateId);
+    return definition ? JSON.parse(JSON.stringify(definition)) : null;
+  }
+
+  function getLegacyLayeredDefinition(templateId) {
+    var definition = LAYERED_ANIMAL_SVG[templateId] || null;
     return definition ? JSON.parse(JSON.stringify(definition)) : null;
   }
 
@@ -1221,6 +1230,7 @@
     unlock: unlock,
     renderTemplate: renderTemplate,
     getLayeredDefinition: getLayeredDefinition,
+    getLegacyLayeredDefinition: getLegacyLayeredDefinition,
     normalizeRegionColors: normalizeRegionColors,
     analyze: analyze,
     getDraft: getDraft,

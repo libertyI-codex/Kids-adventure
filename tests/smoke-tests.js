@@ -47,6 +47,10 @@ function sha256Json(value) {
   return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex").toUpperCase();
 }
 
+function sha256Text(value) {
+  return crypto.createHash("sha256").update(String(value)).digest("hex").toUpperCase();
+}
+
 function pngInfo(filePath) {
   const bytes = fs.readFileSync(filePath);
   return {
@@ -78,7 +82,8 @@ jsFiles.forEach((file) => {
   ["stars.js", ["addLedgerEntry", "validateSpecialRewardAmount", "grantSpecialRewardStars", "pendingSpecialRewards", "recentSpecialRewards", "markSpecialRewardSeen"]],
   ["parent-mode.js", ["authorizeSession", "revokeSession", "isAuthorized"]],
   ["tasks.js", ["ensureJobSettings", "dailyTasks", "completeTask", "setJobEnabled", "addCustomJob", "updateCustomJob", "deleteCustomJob"]],
-  ["migrations.js", ["ensureDataShape", "createDefaultAppData"]]
+  ["migrations.js", ["ensureDataShape", "createDefaultAppData"]],
+  ["coloring.js", ["layeredDefinition", "getLayeredDefinition", "getLegacyLayeredDefinition", "normalizeRegionColors", "renderTemplate", "createArtwork"]]
 ].forEach(([file, expectedNames]) => {
   const source = read(path.join("js", file));
   expectedNames.forEach((name) => {
@@ -101,6 +106,7 @@ jsFiles.forEach((file) => {
   "stars.js",
   "tasks.js",
   "worlds.js",
+  "coloring-art-v30.js",
   "coloring.js",
   "parent-mode.js"
 ].forEach(loadJs);
@@ -121,8 +127,9 @@ const careFlowPreview = read(path.join("tests", "companion-care-flow-preview.htm
 const birdCompanionReview = read(path.join("tests", "bird-companion-review.html"));
 const legendarySpecialPreview = read(path.join("tests", "legendary-bird-special-preview.html"));
 const adultSpecialRewardPreview = read(path.join("tests", "adult-special-reward-preview.html"));
-const cacheQuery = "10p29";
-const scriptOrder = Array.from(indexHtml.matchAll(/<script\s+defer\s+src="js\/([^"?]+)\?v=10p29"><\/script>/g)).map((match) => match[1]);
+const coloringPreview = read(path.join("tests", "coloring-preview.html"));
+const cacheQuery = "10p30";
+const scriptOrder = Array.from(indexHtml.matchAll(/<script\s+defer\s+src="js\/([^"?]+)\?v=10p30"><\/script>/g)).map((match) => match[1]);
 assert(scriptOrder[0] === "boot.js", "boot.js should load before app scripts");
 assert(scriptOrder.indexOf("constants.js") > scriptOrder.indexOf("boot.js"), "constants should load after boot.js");
 assert(scriptOrder.indexOf("companions.js") > scriptOrder.indexOf("eggs.js"), "companions.js should load after eggs.js");
@@ -130,6 +137,8 @@ assert(scriptOrder.indexOf("kitchen.js") > scriptOrder.indexOf("companions.js"),
 assert(scriptOrder.indexOf("bird-house.js") > scriptOrder.indexOf("kitchen.js"), "bird-house.js should load after kitchen.js");
 assert(scriptOrder.indexOf("outings.js") > scriptOrder.indexOf("bird-house.js"), "outings.js should load after bird-house.js");
 assert(scriptOrder.indexOf("migrations.js") > scriptOrder.indexOf("outings.js"), "migrations.js should load after outings.js");
+assert(scriptOrder.indexOf("coloring-art-v30.js") > scriptOrder.indexOf("tasks.js"), "prototype 30 coloring definitions should load after shared data modules");
+assert(scriptOrder.indexOf("coloring.js") > scriptOrder.indexOf("coloring-art-v30.js"), "prototype 30 coloring definitions should load before the coloring renderer");
 assert(scriptOrder.indexOf("app.js") > scriptOrder.indexOf("router.js"), "app.js should load last");
 assert(indexHtml.indexOf("?v=10p11") < 0, "old v=10p11 query should not remain");
 assert(indexHtml.indexOf("?v=10p12\"") < 0 && indexHtml.indexOf("?v=10p12<") < 0, "old v=10p12 query should not remain in index.html");
@@ -148,23 +157,23 @@ assert(indexHtml.indexOf("10p22") < 0 && bootJs.indexOf("10p22") < 0 && appJs.in
 assert(indexHtml.indexOf("10p23") < 0 && bootJs.indexOf("10p23") < 0 && appJs.indexOf("10p23") < 0 && JSON.stringify(manifestJson).indexOf("10p23") < 0, "old v=10p23 query should not remain in production code");
 assert(indexHtml.indexOf("10p24") < 0 && bootJs.indexOf("10p24") < 0 && appJs.indexOf("10p24") < 0 && JSON.stringify(manifestJson).indexOf("10p24") < 0, "old v=10p24 query should not remain in production code");
 assert(indexHtml.indexOf("10p25") < 0 && bootJs.indexOf("10p25") < 0 && appJs.indexOf("10p25") < 0 && JSON.stringify(manifestJson).indexOf("10p25") < 0, "old v=10p25 query should not remain in production code");
-["10p26", "10p27", "10p28"].forEach((oldCache) => {
+["10p26", "10p27", "10p28", "10p29"].forEach((oldCache) => {
   assert(indexHtml.indexOf(oldCache) < 0 && bootJs.indexOf(oldCache) < 0 && appJs.indexOf(oldCache) < 0 && JSON.stringify(manifestJson).indexOf(oldCache) < 0, "old " + oldCache + " query should not remain in production code");
 });
 assert(indexHtml.indexOf('name="apple-mobile-web-app-capable" content="yes"') >= 0, "apple mobile web app capable meta missing");
 assert(indexHtml.indexOf('name="apple-mobile-web-app-title" content="こどもの冒険"') >= 0, "apple mobile web app title meta missing");
-assert(indexHtml.indexOf('rel="manifest" href="./manifest.webmanifest?v=10p29"') >= 0, "manifest link missing");
+assert(indexHtml.indexOf('rel="manifest" href="./manifest.webmanifest?v=10p30"') >= 0, "manifest link missing");
 assert(manifestJson.display === "standalone", "manifest display should be standalone");
 assert(manifestJson.start_url === "./", "manifest start_url should match deployed directory");
 assert(manifestJson.scope === "./", "manifest scope should match deployed directory");
 assert(Array.isArray(manifestJson.icons) && manifestJson.icons.length >= 1, "manifest should include icons");
-assert(manifestJson.icons[0].src === "./apple-touch-icon.png?v=10p29", "manifest icon should use apple touch icon");
+assert(manifestJson.icons[0].src === "./apple-touch-icon.png?v=10p30", "manifest icon should use apple touch icon");
 assert(indexHtml.indexOf("serviceWorker") < 0 && bootJs.indexOf("serviceWorker") < 0 && appJs.indexOf("serviceWorker") < 0, "service worker should not be added for standalone support");
-assert(indexHtml.indexOf('src="./apple-touch-icon.png?v=10p29"') >= 0, "startup splash should use apple-touch-icon v=10p29");
-assert(indexHtml.indexOf('rel="preload" as="image" href="./apple-touch-icon.png?v=10p29"') >= 0, "startup preload missing");
+assert(indexHtml.indexOf('src="./apple-touch-icon.png?v=10p30"') >= 0, "startup splash should use apple-touch-icon v=10p30");
+assert(indexHtml.indexOf('rel="preload" as="image" href="./apple-touch-icon.png?v=10p30"') >= 0, "startup preload missing");
 const appleTouchLinks = Array.from(indexHtml.matchAll(/<link\s+[^>]*rel=["']apple-touch-icon["'][^>]*>/g));
 assert(appleTouchLinks.length === 1, "apple-touch-icon should exist exactly once");
-assert(appleTouchLinks[0][0].indexOf('href="./apple-touch-icon.png?v=10p29"') >= 0, "apple-touch-icon href should use v=10p29");
+assert(appleTouchLinks[0][0].indexOf('href="./apple-touch-icon.png?v=10p30"') >= 0, "apple-touch-icon href should use v=10p30");
 assert((indexHtml.match(/data-startup-splash/g) || []).length === 1, "startup splash DOM should exist once");
 assert((indexHtml.match(/id="boot-recovery-root"/g) || []).length === 1, "boot recovery root should exist once");
 assert(indexHtml.indexOf('data-min-ms="1200"') >= 0, "startup splash should have minimum display time");
@@ -322,8 +331,8 @@ function runStartupCase(name, storedAppData, storedUiState, options) {
     webkitAudioContext: function () {},
     navigator: { userAgent: "SmokeTest Safari", clipboard: null },
     location: {
-      href: opts.safeStart ? "file:///kodomo/index.html?safeStart=1&v=10p29" : "file:///kodomo/index.html?v=10p29",
-      search: opts.safeStart ? "?safeStart=1&v=10p29" : "?v=10p29",
+      href: opts.safeStart ? "file:///kodomo/index.html?safeStart=1&v=10p30" : "file:///kodomo/index.html?v=10p30",
+      search: opts.safeStart ? "?safeStart=1&v=10p30" : "?v=10p30",
       reload() { caseContext.__reloaded = true; }
     },
     addEventListener(name, handler) {
@@ -432,14 +441,36 @@ if (fs.existsSync(adoptedIconPath)) {
 
 const appData = KA.state.getAppData();
 assert(appData.schemaVersion === 1, "schemaVersion should stay 1");
-assert(appData.appVersion === "1.0.0-prototype.29", "appVersion should be prototype 29");
-assert(KA.constants.VERSION_LABEL === "Ver.1.0 試作29", "version label mismatch");
+assert(appData.appVersion === "1.0.0-prototype.30", "appVersion should be prototype 30");
+assert(KA.constants.VERSION_LABEL === "Ver.1.0 試作30", "version label mismatch");
 assert(KA.constants.STORAGE_KEYS.appData === "kodomoAdventure.appData.v1", "app data key changed");
 assert(KA.constants.STORAGE_KEYS.uiState === "kodomoAdventure.uiState.v1", "ui state key changed");
 assert(KA.constants.STORAGE_KEYS.backup === "kodomoAdventure.backup.v1", "backup key changed");
 assert(KA.constants.SCHEMA_VERSION === 1, "constant schemaVersion should stay 1");
 assert(KA.constants.COLORING_TEMPLATES.length === 11, "coloring templates should be 11");
-assert(sha256Json(KA.constants.COLORING_TEMPLATES.slice(0, 10)) === "7269D4ACE6DD52140005A9CD84939B1F08EDD3BAA9456E22282C9CC7221A2AE2", "the existing ten coloring definitions should remain unchanged");
+const protectedColoringHashes = {
+  coloring_butterfly_001: {
+    definition: "B26E6194F4BA9A428A1224309EC3D191534C2884AEDB8563FF328FF748EC1C34",
+    svg: "990E5B7B5D23171EAC6320C9213C02883730F6AE798262763180EC1B6B813FD8"
+  },
+  coloring_flower_001: {
+    definition: "7118F00ED4BCE0EE2FD72D4BCB90A35BDD9A84742672A23C0B6D24D6B05C51B4",
+    svg: "46FA23F3C1C36EB15651F0D9B2470873C77258216832C3360FEFA5C991DF9F10"
+  },
+  coloring_cat_001: {
+    definition: "D50B06E948B550B789AB4DA52EC9374F537EED2DBC62CCBEB4417E8E2223156C",
+    svg: "B21179EE558C3FE27752F04311D74C397CCADC2AB08FF98FA473799C2253570E"
+  },
+  coloring_panda: {
+    definition: "0253E3DD954C2C1916E1C10F09A7F4997362335BF31AF5F9B9CA44236CD1DE56",
+    svg: "F813EB1DD7E5036E660CF2E245E446C230FF12767AF08806D1C8FDC42FF53947"
+  }
+};
+Object.keys(protectedColoringHashes).forEach((templateId) => {
+  const template = KA.constants.COLORING_TEMPLATES.find((item) => item.templateId === templateId);
+  assert(sha256Json(template) === protectedColoringHashes[templateId].definition, templateId + " definition should remain byte-equivalent to prototype 29 JSON");
+  assert(sha256Text(KA.coloring.renderTemplate(templateId, {}, "")) === protectedColoringHashes[templateId].svg, templateId + " rendered SVG should remain byte-equivalent to prototype 29");
+});
 assert(KA.constants.WORLD_DEFINITIONS.length === 6, "worlds should remain 6");
 assert(appData.worlds.world_secret_base && appData.worlds.world_secret_base.designVersion === 1, "secret base should remain available");
 assert(KA.constants.DEFAULT_TASKS.length === 7, "formal jobs should include the six existing jobs and cleanup");
@@ -707,6 +738,12 @@ assert(appJs.indexOf("specialRewardInProgress") >= 0 && appJs.indexOf("grantSpec
 assert(appJs.indexOf("showNextSpecialRewardNotification") >= 0 && appJs.indexOf("markSpecialRewardSeen") >= 0, "child notification should be queued and marked seen without granting stars again");
 assert(legendarySpecialPreview.indexOf("localStorage.") < 0 && adultSpecialRewardPreview.indexOf("localStorage.") < 0, "prototype 29 previews should not use production localStorage");
 assert(legendarySpecialPreview.indexOf("10p29") >= 0 && adultSpecialRewardPreview.indexOf("とくべつな ごほうび") >= 0, "prototype 29 previews should cover legendary birds and special rewards");
+assert(coloringPreview.indexOf("本番localStorageは使用しません") >= 0 && coloringPreview.indexOf("localStorage.") < 0, "prototype 30 coloring review should not use production localStorage");
+assert(coloringPreview.indexOf("../js/coloring-art-v30.js?v=10p30") >= 0 && coloringPreview.indexOf("../js/coloring.js?v=10p30") >= 0, "prototype 30 coloring review should load the refreshed definitions before the renderer");
+["旧原画", "新原画・未着色線画", "新原画・黒シルエット", "新原画・サンプル着色", "80px", "120px", "regionAliases"].forEach((label) => {
+  assert(coloringPreview.indexOf(label) >= 0, "prototype 30 coloring review should include " + label);
+});
+assert(coloringPreview.indexOf("KA.coloringArtV30.targetIds") >= 0 && coloringPreview.indexOf("getLegacyLayeredDefinition") >= 0, "prototype 30 coloring review should compare exactly the refreshed production targets with their legacy definitions");
 
 assert(appData.coloringSettings && Array.isArray(appData.coloringSettings.order), "coloringSettings order should be present");
 assert(appData.coloringSettings.order.length === 11, "coloringSettings order should contain 11 templateIds");
@@ -1075,7 +1112,7 @@ assert(clickBoot(recoveryCase.document, "data-boot-reload"), "reload button shou
 assert(recoveryCase.context.__reloaded === true, "reload button should call location.reload");
 assert(clickBoot(recoveryCase.document, "data-boot-safe-start"), "safeStart button should be handled by boot");
 assert(recoveryCase.context.location.href.indexOf("safeStart=1") >= 0, "safeStart button should navigate with safeStart=1");
-assert(recoveryCase.context.location.href.indexOf("v=10p29") >= 0, "safeStart button should keep prototype 29 cache query");
+assert(recoveryCase.context.location.href.indexOf("v=10p30") >= 0, "safeStart button should keep prototype 30 cache query");
 assert(clickBoot(recoveryCase.document, "data-boot-copy"), "copy button should be handled by boot");
 const diagnostics = JSON.parse(recoveryCase.storage["kodomoAdventure.bootDiagnostic.v1"]);
 assert(Array.isArray(diagnostics) && diagnostics.length >= 1, "diagnostics should be saved");
@@ -1084,21 +1121,96 @@ assert(diagnostics[0].stage && diagnostics[0].errorCode, "diagnostics should inc
 const expectedTemplates = {
   coloring_butterfly_001: 5,
   coloring_flower_001: 6,
-  coloring_rabbit_001: 9,
+  coloring_rabbit_001: 10,
   coloring_cat_001: 5,
-  coloring_dolphin_001: 9,
-  coloring_dinosaur_001: 9,
-  coloring_horse_001: 9,
-  coloring_lion: 2,
+  coloring_dolphin_001: 10,
+  coloring_dinosaur_001: 10,
+  coloring_horse_001: 10,
+  coloring_lion: 3,
   coloring_panda: 1,
-  coloring_grasshopper: 2,
-  coloring_electric_mouse: 1
+  coloring_grasshopper: 3,
+  coloring_electric_mouse: 2
 };
 Object.keys(expectedTemplates).forEach((templateId) => {
   const template = KA.coloring.getTemplate(templateId);
   assert(template, templateId + " should exist");
   assert(template.designVersion === expectedTemplates[templateId], templateId + " designVersion changed");
 });
+
+const refreshedColoringIds = [
+  "coloring_rabbit_001",
+  "coloring_dolphin_001",
+  "coloring_dinosaur_001",
+  "coloring_horse_001",
+  "coloring_lion",
+  "coloring_grasshopper",
+  "coloring_electric_mouse"
+];
+assert(JSON.stringify(KA.coloringArtV30.targetIds) === JSON.stringify(refreshedColoringIds), "prototype 30 should target exactly seven coloring templates");
+refreshedColoringIds.forEach((templateId) => {
+  const template = KA.constants.COLORING_TEMPLATES.find((item) => item.templateId === templateId);
+  const definition = KA.coloring.getLayeredDefinition(templateId);
+  const legacyDefinition = KA.coloring.getLegacyLayeredDefinition(templateId);
+  const svg = KA.coloring.renderTemplate(templateId, {}, "prototype30-review");
+  const colorRegionMarkup = svg.slice(svg.indexOf('<g class="color-regions">'), svg.indexOf("</g>") + 4);
+  assert(definition && legacyDefinition, templateId + " should expose both refreshed and legacy review definitions");
+  assert(definition.sourceLabel === "prototype30 refresh", templateId + " should use the prototype 30 production definition");
+  assert(definition.designVersion === template.designVersion, templateId + " renderer designVersion should match template metadata");
+  assert(sha256Json(definition) !== sha256Json(legacyDefinition), templateId + " refreshed artwork should differ from its prototype 29 artwork");
+  assert(JSON.stringify(definition.regions.map((region) => region.id).sort()) === JSON.stringify(template.regionIds.slice().sort()), templateId + " renderer and template region IDs should match");
+  assert(new Set(definition.regions.map((region) => region.id)).size === definition.regions.length, templateId + " renderer region IDs should be unique");
+  assert(definition.regions.every((region) => region.d && region.fallback), templateId + " every color region should have path data and a fallback");
+  assert(Array.isArray(definition.outer) && definition.outer.length >= 1, templateId + " should have an outer outline");
+  assert(Array.isArray(definition.inner) && definition.inner.length >= 1, templateId + " should have readable inner lines");
+  assert(typeof definition.face === "string" && definition.face.length >= 1, templateId + " should have face details");
+  assert(svg.indexOf('<g class="color-regions">') >= 0 && svg.indexOf('<g class="hit-areas"') >= 0 && svg.indexOf('<g class="outer-outline"') >= 0 && svg.indexOf('<g class="inner-lines"') >= 0 && svg.indexOf('<g class="face-details"') >= 0, templateId + " should render the standard layered SVG groups");
+  assert(!/\sstroke=/.test(colorRegionMarkup), templateId + " color-regions should not contain stroke attributes");
+  assert(svg.indexOf("<img") < 0 && svg.indexOf("http") < 0 && svg.indexOf("<use") < 0, templateId + " should use internal SVG paths only");
+});
+
+const aliasCompatibilitySamples = {
+  coloring_rabbit_001: { input: { ear_left: "#AA0000", cheeks: "#BB0000" }, checks: { ear_left_outer: "#AA0000", ear_left_inner: "#AA0000", cheek: "#BB0000" } },
+  coloring_dolphin_001: { input: { body: "#AA0000", tail: "#BB0000" }, checks: { body_top: "#AA0000", snout: "#AA0000", tail_stem: "#BB0000", tail_fluke_top: "#BB0000", tail_fluke_bottom: "#BB0000" } },
+  coloring_dinosaur_001: { input: { legs: "#AA0000", spikes: "#BB0000", spots: "#CC0000" }, checks: { arm: "#AA0000", back_leg: "#AA0000", foot: "#AA0000", back_spines: "#BB0000", body_mark: "#CC0000" } },
+  coloring_horse_001: { input: { legs: "#AA0000", head: "#BB0000" }, checks: { front_leg_near: "#AA0000", front_leg_far: "#AA0000", back_leg_near: "#AA0000", back_leg_far: "#AA0000", ears: "#BB0000", muzzle: "#BB0000" } },
+  coloring_lion: { input: { head: "#AA0000", legs: "#BB0000", tail_tuft: "#CC0000" }, checks: { face: "#AA0000", front_leg: "#BB0000", back_leg: "#BB0000", tail_tip: "#CC0000" } },
+  coloring_grasshopper: { input: { body: "#AA0000", legs: "#BB0000", antenna: "#CC0000" }, checks: { thorax: "#AA0000", abdomen: "#AA0000", front_leg: "#BB0000", middle_leg: "#BB0000", back_leg: "#BB0000", antennae: "#CC0000" } },
+  coloring_electric_mouse: { input: { body: "#AA0000", tail: "#BB0000" }, checks: { body: "#AA0000", tail: "#BB0000" } }
+};
+Object.keys(aliasCompatibilitySamples).forEach((templateId) => {
+  const sample = aliasCompatibilitySamples[templateId];
+  const normalized = KA.coloring.normalizeRegionColors(templateId, sample.input);
+  Object.keys(sample.checks).forEach((regionId) => {
+    assert(normalized[regionId] === sample.checks[regionId], templateId + " should migrate legacy region color into " + regionId);
+  });
+});
+
+const legacyColoringData = KA.migrations.createDefaultAppData();
+legacyColoringData.artworks = refreshedColoringIds.map((templateId, index) => ({
+  artworkId: "legacy_coloring_" + index,
+  templateId,
+  title: templateId,
+  createdAt: "2026-01-01T00:00:00+09:00",
+  completedAt: "2026-01-01T00:00:00+09:00",
+  localDate: "2026-01-01",
+  status: "completed",
+  regionColors: JSON.parse(JSON.stringify(aliasCompatibilitySamples[templateId].input)),
+  usedColors: [],
+  analysis: {},
+  magicResult: {},
+  favorite: false,
+  placementId: null
+}));
+KA.migrations.ensureDataShape(legacyColoringData);
+legacyColoringData.artworks.forEach((artwork) => {
+  assert(artwork.regionColorDesignVersion === expectedTemplates[artwork.templateId], artwork.templateId + " legacy artwork should record the current design version");
+  Object.keys(aliasCompatibilitySamples[artwork.templateId].checks).forEach((regionId) => {
+    assert(artwork.regionColors[regionId] === aliasCompatibilitySamples[artwork.templateId].checks[regionId], artwork.templateId + " migration should preserve legacy colors in " + regionId);
+  });
+});
+const legacyColoringAfterFirstEnsure = JSON.stringify(legacyColoringData.artworks);
+KA.migrations.ensureDataShape(legacyColoringData);
+assert(JSON.stringify(legacyColoringData.artworks) === legacyColoringAfterFirstEnsure, "prototype 30 artwork migration should be idempotent");
 
 const electricMouseTemplate = KA.coloring.getTemplate("coloring_electric_mouse");
 const electricMouseDefinition = KA.coloring.getLayeredDefinition("coloring_electric_mouse");
@@ -1146,8 +1258,8 @@ const electricMouseSvg = KA.coloring.renderTemplate("coloring_electric_mouse", {
 assert(electricMouseSvg.indexOf('aria-label="びりびり ねずみ"') >= 0, "electric mouse SVG should have an accessible label");
 assert((electricMouseSvg.match(/class="color-region"/g) || []).length === 15, "electric mouse should render fifteen colorable regions");
 assert(electricMouseSvg.indexOf("<img") < 0 && electricMouseSvg.indexOf("http") < 0 && electricMouseSvg.indexOf("<use") < 0, "electric mouse should use only internal SVG paths");
-assert(electricMouseDefinition.regions.filter((region) => region.id === "tail")[0].d.indexOf("C181 124 205 112") >= 0, "electric mouse should use a curled tail");
-assert(electricMouseDefinition.regions.filter((region) => region.id === "left_cheek_star")[0].d.indexOf("L91 82") >= 0, "electric mouse cheek should use a star shape");
+assert(electricMouseDefinition.regions.filter((region) => region.id === "tail")[0].d.indexOf("C205 125 221 108") >= 0, "electric mouse should use a curled spiral tail");
+assert(electricMouseDefinition.regions.filter((region) => region.id === "left_cheek_star")[0].d.indexOf("L95 83") >= 0, "electric mouse cheek should use an original star shape");
 const electricArtworkBefore = appData.artworks.length;
 const electricArtworkResult = KA.coloring.createArtwork("coloring_electric_mouse", {
   body: "#9AD4C8",

@@ -3,16 +3,33 @@
 ## 概要
 「こどもの冒険」は、毎日のおしごと、スター、ぬりえ、作品を置く世界、たまご育成をローカル保存で楽しむ子ども向けWebアプリです。
 
-Ver.1.0 試作29では、伝説の鳥4種類をspecies定義の共通属性で管理し、全画面の伝説バッジ、専用孵化・進化演出へ反映しました。「ほうおう」は金色主体の高貴な姿へ全面更新し、おとなモードには任意のスターを安全に渡せる「とくべつな ごほうび」を追加しました。
+Ver.1.0 試作30では、うさぎ、イルカ、きょうりゅう、うま、ライオン、バッタ、びりびり ねずみのSVG原画を、幼児が見分けやすく塗りやすい形へ刷新しました。ちょうちょ、おはな、ねこ、パンダは定義と見た目を変更していません。
 
 既存のホーム画面アイコンは古いHTML設定を保持するため、一度削除してからSafariで最新版を開き、改めてホーム画面へ追加してください。
 
 ## バージョン
 - 表示名: 結羽ちゃんの冒険
-- バージョン: Ver.1.0 試作29
-- appVersion: `1.0.0-prototype.29`
+- バージョン: Ver.1.0 試作30
+- appVersion: `1.0.0-prototype.30`
 - schemaVersion: `1`
-- キャッシュ対策: `?v=10p29`
+- キャッシュ対策: `?v=10p30`
+
+## 試作30のぬりえ原画
+
+- うさぎは長い耳、丸い顔、大きな後脚、短い前脚を一目で追える横向きへ刷新
+- イルカは流線形の胴体、自然なくち先、背びれ、胸びれ、上下の尾びれを明確化
+- きょうりゅうは大きな頭、あご、小さな前脚、太い後脚、長い尾、背中の突起を整理
+- うまは首から顔への流れ、たてがみ、尾、4本の脚、ひづめが小サイズでも読める横向きへ刷新
+- ライオンは大きなたてがみと顔を主役にし、胴体、4本脚、尾房を簡潔に整理
+- バッタは細長い胴体、触角、羽、大きく折れた後脚を明確化
+- びりびり ねずみは大きな楕円耳、星形の頬、両手を広げた姿、渦巻き尾と火花を維持しながら、丸く親しみやすい形へ刷新
+- 刷新7種は `color-regions`、`hit-areas`、`outer-outline`、`inner-lines`、`face-details` の共通構造を使用
+- `color-regions` にstrokeを持たせず、耳、脚、触角、模様など小さい領域は透明なhit-areaでタップ範囲を補強
+- `templateId`、必要スター、解放順、既存作品形式を維持し、旧region IDは `regionAliases` で可能な範囲を引き継ぐ
+- ちょうちょ、おはな、ねこ、パンダは定義JSONと空SVGのSHA-256が試作29と一致
+- `tests/coloring-preview.html` で旧原画、新線画、黒シルエット、サンプル着色、80px、120pxを比較可能
+- 11種類のぬりえ、作品アルバム、世界配置、JSONバックアップ・復元、保存キー4種、`schemaVersion: 1` を維持
+- 外部画像、外部SVG、CDN、fetch、外部API、type=moduleは不使用
 
 ## 試作29の伝説の鳥と特別なご褒美
 
@@ -479,7 +496,7 @@ birdHouseデータは `appData.birdHouse` に保存します。
 ## スタート画面
 アプリ起動時に、採用済みの `apple-touch-icon.png` をそのまま表示するスタート画面を追加しました。
 
-- 画像パス: `./apple-touch-icon.png?v=10p29`
+- 画像パス: `./apple-touch-icon.png?v=10p30`
 - 最低表示時間: 1.2秒
 - 通常終了目安: 初期化完了後
 - フェイルセーフ: 約4秒
@@ -493,7 +510,7 @@ iPhoneのホーム画面から独立Webアプリとして起動できるよう�
 
 - `apple-mobile-web-app-capable`: `yes`
 - `apple-mobile-web-app-title`: `こどもの冒険`
-- manifest: `./manifest.webmanifest?v=10p29`
+- manifest: `./manifest.webmanifest?v=10p30`
 - manifest `display`: `standalone`
 - manifest `start_url`: `./`
 - manifest `scope`: `./`
@@ -510,15 +527,15 @@ iPhoneのホーム画面から独立Webアプリとして起動できるよう�
 | --- | --- | ---: | ---: |
 | ちょうちょ | `coloring_butterfly_001` | 4 | 5 |
 | おはな | `coloring_flower_001` | 8 | 6 |
-| うさぎ | `coloring_rabbit_001` | 12 | 9 |
+| うさぎ | `coloring_rabbit_001` | 12 | 10 |
 | ねこ | `coloring_cat_001` | 16 | 5 |
-| イルカ | `coloring_dolphin_001` | 20 | 9 |
-| きょうりゅう | `coloring_dinosaur_001` | 24 | 9 |
-| うま | `coloring_horse_001` | 28 | 9 |
-| ライオン | `coloring_lion` | 32 | 2 |
+| イルカ | `coloring_dolphin_001` | 20 | 10 |
+| きょうりゅう | `coloring_dinosaur_001` | 24 | 10 |
+| うま | `coloring_horse_001` | 28 | 10 |
+| ライオン | `coloring_lion` | 32 | 3 |
 | パンダ | `coloring_panda` | 36 | 1 |
-| バッタ | `coloring_grasshopper` | 40 | 2 |
-| びりびり ねずみ | `coloring_electric_mouse` | 44 | 1 |
+| バッタ | `coloring_grasshopper` | 40 | 3 |
+| びりびり ねずみ | `coloring_electric_mouse` | 44 | 2 |
 
 12色クレヨンパレット、まほうの仕上げ、アルバム、世界選択、世界間移動、自由配置は維持しています。
 
@@ -550,6 +567,7 @@ iPhoneのホーム画面から独立Webアプリとして起動できるよう�
 本番ナビからはリンクしない確認用ページです。保存版には含めますが、GitHub Pages公開用フォルダにはコピーしません。
 
 - `tests/coloring-preview.html`
+- `tests/browser-qa-p30.cjs`
 - `tests/forest-placement-preview.html`
 - `tests/worlds-preview.html`
 - `tests/animal-svg-review.html`
@@ -583,6 +601,7 @@ kodomo-adventure-local
 │  ├─ state.js
 │  ├─ stars.js
 │  ├─ tasks.js
+│  ├─ coloring-art-v30.js
 │  ├─ coloring.js
 │  ├─ worlds.js
 │  ├─ parent-mode.js
