@@ -10,8 +10,7 @@
       "coloring_dinosaur_001",
       "coloring_horse_001",
       "coloring_lion",
-      "coloring_grasshopper",
-      "coloring_electric_mouse"
+      "coloring_grasshopper"
     ],
     definitions: {
       coloring_rabbit_001: {

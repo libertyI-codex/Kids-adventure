@@ -277,6 +277,27 @@
     });
   }
 
+  function tabletCompanionPosition(index, count, columns, top, bottom) {
+    var safeCount = Math.max(1, Number(count || 1));
+    var row = Math.floor(index / columns);
+    var rows = Math.max(1, Math.ceil(safeCount / columns));
+    var rowStart = row * columns;
+    var rowCount = Math.min(columns, safeCount - rowStart);
+    var column = index - rowStart;
+    var side = rowCount >= 7 ? 7 : rowCount >= 5 ? 10 : rowCount === 4 ? 14 : rowCount === 3 ? 22 : 30;
+    var x = rowCount === 1 ? 50 : side + ((100 - (side * 2)) * column / (rowCount - 1));
+    var y = rows === 1 ? (top + bottom) / 2 : top + ((bottom - top) * row / (rows - 1));
+    return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+  }
+
+  function tabletCompanionScale(count, landscape) {
+    if (count >= 13) return landscape ? 0.64 : 0.56;
+    if (count >= 10) return landscape ? 0.68 : 0.62;
+    if (count >= 7) return landscape ? 0.76 : 0.7;
+    if (count >= 4) return landscape ? 0.88 : 0.82;
+    return 1;
+  }
+
   function companionLayout(appData, focusSpeciesId) {
     var data = appData || KA.state.getAppData();
     var owned = ownedCompanions(data);
@@ -313,13 +334,21 @@
       var species = KA.companions.getSpecies(companion.speciesId);
       var position = positions[index] || { x: 50, y: 70, scale: 0.75 };
       var scale = position.scale;
+      var tabletPortrait = tabletCompanionPosition(index, owned.length, 5, 34, 84);
+      var tabletLandscape = tabletCompanionPosition(index, owned.length, 8, 47, 78);
+      var tabletPortraitScale = tabletCompanionScale(owned.length, false);
+      var tabletLandscapeScale = tabletCompanionScale(owned.length, true);
       if (companion.speciesId === "companion_peacock") scale *= 0.82;
+      if (companion.speciesId === "companion_peacock") tabletPortraitScale *= 0.82;
+      if (companion.speciesId === "companion_peacock") tabletLandscapeScale *= 0.82;
       return {
         companion: companion,
         species: species,
         x: position.x,
         y: position.y,
         scale: scale,
+        tabletPortrait: { x: tabletPortrait.x, y: tabletPortrait.y, scale: tabletPortraitScale },
+        tabletLandscape: { x: tabletLandscape.x, y: tabletLandscape.y, scale: tabletLandscapeScale },
         isFocus: companion.speciesId === focusId
       };
     });

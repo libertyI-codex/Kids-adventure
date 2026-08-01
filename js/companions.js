@@ -648,6 +648,29 @@
     }
   };
 
+  var LEGACY_SPECIES = JSON.parse(JSON.stringify(SPECIES));
+  var LEGACY_EVOLUTION_DECORATIONS = JSON.parse(JSON.stringify(EVOLUTION_DECORATIONS));
+
+  function applyCompanionArtV31() {
+    var artwork = KA.companionArtV31;
+    if (!artwork || !artwork.species || !artwork.evolutionDecorations) return;
+    SPECIES = SPECIES.map(function (species) {
+      var override = artwork.species[species.id];
+      var merged;
+      if (!override) return species;
+      merged = JSON.parse(JSON.stringify(species));
+      Object.keys(override).forEach(function (key) {
+        merged[key] = JSON.parse(JSON.stringify(override[key]));
+      });
+      return merged;
+    });
+    Object.keys(artwork.evolutionDecorations).forEach(function (speciesId) {
+      EVOLUTION_DECORATIONS[speciesId] = JSON.parse(JSON.stringify(artwork.evolutionDecorations[speciesId]));
+    });
+  }
+
+  applyCompanionArtV31();
+
   function cloneSpeciesData(value) {
     return JSON.parse(JSON.stringify(value));
   }
@@ -1051,7 +1074,7 @@
     var innerWidth = Number(species.innerWidth || 2.2);
     var transparentBoxClass = species.transparentOuterBox ? " companion-transparent-box" : "";
     var evolution = renderEvolutionContext(species, opts);
-    if (species.id === "companion_peacock") {
+    if (species.id === "companion_peacock" && species.renderer !== "generic") {
       return renderPeacockCompanion(species, opts);
     }
     if (opts.silhouette) {
@@ -1103,6 +1126,8 @@
     markEvolutionStageSeen: markEvolutionStageSeen,
     increaseCompanionBond: increaseCompanionBond,
     evolutionDecorations: cloneSpeciesData(EVOLUTION_DECORATIONS),
+    legacySpecies: cloneSpeciesData(LEGACY_SPECIES),
+    legacyEvolutionDecorations: cloneSpeciesData(LEGACY_EVOLUTION_DECORATIONS),
     normalizeCompanionNickname: normalizeCompanionNickname,
     companionNicknameLength: companionNicknameLength,
     setCompanionNickname: setCompanionNickname,

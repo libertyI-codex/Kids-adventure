@@ -1,0 +1,585 @@
+:root {
+  --app-content-max-width: 960px;
+  --tablet-page-padding: 20px;
+  --tablet-card-gap: 16px;
+  --tablet-nav-size: 104px;
+  --tablet-modal-width: 720px;
+  --touch-target-size: 48px;
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+.bird-house-bird {
+  left: var(--bird-phone-x, 50%);
+  top: var(--bird-phone-y, 70%);
+}
+
+.companion-svg,
+.bird-house-furniture-svg,
+.editor-canvas svg {
+  -webkit-user-drag: none;
+}
+
+.editor-canvas svg {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@media (min-width: 600px) {
+  :root {
+    --app-content-max-width: 1120px;
+    --tablet-page-padding: clamp(20px, 3vw, 32px);
+    --tablet-card-gap: clamp(14px, 2vw, 20px);
+    --touch-target-size: 52px;
+  }
+
+  body {
+    scroll-padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 32px);
+  }
+
+  .app-shell {
+    padding: calc(18px + var(--safe-top))
+      calc(var(--tablet-page-padding) + var(--safe-right))
+      calc(var(--nav-height) + var(--safe-bottom) + 34px)
+      calc(var(--tablet-page-padding) + var(--safe-left));
+  }
+
+  .screen {
+    width: min(100%, var(--app-content-max-width));
+    max-width: var(--app-content-max-width);
+  }
+
+  .topbar {
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-size: clamp(1.9rem, 3.2vw, 2.35rem);
+  }
+
+  .panel-pad {
+    padding: clamp(16px, 2.2vw, 22px);
+  }
+
+  .btn {
+    min-height: var(--touch-target-size);
+  }
+
+  .bottom-nav {
+    right: auto;
+    left: 50%;
+    width: min(calc(100% - 32px - var(--safe-left) - var(--safe-right)), 960px);
+    padding-right: 12px;
+    padding-left: 12px;
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
+    transform: translateX(-50%);
+  }
+
+  .nav-btn {
+    min-height: 60px;
+    font-size: 0.84rem;
+  }
+
+  .home-flow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--tablet-card-gap);
+    align-items: start;
+  }
+
+  .home-hero,
+  .evolution-home-notice,
+  .home-star-strip {
+    grid-column: 1 / -1;
+  }
+
+  .home-hero {
+    grid-template-columns: 150px minmax(0, 1fr);
+    min-height: 196px;
+    padding: 22px;
+  }
+
+  .home-hero-art {
+    width: 150px;
+    height: 150px;
+  }
+
+  .home-hero-art .companion-svg,
+  .home-hero-art .egg-svg {
+    width: 138px;
+    max-height: 142px;
+  }
+
+  .home-adventure-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .home-adventure-item:last-child {
+    grid-column: auto;
+  }
+
+  .companion-status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .companion-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--tablet-card-gap);
+  }
+
+  .companion-art {
+    width: 132px;
+    min-height: 132px;
+  }
+
+  .coloring-grid,
+  .album-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--tablet-card-gap);
+  }
+
+  .kitchen-recipe-grid,
+  .kitchen-feed-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--tablet-card-gap);
+  }
+
+  .ingredient-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .outing-companion-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .outing-destination-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .bird-house-room {
+    height: clamp(620px, 52vh, 760px);
+    min-height: 620px;
+  }
+
+  .bird-house-bird {
+    left: var(--bird-tablet-portrait-x, var(--bird-phone-x, 50%));
+    top: var(--bird-tablet-portrait-y, var(--bird-phone-y, 70%));
+    width: 132px;
+    height: 132px;
+    transform: translate(-50%, -50%) scale(var(--bird-tablet-portrait-scale, var(--bird-phone-scale, 1)));
+  }
+
+  .bird-house-furniture {
+    width: 112px;
+    height: 112px;
+  }
+
+  .bird-house-slot-nestCorner,
+  .bird-house-slot-floorLeft,
+  .bird-house-slot-floorRight {
+    width: 100px;
+    height: 100px;
+  }
+
+  .bird-house-slot-centerTable {
+    width: 132px;
+    height: 132px;
+  }
+
+  .bird-house-item-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .screen.parent-screen > section.parent-screen.grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .screen.parent-screen > section.parent-screen.grid > .parent-companion-gallery,
+  .screen.parent-screen > section.parent-screen.grid > [data-coloring-settings-panel],
+  .screen.parent-screen > section.parent-screen.grid > .parent-job-settings {
+    grid-column: 1 / -1;
+  }
+
+  .parent-companion-design-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--tablet-card-gap);
+  }
+
+  .modal-root {
+    padding: clamp(24px, 4vw, 48px);
+  }
+
+  .modal {
+    width: min(var(--tablet-modal-width), 100%);
+    max-height: min(88vh, calc(100dvh - 48px));
+    padding: clamp(20px, 3vw, 28px);
+  }
+
+  .companion-nickname-modal,
+  .kitchen-meal-result-modal {
+    width: min(620px, 100%);
+  }
+
+  .modal-actions .btn {
+    min-height: 52px;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 1rem;
+    scroll-margin-top: 96px;
+    scroll-margin-bottom: 180px;
+  }
+
+  .parent-coloring-list,
+  .parent-job-list,
+  .outing-history-list {
+    min-width: 0;
+  }
+
+  @supports (content-visibility: auto) {
+    .coloring-card,
+    .art-card,
+    .parent-companion-design-card {
+      content-visibility: auto;
+      contain-intrinsic-size: 260px;
+    }
+  }
+}
+
+@media (min-width: 600px) and (orientation: portrait) {
+  .editor-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .editor-canvas {
+    display: grid;
+    place-items: center;
+    min-height: clamp(420px, 62vh, 820px);
+  }
+
+  .editor-canvas svg {
+    width: auto;
+    max-width: 100%;
+    max-height: min(70vh, 800px);
+  }
+
+  .palette {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .editor-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) and (orientation: portrait) {
+  .coloring-grid,
+  .album-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .companion-status-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .bird-house-item-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) and (min-aspect-ratio: 4 / 3) {
+  :root {
+    --app-content-max-width: 1200px;
+    --tablet-nav-size: 104px;
+    --tablet-page-padding: clamp(20px, 2.4vw, 36px);
+  }
+
+  body {
+    scroll-padding-bottom: 28px;
+  }
+
+  .app-shell {
+    padding:
+      calc(16px + var(--safe-top))
+      calc(var(--tablet-page-padding) + var(--safe-right))
+      calc(24px + var(--safe-bottom))
+      calc(var(--tablet-nav-size) + var(--tablet-page-padding) + var(--safe-left));
+  }
+
+  .bottom-nav {
+    top: var(--safe-top);
+    right: auto;
+    bottom: var(--safe-bottom);
+    left: var(--safe-left);
+    width: var(--tablet-nav-size);
+    min-height: 0;
+    padding: 12px 10px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(5, minmax(64px, auto));
+    align-content: center;
+    border: 0;
+    border-right: 1px solid var(--line);
+    border-radius: 0 18px 18px 0;
+    transform: none;
+  }
+
+  .nav-btn {
+    min-height: 64px;
+    padding: 8px 4px;
+  }
+
+  .nav-btn span {
+    margin-bottom: 5px;
+    font-size: 1.5rem;
+  }
+
+  .home-flow {
+    grid-template-columns: minmax(330px, 0.82fr) minmax(480px, 1.18fr);
+    grid-auto-flow: row dense;
+  }
+
+  .home-hero,
+  .evolution-home-notice,
+  .home-star-strip,
+  .home-support-stack,
+  .outing-home-card {
+    grid-column: 1;
+  }
+
+  .home-hero,
+  .home-adventure-card {
+    grid-row: 1;
+  }
+
+  .home-adventure-card,
+  .companion-status-card {
+    grid-column: 2;
+  }
+
+  .companion-status-card {
+    grid-row: 2 / span 4;
+  }
+
+  .home-hero {
+    grid-template-columns: 148px minmax(0, 1fr);
+    min-height: 190px;
+  }
+
+  .companion-status-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .companion-status-item {
+    grid-template-columns: 58px minmax(0, 1fr);
+  }
+
+  .companion-status-art {
+    width: 58px;
+    height: 58px;
+  }
+
+  .companion-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .companion-detail-screen {
+    display: grid;
+    grid-template-columns: minmax(360px, 0.86fr) minmax(500px, 1.14fr);
+    gap: var(--tablet-card-gap);
+    align-items: start;
+  }
+
+  .companion-detail-screen > .topbar,
+  .companion-detail-screen > .companion-detail-header {
+    grid-column: 1 / -1;
+  }
+
+  .companion-detail-screen > .companion-detail-hero {
+    grid-column: 1;
+  }
+
+  .companion-detail-screen > .companion-action-grid {
+    grid-column: 2;
+    grid-row: 3 / span 2;
+  }
+
+  .companion-detail-screen > .companion-evolution-status {
+    grid-column: 1;
+  }
+
+  .companion-detail-hero {
+    grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1fr);
+  }
+
+  .companion-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .coloring-grid,
+  .album-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .editor-layout {
+    grid-template-columns: minmax(0, 1.72fr) minmax(300px, 0.78fr);
+    gap: var(--tablet-card-gap);
+    align-items: start;
+  }
+
+  .editor-canvas {
+    display: grid;
+    place-items: center;
+    min-height: min(620px, calc(100dvh - 170px));
+    max-height: calc(100dvh - 142px);
+  }
+
+  .editor-canvas svg {
+    width: auto;
+    max-width: 100%;
+    max-height: calc(100dvh - 180px);
+  }
+
+  .editor-layout > .panel {
+    max-height: calc(100dvh - 142px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .palette,
+  .editor-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .kitchen-screen {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .kitchen-screen > .topbar,
+  .kitchen-screen > .screen-header {
+    grid-column: 1 / -1;
+  }
+
+  .kitchen-screen > .kitchen-selected-companion,
+  .kitchen-screen > .kitchen-tabs,
+  .kitchen-screen > .kitchen-notice {
+    grid-column: 1 / 5;
+  }
+
+  .kitchen-screen > .kitchen-recipe-grid,
+  .kitchen-screen > .kitchen-select-panel,
+  .kitchen-screen > .kitchen-work-panel,
+  .kitchen-screen > .kitchen-complete-panel {
+    grid-column: 5 / -1;
+    grid-row: 3 / span 4;
+  }
+
+  .kitchen-screen > .kitchen-tabs {
+    grid-row: 4;
+  }
+
+  .kitchen-screen > .kitchen-notice {
+    grid-row: 5;
+  }
+
+  .kitchen-recipe-grid,
+  .kitchen-feed-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .kitchen-feed-action {
+    bottom: 16px;
+  }
+
+  .outing-screen {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .outing-screen > .topbar,
+  .outing-screen > .screen-header,
+  .outing-screen > .outing-preparation,
+  .outing-screen > .outing-history {
+    grid-column: 1 / -1;
+  }
+
+  .outing-screen > .outing-companion-panel {
+    grid-column: 1 / 8;
+  }
+
+  .outing-screen > .outing-destination-panel {
+    grid-column: 8 / -1;
+  }
+
+  .outing-screen > .outing-confirm,
+  .outing-screen > .outing-active {
+    grid-column: 3 / 11;
+  }
+
+  .outing-companion-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .outing-history-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bird-house-room {
+    height: clamp(540px, calc(100dvh - 250px), 720px);
+    min-height: 540px;
+  }
+
+  .bird-house-bird {
+    left: var(--bird-tablet-landscape-x, var(--bird-tablet-portrait-x, var(--bird-phone-x, 50%)));
+    top: var(--bird-tablet-landscape-y, var(--bird-tablet-portrait-y, var(--bird-phone-y, 70%)));
+    width: 142px;
+    height: 142px;
+    transform: translate(-50%, -50%) scale(var(--bird-tablet-landscape-scale, var(--bird-tablet-portrait-scale, var(--bird-phone-scale, 1))));
+  }
+
+  .bird-house-item-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .screen.parent-screen > section.parent-screen.grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .parent-companion-design-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .parent-companion-design-art {
+    height: 154px;
+  }
+
+  .modal {
+    width: min(var(--tablet-modal-width), 100%);
+    max-height: calc(100dvh - 48px);
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 620px) {
+  .modal-root {
+    place-items: start center;
+    padding: calc(8px + var(--safe-top)) 20px calc(8px + var(--safe-bottom));
+    overflow-y: auto;
+  }
+
+  .modal {
+    max-height: calc(100dvh - 16px - var(--safe-top) - var(--safe-bottom));
+  }
+
+  .parent-special-reward input,
+  .parent-special-reward textarea,
+  .modal input,
+  .modal textarea {
+    scroll-margin-top: 72px;
+    scroll-margin-bottom: 220px;
+  }
+}

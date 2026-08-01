@@ -913,6 +913,9 @@
   }
 
   function layeredDefinition(templateId) {
+    if (templateId === "coloring_electric_mouse") {
+      return LAYERED_ANIMAL_SVG[templateId] || null;
+    }
     var refreshed = KA.coloringArtV30 && KA.coloringArtV30.definitions
       ? KA.coloringArtV30.definitions[templateId]
       : null;

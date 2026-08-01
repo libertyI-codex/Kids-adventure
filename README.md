@@ -3,16 +3,50 @@
 ## 概要
 「こどもの冒険」は、毎日のおしごと、スター、ぬりえ、作品を置く世界、たまご育成をローカル保存で楽しむ子ども向けWebアプリです。
 
-Ver.1.0 試作30では、うさぎ、イルカ、きょうりゅう、うま、ライオン、バッタ、びりびり ねずみのSVG原画を、幼児が見分けやすく塗りやすい形へ刷新しました。ちょうちょ、おはな、ねこ、パンダは定義と見た目を変更していません。
+Ver.1.0 試作32では、試作31のスマートフォン表示と全機能を維持しながら、Fire HD 10相当の10インチタブレット向けに縦向き・横向きの専用レスポンシブレイアウトを追加しました。Amazon SilkおよびAmazon Kidsの許可サイトとしてのWeb利用を想定しています。
 
 既存のホーム画面アイコンは古いHTML設定を保持するため、一度削除してからSafariで最新版を開き、改めてホーム画面へ追加してください。
 
 ## バージョン
 - 表示名: 結羽ちゃんの冒険
-- バージョン: Ver.1.0 試作30
-- appVersion: `1.0.0-prototype.30`
+- バージョン: Ver.1.0 試作32
+- appVersion: `1.0.0-prototype.32`
 - schemaVersion: `1`
-- キャッシュ対策: `?v=10p30`
+- キャッシュ対策: `?v=10p32`
+
+## 試作32のFire HD 10対応
+
+- 390px以下では試作31のスマートフォン配置を維持し、600px以上をタブレット表示、900px以上かつ横向きを10インチ横向き表示として整理
+- 固定端末名やUser-Agentではなく、viewport幅・高さ・向き・aspect-ratioでレイアウトを切り替え
+- タブレット共通コンテンツ幅を最大1200px、設定やモーダルを読みやすい幅へ制限し、単純拡大と過度な余白を回避
+- 縦向きでは一覧を2〜3列、横向きではなかま一覧・デザイン一覧を4〜5列へ展開
+- 横向きでは下部ナビを左サイドナビへ切り替え、ホーム、鳥詳細、キッチン、おでかけ、ぬりえ、大人モードを複数カラム化
+- ホームは代表鳥と今日の状態を左、今日の冒険・なかま・おでかけを右へ整理し、スター表示と主操作を維持
+- 鳥詳細は横向き2カラム、とりのおうちはスマートフォン・タブレット縦・タブレット横の15羽配置を用意
+- キッチンは選択中の鳥と料理、なかまとおでかけは鳥選択と行き先、ぬりえは原画とパレットを横向きで左右分割
+- 大人モードは管理カードを2列化し、未取得を含むなかまデザイン一覧を縦3列・横5列で表示
+- モーダルは最大幅720px・viewport内の最大高さと内部スクロールを設け、短い横向き画面やソフトウェアキーボード相当へ対応
+- タップ領域は48px以上、タブレットの主要操作は52pxを基準とし、SVG装飾のドラッグ防止とぬりえ原画内だけの`touch-action`制御を追加
+- 回転時はJavaScriptで再描画せずCSSだけを切り替えるため、現在ルート、selectedCompanionId、入力内容、ぬりえ色、処理中ガードを維持
+- `prefers-reduced-motion`、safe-area、PWA standalone、safeStart、boot診断、JSON互換、保存キー4種、`schemaVersion: 1`を維持
+- `tests/fire-hd10-layout-preview.html`で7種類のviewportと主要画面を切り替えて確認可能
+- `tests/browser-qa-p32.cjs`で390×844、800×1280、1280×800を中心に、回転、15羽配置、複数カラム、モーダル、横スクロールを実ブラウザ検証
+
+## 試作31の鳥デザインと原画復元
+
+- `coloring_electric_mouse`（びりびり ねずみ）は、試作29の `designVersion: 1`・`electric_mouse_original_v1`へ復元
+- 15領域、`templateId`、44スター、解放順、作品形式を維持し、region IDが同一のため`regionAliases`追加は不要
+- びりびり ねずみ以外のぬりえ10種類は試作30から変更なし
+- 鳥15種類すべてのstage 1本体を、80pxでも輪郭と種類が読み取れる手書きインラインSVGへ更新
+- stage 2・3装飾も新本体へ合わせ、同じ鳥のまま羽・尾・冠羽・テーマ装飾が育つ構成を維持
+- 小鳥4種は体形、顔模様、尾、くちばしを分け、氷・雷・炎・ほうおうは翼と尾の構造・配色を明確に区別
+- ほうおうは金色と太陽扇尾、雷鳥は黄色と角張った稲妻翼、ケツァールは緑の体と長い二本尾を維持
+- companionId、speciesId、正式名、nickname、favorite、bondLevel、hatchCount、mealCount、fixed seed、plannedSpeciesIdを変更しない
+- おとなモードに「なかまデザイン一覧」を追加し、取得状態にかかわらず全15種類をstage 1・2・3で切り替えて閲覧可能
+- `tests/bird-companion-review.html`で全15種類のstage 1〜3、80px、120px、黒シルエットを確認可能
+- `tests/companion-design-gallery-preview.html`で390px相当の大人モード一覧を確認可能
+- 保存キー4種、`schemaVersion: 1`、PWA standalone、safeStart、`renderAlbum()`を維持
+- 外部画像、外部SVG、CDN、fetch、外部API、type=moduleは不使用
 
 ## 試作30のぬりえ原画
 
@@ -496,7 +530,7 @@ birdHouseデータは `appData.birdHouse` に保存します。
 ## スタート画面
 アプリ起動時に、採用済みの `apple-touch-icon.png` をそのまま表示するスタート画面を追加しました。
 
-- 画像パス: `./apple-touch-icon.png?v=10p30`
+- 画像パス: `./apple-touch-icon.png?v=10p32`
 - 最低表示時間: 1.2秒
 - 通常終了目安: 初期化完了後
 - フェイルセーフ: 約4秒
@@ -510,7 +544,7 @@ iPhoneのホーム画面から独立Webアプリとして起動できるよう�
 
 - `apple-mobile-web-app-capable`: `yes`
 - `apple-mobile-web-app-title`: `こどもの冒険`
-- manifest: `./manifest.webmanifest?v=10p30`
+- manifest: `./manifest.webmanifest?v=10p32`
 - manifest `display`: `standalone`
 - manifest `start_url`: `./`
 - manifest `scope`: `./`
