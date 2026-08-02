@@ -56,7 +56,7 @@
     },
     {
       id: "companion_parrot",
-      name: "オウム",
+      name: "おうむ",
       displayOrder: 3,
       designVersion: 2,
       preferredWorldIds: ["world_island", "world_sky_island", "world_secret_base"],
@@ -651,8 +651,7 @@
   var LEGACY_SPECIES = JSON.parse(JSON.stringify(SPECIES));
   var LEGACY_EVOLUTION_DECORATIONS = JSON.parse(JSON.stringify(EVOLUTION_DECORATIONS));
 
-  function applyCompanionArtV31() {
-    var artwork = KA.companionArtV31;
+  function applyCompanionArtwork(artwork) {
     if (!artwork || !artwork.species || !artwork.evolutionDecorations) return;
     SPECIES = SPECIES.map(function (species) {
       var override = artwork.species[species.id];
@@ -669,7 +668,8 @@
     });
   }
 
-  applyCompanionArtV31();
+  applyCompanionArtwork(KA.companionArtV31);
+  applyCompanionArtwork(KA.companionArtV33);
 
   function cloneSpeciesData(value) {
     return JSON.parse(JSON.stringify(value));
@@ -1008,31 +1008,39 @@
     var innerStroke = species.innerStroke || "#5b4631";
     var tailTransform = species.peacockTailTransform;
     var bodyTransform = species.peacockBodyTransform;
+    var tailRegionIds = Array.isArray(species.peacockTailRegionIds)
+      ? species.peacockTailRegionIds
+      : ["tail", "tail_eyes"];
+    var bodyOuterIndexes = Array.isArray(species.peacockBodyOuterIndexes)
+      ? species.peacockBodyOuterIndexes
+      : [1];
+    var tailInnerCount = Number(species.peacockTailInnerCount || 5);
     var tailRegions = species.regions.filter(function (region) {
-      return region.id === "tail" || region.id === "tail_eyes";
+      return tailRegionIds.indexOf(region.id) >= 0;
     });
     var bodyRegions = species.regions.filter(function (region) {
-      return region.id !== "tail" && region.id !== "tail_eyes";
+      return tailRegionIds.indexOf(region.id) < 0;
     });
-    var tailInner = species.inner.slice(0, 5);
-    var bodyInner = species.inner.slice(5);
+    var bodyOuter = species.outer.filter(function (_path, index) {
+      return bodyOuterIndexes.indexOf(index) >= 0;
+    });
+    var tailInner = species.inner.slice(0, tailInnerCount);
+    var bodyInner = species.inner.slice(tailInnerCount);
     var evolution = renderEvolutionContext(species, opts);
     if (opts.silhouette) {
       return [
-        '<svg class="companion-svg companion-silhouette companion-peacock' + (isLegendaryCompanionSpecies(species) ? ' companion-legendary' : '') + '" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
+        '<svg class="companion-svg companion-silhouette companion-peacock' + (species.transparentOuterBox ? ' companion-transparent-box' : '') + (isLegendaryCompanionSpecies(species) ? ' companion-legendary' : '') + '" viewBox="' + species.viewBox + '" aria-hidden="true" focusable="false">',
         '<g class="peacock-tail-group" transform="' + tailTransform + '">',
         '<path d="' + species.outer[0] + '" fill="#1f2937"/>',
         '</g>',
         '<g class="peacock-body-group" transform="' + bodyTransform + '">',
-        '<path d="' + species.outer[1] + '" fill="#1f2937"/>',
-        '<path d="' + species.regions[1].d + '" fill="#1f2937"/>',
-        '<path d="' + species.regions[2].d + '" fill="#1f2937"/>',
+        bodyOuter.map(function (d) { return '<path d="' + d + '" fill="#1f2937"/>'; }).join(""),
         '</g>',
         '</svg>'
       ].join("");
     }
     return [
-      '<svg class="companion-svg companion-peacock evolution-stage-' + evolution.stage + (isLegendaryCompanionSpecies(species) ? ' companion-legendary' : '') + '" viewBox="' + species.viewBox + '" role="img" aria-label="' + escapeSvgAttribute(evolution.ariaLabel) + '" focusable="false">',
+      '<svg class="companion-svg companion-peacock' + (species.transparentOuterBox ? ' companion-transparent-box' : '') + ' evolution-stage-' + evolution.stage + (isLegendaryCompanionSpecies(species) ? ' companion-legendary' : '') + '" viewBox="' + species.viewBox + '" role="img" aria-label="' + escapeSvgAttribute(evolution.ariaLabel) + '" focusable="false">',
       evolutionDecorationMarkup(species.id, evolution.stage, "back"),
       '<g class="body-regions">',
       '<g class="peacock-tail-group" transform="' + tailTransform + '">',
@@ -1051,7 +1059,7 @@
       '</g>',
       '<g class="outer-outline" fill="none" stroke="' + outlineStroke + '" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">',
       '<g class="peacock-tail-group" transform="' + tailTransform + '"><path d="' + species.outer[0] + '"/></g>',
-      '<g class="peacock-body-group" transform="' + bodyTransform + '"><path d="' + species.outer[1] + '"/></g>',
+      '<g class="peacock-body-group" transform="' + bodyTransform + '">' + bodyOuter.map(function (d) { return '<path d="' + d + '"/>'; }).join("") + '</g>',
       '</g>',
       '<g class="inner-lines" fill="none" stroke="' + innerStroke + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">',
       '<g class="peacock-tail-group" transform="' + tailTransform + '">' + tailInner.map(function (d) { return '<path d="' + d + '"/>'; }).join("") + '</g>',

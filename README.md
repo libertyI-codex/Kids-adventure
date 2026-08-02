@@ -3,16 +3,32 @@
 ## 概要
 「こどもの冒険」は、毎日のおしごと、スター、ぬりえ、作品を置く世界、たまご育成をローカル保存で楽しむ子ども向けWebアプリです。
 
-Ver.1.0 試作32では、試作31のスマートフォン表示と全機能を維持しながら、Fire HD 10相当の10インチタブレット向けに縦向き・横向きの専用レスポンシブレイアウトを追加しました。Amazon SilkおよびAmazon Kidsの許可サイトとしてのWeb利用を想定しています。
+Ver.1.0 試作33では、試作32のレスポンシブ表示と全機能を維持しながら、クジャク、小鳥4種、伝説3鳥、ほうおうの手書きインラインSVGを部分刷新しました。おうむの利用者向け表示もひらがなへ統一しています。
 
 既存のホーム画面アイコンは古いHTML設定を保持するため、一度削除してからSafariで最新版を開き、改めてホーム画面へ追加してください。
 
 ## バージョン
 - 表示名: 結羽ちゃんの冒険
-- バージョン: Ver.1.0 試作32
-- appVersion: `1.0.0-prototype.32`
+- バージョン: Ver.1.0 試作33
+- appVersion: `1.0.0-prototype.33`
 - schemaVersion: `1`
-- キャッシュ対策: `?v=10p32`
+- キャッシュ対策: `?v=10p33`
+
+## 試作33の鳥デザイン部分修正
+
+- 試作31の全15羽アートを保持する `js/companion-art-v31.js` は変更せず、対象9羽だけを `js/companion-art-v33.js` で後段上書き
+- クジャクは尾羽の外形、色面、目玉模様、内側線を完全一致で維持し、顔・体だけを中心位置調整付きの35%表示へ変更
+- ひよこ、すずめ、しまえなが、ぶんちょうは、体・顔・配色を維持し、くちばしだけを顔輪郭へ自然につながる位置へ移動
+- 氷、雷、炎の伝説鳥は胴体と基本配色を維持し、翼幅と翼面積を拡大。stage 2・3の光、模様、粒も新しい翼へ合わせて調整
+- ほうおうは参考画像の背景や画像自体を使わず、金色の流線、大きく広がる左右非対称の翼、三層の長い尾、王冠状冠羽を手書きSVGで再構成
+- ほうおうは金、淡い金、白金を主体とし、濃紺は小さな顔アクセントだけに限定。赤・橙主体の炎鳥と翼・尾・シルエットを分離
+- `companion_parrot`のIDを維持したまま、利用者向け表示名を「おうむ」へ変更
+- nickname、favorite、bondLevel、hatchCount、mealCount、plannedSpeciesId、fixed seed、15種の孵化候補、進化3段階を維持
+- 大人モードの未取得を含む全15種デザイン一覧、ホーム、図鑑、詳細、おうち、キッチン、おでかけ、孵化表示は共有レンダラーから自動反映
+- `tests/bird-companion-review.html`で試作32／33比較、80px、120px、黒シルエット、stage 1〜3を確認可能
+- `tests/companion-design-gallery-preview.html`で全15種のstage切替を確認可能
+- 保存キー4種、`schemaVersion: 1`、JSON互換、PWA standalone、safeStart、`renderAlbum()`を維持
+- 画像生成、外部画像、外部SVG、外部音声、CDN、fetch、外部API、type=moduleは不使用
 
 ## 試作32のFire HD 10対応
 
@@ -188,7 +204,7 @@ Ver.1.0 試作32では、試作31のスマートフォン表示と全機能を�
 ## 試作21 修正1の表示修正
 
 - ひよこの不要な黒い外枠を削除
-- オウムの不要な黒い外枠を削除
+- おうむの不要な黒い外枠を削除
 - ふくろうの不要な黒い外枠を削除
 - 鳥本体の輪郭・表情・模様は維持
 - あひる・くじゃく・すずめは変更なし
@@ -390,7 +406,7 @@ birdHouseデータは `appData.birdHouse` に保存します。
 | --- | --- |
 | ひよこ | 黒丸の目をなくし、小さな曲線の目に変更 |
 | あひる | 体・頭・目・姿勢は維持し、くちばしだけ左向きへ変更 |
-| オウム | 形状と色面を維持し、黒い外線・内線を非表示化 |
+| おうむ | 形状と色面を維持し、黒い外線・内線を非表示化 |
 | くじゃく | 試作17で尾羽は約2倍を維持し、本体を約0.75倍へ調整 |
 | ふくろう | 形状と配色を維持し、黒い外線・内線を非表示化 |
 | すずめ | あひる風の形をやめ、小さな茶系の雀として全面作り直し |
@@ -500,21 +516,21 @@ birdHouseデータは `appData.birdHouse` に保存します。
 
 | 仲間 | speciesId | designVersion |
 | --- | --- | ---: |
-| ひよこ | `companion_chick` | 2 |
-| あひる | `companion_duck` | 2 |
-| オウム | `companion_parrot` | 2 |
-| くじゃく | `companion_peacock` | 4 |
-| ふくろう | `companion_owl` | 2 |
-| すずめ | `companion_sparrow` | 2 |
-| ぺんぎん | `companion_penguin` | 1 |
-| しまえなが | `companion_shimaenaga` | 1 |
-| いんこ | `companion_parakeet` | 1 |
-| ぶんちょう | `companion_java_sparrow` | 1 |
-| でんせつのこおりのとり | `companion_ice_legend_bird` | 1 |
-| でんせつの かみなりのとり | `companion_thunder_legend_bird` | 2 |
-| でんせつの ほのおのとり | `companion_fire_legend_bird` | 1 |
-| ほうおう | `companion_phoenix` | 1 |
-| ケツァール | `companion_quetzal` | 1 |
+| ひよこ | `companion_chick` | 4 |
+| あひる | `companion_duck` | 3 |
+| おうむ | `companion_parrot` | 3 |
+| くじゃく | `companion_peacock` | 6 |
+| ふくろう | `companion_owl` | 3 |
+| すずめ | `companion_sparrow` | 4 |
+| ぺんぎん | `companion_penguin` | 2 |
+| しまえなが | `companion_shimaenaga` | 3 |
+| いんこ | `companion_parakeet` | 2 |
+| ぶんちょう | `companion_java_sparrow` | 3 |
+| でんせつのこおりのとり | `companion_ice_legend_bird` | 3 |
+| でんせつの かみなりのとり | `companion_thunder_legend_bird` | 4 |
+| でんせつの ほのおのとり | `companion_fire_legend_bird` | 3 |
+| ほうおう | `companion_phoenix` | 4 |
+| ケツァール | `companion_quetzal` | 2 |
 
 鳥はぬりえ作品とは独立した `companions` データとして管理します。`templateId`、`regionColors`、作品ID、作品配置、親コメント、作品のおきにいり状態は共有しません。
 
@@ -530,7 +546,7 @@ birdHouseデータは `appData.birdHouse` に保存します。
 ## スタート画面
 アプリ起動時に、採用済みの `apple-touch-icon.png` をそのまま表示するスタート画面を追加しました。
 
-- 画像パス: `./apple-touch-icon.png?v=10p32`
+- 画像パス: `./apple-touch-icon.png?v=10p33`
 - 最低表示時間: 1.2秒
 - 通常終了目安: 初期化完了後
 - フェイルセーフ: 約4秒
@@ -544,7 +560,7 @@ iPhoneのホーム画面から独立Webアプリとして起動できるよう�
 
 - `apple-mobile-web-app-capable`: `yes`
 - `apple-mobile-web-app-title`: `こどもの冒険`
-- manifest: `./manifest.webmanifest?v=10p32`
+- manifest: `./manifest.webmanifest?v=10p33`
 - manifest `display`: `standalone`
 - manifest `start_url`: `./`
 - manifest `scope`: `./`
